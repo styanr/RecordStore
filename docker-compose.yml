@@ -1,0 +1,40 @@
+secrets:
+  pgsql-password:
+    file: ./pgsql-password.txt
+  pgadmin-password:
+    file: ./pgadmin-password.txt
+
+services:
+  db:
+    image: postgres
+    container_name: local-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/pgsql-password
+    secrets:
+      - pgsql-password
+    volumes:
+      - local-pgdata:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: local-pgadmin
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: test@admin.org
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin-password
+    secrets:
+      - pgadmin-password
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+volumes:
+  local-pgdata:
+  pgadmin-data:
+
+
+# TODO: add some configuration for the pgadmin container
