@@ -35,6 +35,3 @@ services:
 volumes:
   local-pgdata:
   pgadmin-data:
-
-
-# TODO: add some configuration for the pgadmin container

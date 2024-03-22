@@ -6,11 +6,12 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public."user"
 (
     id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
-    email character varying(255) COLLATE pg_catalog."default",
-    password character varying(128) COLLATE pg_catalog."default",
-    first_name character varying(50) COLLATE pg_catalog."default",
-    last_name character varying(50) COLLATE pg_catalog."default",
-    created_at timestamp with time zone DEFAULT now(),
+    email character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    password character varying(128) COLLATE pg_catalog."default" NOT NULL,
+    first_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    last_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    updated_at timestamp without time zone,
     CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS public.record
     description text,
     image_url character varying(150),
     release_date date NOT NULL,
+    duration_seconds integer NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -64,7 +66,8 @@ CREATE TABLE IF NOT EXISTS public.format
 (
     id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 ),
     format_name character varying(50) NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE (format_name)
 );
 
 CREATE TABLE IF NOT EXISTS public.product
@@ -84,7 +87,7 @@ CREATE TABLE IF NOT EXISTS public.discount
     product_id integer NOT NULL,
     start_date date NOT NULL,
     end_date date NOT NULL,
-    discount integer,
+    discount_percent integer,
     PRIMARY KEY (id)
 );
 
@@ -93,6 +96,96 @@ CREATE TABLE IF NOT EXISTS public.artist_record
     artist_id integer NOT NULL,
     record_id integer NOT NULL,
     PRIMARY KEY (artist_id, record_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.genre
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 ),
+    name character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.genre_record
+(
+    genre_id integer NOT NULL,
+    record_id integer NOT NULL,
+    PRIMARY KEY (genre_id, record_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.genre_artist
+(
+    genre_id integer NOT NULL,
+    artist_id integer NOT NULL,
+    PRIMARY KEY (genre_id, artist_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.track
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 ),
+    title character varying NOT NULL,
+    duration_seconds integer NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.track_record
+(
+    track_id integer NOT NULL,
+    record_id integer NOT NULL,
+    track_order integer NOT NULL,
+    PRIMARY KEY (track_id, record_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.track_artist
+(
+    track_id integer NOT NULL,
+    artist_id integer NOT NULL,
+    PRIMARY KEY (track_id, artist_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.shopping_cart
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 ),
+    user_id integer NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.shopping_cart_product
+(
+    shopping_cart_id integer NOT NULL,
+    product_id integer NOT NULL,
+    quantity integer,
+    PRIMARY KEY (shopping_cart_id, product_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.shop_order
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 ),
+    user_id integer NOT NULL,
+    total money NOT NULL,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    city character varying(50) NOT NULL,
+    street character varying(150) NOT NULL,
+    building character varying(10) NOT NULL,
+    apartment character varying(10),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.order_line
+(
+    shop_order_id integer NOT NULL,
+    product_id integer NOT NULL,
+    quantity integer NOT NULL,
+    price money NOT NULL,
+    PRIMARY KEY (shop_order_id, product_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.review
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 ),
+    user_id integer NOT NULL,
+    rating integer NOT NULL,
+    description text,
+    PRIMARY KEY (id)
 );
 
 ALTER TABLE IF EXISTS public.address
@@ -154,6 +247,126 @@ ALTER TABLE IF EXISTS public.artist_record
 ALTER TABLE IF EXISTS public.artist_record
     ADD FOREIGN KEY (record_id)
     REFERENCES public.record (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.genre_record
+    ADD FOREIGN KEY (genre_id)
+    REFERENCES public.genre (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.genre_record
+    ADD FOREIGN KEY (record_id)
+    REFERENCES public.record (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.genre_artist
+    ADD FOREIGN KEY (genre_id)
+    REFERENCES public.genre (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.genre_artist
+    ADD FOREIGN KEY (artist_id)
+    REFERENCES public.artist (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.track_record
+    ADD FOREIGN KEY (track_id)
+    REFERENCES public.track (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.track_record
+    ADD FOREIGN KEY (record_id)
+    REFERENCES public.record (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.track_artist
+    ADD FOREIGN KEY (track_id)
+    REFERENCES public.track (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.track_artist
+    ADD FOREIGN KEY (artist_id)
+    REFERENCES public.artist (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.shopping_cart
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public."user" (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.shopping_cart_product
+    ADD FOREIGN KEY (shopping_cart_id)
+    REFERENCES public.shopping_cart (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.shopping_cart_product
+    ADD FOREIGN KEY (product_id)
+    REFERENCES public.product (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.shop_order
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public."user" (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.order_line
+    ADD FOREIGN KEY (shop_order_id)
+    REFERENCES public.shop_order (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.order_line
+    ADD FOREIGN KEY (product_id)
+    REFERENCES public.product (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.review
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public."user" (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
