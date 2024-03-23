@@ -18,6 +18,7 @@ services:
       - pgsql-password
     volumes:
       - local-pgdata:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
   pgadmin:
     image: dpage/pgadmin4
     container_name: local-pgadmin
