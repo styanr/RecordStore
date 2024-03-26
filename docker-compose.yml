@@ -1,8 +1,8 @@
 secrets:
   pgsql-password:
-    file: ./pgsql-password.txt
+    file: ./secrets/pgsql-password.txt
   pgadmin-password:
-    file: ./pgadmin-password.txt
+    file: ./secrets/pgadmin-password.txt
 
 services:
   db:
