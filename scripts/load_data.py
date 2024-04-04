@@ -1,9 +1,9 @@
-import re
-import xml.etree.ElementTree as ET
+import lxml.etree as ET
 from sqlobject.converters import sqlrepr
 from rich.progress import Progress, BarColumn, TimeRemainingColumn, TextColumn
 from model import *
 import psycopg2 as pg
+from utils import *
 
 progress = Progress(
     TextColumn("[bold blue]{task.description}", justify="right"),
@@ -11,42 +11,20 @@ progress = Progress(
     "[progress.percentage]{task.percentage:>3.1f}%",
     TimeRemainingColumn(),
 )
+# CONSTANTS
+DB_NAME = "RecordStoreDB"
+DB_USER = "postgres"
+DB_PASSWORD = "Jd35B^1-W\"a_/}0,"
+DB_HOST = "localhost"
+DB_PORT = "5432"
 
 
 def connect():
-    pg_password = "Jd35B^1-W\"a_/}0,"
-
-    return pg.connect(dbname="RecordStoreDB",
-                      user="postgres",
-                      password=pg_password,
-                      host="localhost",
-                      port="5432")
-
-
-def remove_brackets(text):
-    pattern = r'\\?\[(l=|a=)(.+?)\\]'
-    return re.sub(pattern, r'\2', text)
-
-
-def fix_date(date):
-    if date is None:
-        return None
-
-    date = date.split('-')
-
-    if len(date) == 1:
-        return date[0] + '-01-01'
-
-    elif len(date) == 2:
-        return date[0] + '-' + date[1] + '-01'
-
-    if date[1] == '00':
-        return date[0] + '-01-01'
-
-    if date[2] == '00':
-        return date[0] + '-' + date[1] + '-01'
-
-    return date[0] + '-' + date[1] + '-' + date[2]
+    return pg.connect(dbname=DB_NAME,
+                      user=DB_USER,
+                      password=DB_PASSWORD,
+                      host=DB_HOST,
+                      port=DB_PORT)
 
 
 def parse_artist_xml(file_path):
@@ -90,7 +68,7 @@ def process_artists(artists, cursor):
 # release xml parsing
 
 
-def parse_release_xml(file_path, artists):
+def parse_master_xml(file_path, artists):
     """
     ### Returns
     ---
@@ -100,7 +78,7 @@ def parse_release_xml(file_path, artists):
         ArtistRecord objects are used to link the record to the artists
         after they have been inserted into the database.
     """
-    artists_ids = [artist.dataset_id for artist in artists]
+    db_artist_ids = [artist.dataset_id for artist in artists]
 
     records = []
     count = 0
@@ -110,11 +88,12 @@ def parse_release_xml(file_path, artists):
     event, root = next(context)  # Get the root element
 
     for event, element in context:
-        if event == "end" and element.tag == "release":
+        if event == "end" and element.tag == "master":
             dataset_artists = element.find('artists')
             if dataset_artists is not None:
-                artist_ids = [int(a.find('id').text) for a in dataset_artists]
-                if any(artist_id in artists_ids for artist_id in artist_ids):
+                artist_ids = [int(artist.find('id').text)
+                              for artist in dataset_artists]
+                if any(artist_id in db_artist_ids for artist_id in artist_ids):
                     record, artist_records, genres = parse_record(
                         element, artists)
                     records.append((record, artist_records, genres))
@@ -131,29 +110,30 @@ def parse_release_xml(file_path, artists):
     return records
 
 
-def parse_record(release, artists) -> tuple[Record, list[ArtistRecord]]:
+def parse_record(xml_master, db_artists) -> tuple[Record, list[ArtistRecord]]:
     """
     This function has to be called after the artists have been inserted into the database.
     ### Parameters
     ---
     #### `release: xml.etree.ElementTree.Element`
         The release element from the XML file.
-    #### artists: list[Artist]
+    #### `artists: list[Artist]`
         A list of Artist objects.
     ### Returns
     ---
-    #### tuple[Record, list[ArtistRecord], list[Genre]]
+    #### `tuple[Record, list[ArtistRecord], list[Genre]]`
         A tuple containing the record, a list of ArtistRecord objects, and a list of Genre objects.
     """
-    title = sqlrepr(release.find('title').text, 'postgres')
+    # TODO: ADD TRACKS, MASTERS
+    title = sqlrepr(xml_master.find('title').text, 'postgres')
 
-    release_date = release.find('released')
+    release_date = xml_master.find('year')
 
     release_date = release_date.text if release_date is not None else None
 
     release_date = fix_date(release_date)
 
-    dataset_artists = release.find('artists')
+    dataset_artists = xml_master.find('artists')
 
     artistRecords = []
 
@@ -170,27 +150,27 @@ def parse_record(release, artists) -> tuple[Record, list[ArtistRecord]]:
             dataset_ids.append(dataset_id)
 
             matching_artist_ids = [
-                artist.database_id for artist in artists if artist.dataset_id == dataset_id]
+                artist.database_id for artist in db_artists if artist.dataset_id == dataset_id]
 
             if matching_artist_ids:
                 artistRecords.append(ArtistRecord(
                     matching_artist_ids[0], None))
 
-    genres = genre if (genre := release.find(
+    genres = genre if (genre := xml_master.find(
         'genres')) is not None else None
-    styles = style if (style := release.find(
+    styles = style if (style := xml_master.find(
         'styles')) is not None else None
 
     record_genres = []
-    if genres:
+    if genres is not None:
         for genre in genres:
             record_genres.append(Genre(genre.text))
 
-    if styles:
+    if styles is not None:
         for style in styles:
             record_genres.append(Genre(style.text))
 
-    return (Record(title, release_date=release_date, dataset_id=int(release.get('id'))), artistRecords, record_genres)
+    return (Record(title, release_date=release_date, dataset_id=int(xml_master.get('id'))), artistRecords, record_genres)
 
 
 def insert_record(cursor, record):
@@ -283,7 +263,7 @@ def process_records(records, cursor):
     """
     Process the records and their associated artists and genres.
     """
-    task = progress.add_task("[red]Processing Records...", total=len(records))
+    task = progress.add_task("[red]Processing Releases...", total=len(records))
 
     with progress:
         for record_tuple in records:
@@ -308,6 +288,233 @@ def process_records(records, cursor):
                         cursor, artist_record.artist_id, genre.database_id)
 
             progress.advance(task)
+    progress.remove_task(task)
+
+
+def parse_release_xml(file_path, record_artists_tuples):
+
+    products = []
+
+    context = ET.iterparse(file_path, events=("start", "end"))
+    context = iter(context)
+    event, root = next(context)  # Get the root element
+
+    count = 0
+    total_count = 0
+    record_dict = {record.dataset_id: record for record,
+                   _, _ in record_artists_tuples}
+
+    for event, element in context:
+        if event == "end" and element.tag == "release":
+            total_count += 1
+            release_master_id = element.find('master_id')
+
+            if release_master_id is not None:
+                release_master_id = int(release_master_id.text)
+
+                master_record = record_dict.get(release_master_id)
+
+                if master_record is not None:
+                    product_track_tuple = parse_product(element, master_record)
+                    products.append(product_track_tuple)
+                    count += 1
+
+                    if count % 100 == 0:
+                        progress.console.print(
+                            f"[bold green]{count} products parsed...")
+                        progress.console.print(
+                            f"[bold green]{total_count} products parsed in total...")
+
+                if count >= 5000:                                   # for testing purposes
+                    break
+        root.clear()  # Free up memory
+
+    return products
+
+
+def parse_product(xml_release, record):
+    record_id = record.database_id
+
+    formats = xml_release.find('formats')
+    if formats is None:
+        format_names = []
+        format_descriptions = []
+    else:
+        format_names = [format.get('name') for format in formats]
+        format_descriptions = [format.find('descriptions').text if format.find(
+            'descriptions') is not None else "" for format in formats]
+
+    id = xml_release.get('id', '')
+
+    description = ""
+    if format_descriptions:
+        description = "Format notes: " + \
+            ", ".join(desc for desc in format_descriptions if desc)
+
+    notes = xml_release.find('notes')
+    if notes is not None and notes.text:
+        description += "\n\nNotes: " + notes.text
+
+    dataset_id = int(id) if id else -1
+
+    price = random_price()
+    quantity = random_quantity()
+
+    product = Product(
+        record_id, format_names if format_names else [], description, dataset_id, price, quantity)
+
+    tracks = []
+
+    tracks_xml = xml_release.find('tracklist')
+    if tracks_xml is not None:
+        for track_xml in tracks_xml:
+            track, track_product = parse_track(track_xml, product)
+            tracks.append((track, track_product))
+
+    return product, tracks
+
+
+def parse_track(track_xml, product):
+    title = track_xml.find('title').text if track_xml.find(
+        'title') is not None else ""
+    duration_xml = track_xml.find('duration')
+
+    if title == "Piercing Music":
+        pass
+
+    duration = get_duration_seconds(
+        duration_xml.text if duration_xml is not None else None)
+    track_order = track_xml.find('position').text if track_xml.find(
+        'position') is not None else ""
+
+    track = Track(title, duration)
+    track_product = TrackProduct(-1, -1, track_order)
+
+    return track, track_product
+
+
+def get_duration_seconds(duration):
+    if duration is None:
+        return 0
+
+    parts = duration.split(':')
+
+    if len(parts) == 1:
+        parts = duration.split('.')
+
+    if len(parts) == 2:
+        return int(parts[0]) * 60 + int(parts[1])
+
+    if len(parts) == 3:
+        return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+
+
+def process_products(products_tuple, cursor):
+    task = progress.add_task(
+        "[red]Processing Products...", total=len(products_tuple)
+    )
+
+    with progress:
+        for product, tracks in products_tuple:
+            format_id = get_or_create_format(cursor, product.formats)
+
+            product.database_id = insert_product(
+                cursor,
+                product.record_id,
+                format_id,
+                product.description,
+                product.quantity,
+                product.price,
+                product.inactive,
+            )
+
+            insert_tracks(cursor, tracks, product.database_id)
+
+            progress.advance(task)
+    progress.remove_task(task)
+
+
+def get_or_create_format(cursor, format_names):
+    format_id = None
+    for format_name in format_names:
+        cursor.execute(
+            """
+            SELECT id FROM format
+            WHERE format_name = %s;
+            """,
+            (format_name,),
+        )
+
+        if cursor.rowcount == 0:
+            cursor.execute(
+                """
+                INSERT INTO format (format_name)
+                VALUES (%s)
+                RETURNING id;
+                """,
+                (format_name,),
+            )
+
+        format_id = cursor.fetchone()[0]
+
+    return format_id
+
+
+def insert_product(
+    cursor, record_id, format_id, description, quantity, price, inactive
+):
+    cursor.execute(
+        """
+        INSERT INTO product (record_id, format_id, description, quantity, price, inactive)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING id;
+        """,
+        (
+            record_id,
+            format_id,
+            description,
+            quantity,
+            price,
+            inactive,
+        ),
+    )
+    return cursor.fetchone()[0]
+
+
+def insert_tracks(cursor, tracks, product_id):
+    for track, track_product in tracks:
+        track.database_id = insert_track(cursor, track.title, track.duration)
+        insert_track_product(cursor, track.database_id,
+                             product_id, track_product.track_order)
+
+
+def insert_track(cursor, title, duration):
+    cursor.execute(
+        """
+        INSERT INTO track (title, duration_seconds)
+        VALUES (%s, %s)
+        RETURNING id;
+        """,
+        (
+            title,
+            duration,
+        ),
+    )
+    return cursor.fetchone()[0]
+
+
+def insert_track_product(cursor, track_id, product_id, track_order):
+    cursor.execute(
+        """
+        INSERT INTO track_product (track_id, product_id, track_order)
+        VALUES (%s, %s, %s);
+        """,
+        (
+            track_id,
+            product_id,
+            track_order,
+        ),
+    )
 
 
 def main():
@@ -316,16 +523,22 @@ def main():
 
         with progress.console.status("[bold green]Processing Artists XML file..."):
             artists = parse_artist_xml(
-                r'D:\DBMusicDataset\artists_correct.xml')
+                r'./artists_correct.xml')
         process_artists(artists, cursor)
 
-        with progress.console.status("[bold green]Processing Releases XML file..."):
-            records = parse_release_xml(
-                r'D:\DBMusicDataset\discogs_20240301_releases.xml', artists)
-        process_records(records, cursor)
+        with progress.console.status("[bold green]Processing Masters XML file..."):
+            record_artists_tuples = parse_master_xml(
+                r'./discogs_20240301_masters.xml', artists)
+        process_records(record_artists_tuples, cursor)
 
-        conn.commit()
-        # conn.rollback()  # for testing purposes
+        with progress.console.status("[bold green]Processing Releases XML file..."):
+            products_tuple = parse_release_xml(
+                r'./discogs_20240301_releases.xml', record_artists_tuples)
+
+        process_products(products_tuple, cursor)
+
+        # conn.commit()
+        conn.rollback()  # for testing purposes
 
 
 if __name__ == '__main__':

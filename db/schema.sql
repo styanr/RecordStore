@@ -5,8 +5,6 @@
 -- Dumped from database version 16.2 (Debian 16.2-1.pgdg120+2)
 -- Dumped by pg_dump version 16.2
 
--- Started on 2024-03-28 21:09:22 UTC
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -27,7 +25,7 @@ CREATE EXTENSION IF NOT EXISTS moddatetime WITH SCHEMA public;
 
 
 --
--- TOC entry 3566 (class 0 OID 0)
+-- TOC entry 3558 (class 0 OID 0)
 -- Dependencies: 2
 -- Name: EXTENSION moddatetime; Type: COMMENT; Schema: -; Owner: 
 --
@@ -54,6 +52,7 @@ CREATE TABLE public.address (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
+
 
 ALTER TABLE public.address OWNER TO postgres;
 
@@ -272,7 +271,7 @@ CREATE TABLE public.genre_record (
 ALTER TABLE public.genre_record OWNER TO postgres;
 
 --
--- TOC entry 247 (class 1259 OID 33232)
+-- TOC entry 245 (class 1259 OID 33232)
 -- Name: order_line; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -288,7 +287,7 @@ CREATE TABLE public.order_line (
 ALTER TABLE public.order_line OWNER TO postgres;
 
 --
--- TOC entry 251 (class 1259 OID 33249)
+-- TOC entry 249 (class 1259 OID 33249)
 -- Name: order_status; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -302,7 +301,7 @@ CREATE TABLE public.order_status (
 ALTER TABLE public.order_status OWNER TO postgres;
 
 --
--- TOC entry 250 (class 1259 OID 33248)
+-- TOC entry 248 (class 1259 OID 33248)
 -- Name: order_status_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -413,7 +412,7 @@ ALTER TABLE public.region ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- TOC entry 249 (class 1259 OID 33239)
+-- TOC entry 247 (class 1259 OID 33239)
 -- Name: review; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -431,7 +430,7 @@ CREATE TABLE public.review (
 ALTER TABLE public.review OWNER TO postgres;
 
 --
--- TOC entry 248 (class 1259 OID 33238)
+-- TOC entry 246 (class 1259 OID 33238)
 -- Name: review_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -446,7 +445,7 @@ ALTER TABLE public.review ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- TOC entry 246 (class 1259 OID 33226)
+-- TOC entry 244 (class 1259 OID 33226)
 -- Name: shop_order; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -466,7 +465,7 @@ CREATE TABLE public.shop_order (
 ALTER TABLE public.shop_order OWNER TO postgres;
 
 --
--- TOC entry 245 (class 1259 OID 33225)
+-- TOC entry 243 (class 1259 OID 33225)
 -- Name: shop_order_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -481,7 +480,7 @@ ALTER TABLE public.shop_order ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- TOC entry 243 (class 1259 OID 33213)
+-- TOC entry 241 (class 1259 OID 33213)
 -- Name: shopping_cart; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -494,7 +493,7 @@ CREATE TABLE public.shopping_cart (
 ALTER TABLE public.shopping_cart OWNER TO postgres;
 
 --
--- TOC entry 242 (class 1259 OID 33212)
+-- TOC entry 240 (class 1259 OID 33212)
 -- Name: shopping_cart_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -509,7 +508,7 @@ ALTER TABLE public.shopping_cart ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTIT
 
 
 --
--- TOC entry 244 (class 1259 OID 33218)
+-- TOC entry 242 (class 1259 OID 33218)
 -- Name: shopping_cart_product; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -541,19 +540,6 @@ CREATE TABLE public.track (
 ALTER TABLE public.track OWNER TO postgres;
 
 --
--- TOC entry 241 (class 1259 OID 33207)
--- Name: track_artist; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.track_artist (
-    track_id integer NOT NULL,
-    artist_id integer NOT NULL
-);
-
-
-ALTER TABLE public.track_artist OWNER TO postgres;
-
---
 -- TOC entry 238 (class 1259 OID 33192)
 -- Name: track_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -569,18 +555,18 @@ ALTER TABLE public.track ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- TOC entry 240 (class 1259 OID 33202)
--- Name: track_record; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 250 (class 1259 OID 42294)
+-- Name: track_product; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.track_record (
+CREATE TABLE public.track_product (
     track_id integer NOT NULL,
-    record_id integer NOT NULL,
+    product_id integer NOT NULL,
     track_order character varying(10)
 );
 
 
-ALTER TABLE public.track_record OWNER TO postgres;
+ALTER TABLE public.track_product OWNER TO postgres;
 
 --
 -- TOC entry 222 (class 1259 OID 33110)
@@ -597,7 +583,7 @@ CREATE TABLE public.user_address (
 ALTER TABLE public.user_address OWNER TO postgres;
 
 --
--- TOC entry 3334 (class 2606 OID 33101)
+-- TOC entry 3330 (class 2606 OID 33101)
 -- Name: address address_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -606,7 +592,7 @@ ALTER TABLE ONLY public.address
 
 
 --
--- TOC entry 3330 (class 2606 OID 33093)
+-- TOC entry 3326 (class 2606 OID 33093)
 -- Name: app_user app_user_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -615,7 +601,7 @@ ALTER TABLE ONLY public.app_user
 
 
 --
--- TOC entry 3344 (class 2606 OID 33134)
+-- TOC entry 3340 (class 2606 OID 33134)
 -- Name: artist artist_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -624,7 +610,7 @@ ALTER TABLE ONLY public.artist
 
 
 --
--- TOC entry 3354 (class 2606 OID 33169)
+-- TOC entry 3350 (class 2606 OID 33169)
 -- Name: artist_record artist_record_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -633,7 +619,7 @@ ALTER TABLE ONLY public.artist_record
 
 
 --
--- TOC entry 3352 (class 2606 OID 33164)
+-- TOC entry 3348 (class 2606 OID 33164)
 -- Name: discount discount_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -642,7 +628,7 @@ ALTER TABLE ONLY public.discount
 
 
 --
--- TOC entry 3346 (class 2606 OID 33144)
+-- TOC entry 3342 (class 2606 OID 33144)
 -- Name: format format_format_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -651,7 +637,7 @@ ALTER TABLE ONLY public.format
 
 
 --
--- TOC entry 3348 (class 2606 OID 33142)
+-- TOC entry 3344 (class 2606 OID 33142)
 -- Name: format format_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -660,7 +646,7 @@ ALTER TABLE ONLY public.format
 
 
 --
--- TOC entry 3362 (class 2606 OID 33191)
+-- TOC entry 3358 (class 2606 OID 33191)
 -- Name: genre_artist genre_artist_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -669,7 +655,7 @@ ALTER TABLE ONLY public.genre_artist
 
 
 --
--- TOC entry 3356 (class 2606 OID 33946)
+-- TOC entry 3352 (class 2606 OID 33946)
 -- Name: genre genre_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -678,7 +664,7 @@ ALTER TABLE ONLY public.genre
 
 
 --
--- TOC entry 3358 (class 2606 OID 33179)
+-- TOC entry 3354 (class 2606 OID 33179)
 -- Name: genre genre_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -687,7 +673,7 @@ ALTER TABLE ONLY public.genre
 
 
 --
--- TOC entry 3360 (class 2606 OID 33186)
+-- TOC entry 3356 (class 2606 OID 33186)
 -- Name: genre_record genre_record_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -696,7 +682,7 @@ ALTER TABLE ONLY public.genre_record
 
 
 --
--- TOC entry 3376 (class 2606 OID 33237)
+-- TOC entry 3368 (class 2606 OID 33237)
 -- Name: order_line order_line_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -705,7 +691,7 @@ ALTER TABLE ONLY public.order_line
 
 
 --
--- TOC entry 3380 (class 2606 OID 33255)
+-- TOC entry 3372 (class 2606 OID 33255)
 -- Name: order_status order_status_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -714,7 +700,7 @@ ALTER TABLE ONLY public.order_status
 
 
 --
--- TOC entry 3350 (class 2606 OID 33155)
+-- TOC entry 3346 (class 2606 OID 33155)
 -- Name: product product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -723,7 +709,7 @@ ALTER TABLE ONLY public.product
 
 
 --
--- TOC entry 3342 (class 2606 OID 33124)
+-- TOC entry 3338 (class 2606 OID 33124)
 -- Name: record record_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -732,7 +718,7 @@ ALTER TABLE ONLY public.record
 
 
 --
--- TOC entry 3336 (class 2606 OID 33107)
+-- TOC entry 3332 (class 2606 OID 33107)
 -- Name: region region_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -741,7 +727,7 @@ ALTER TABLE ONLY public.region
 
 
 --
--- TOC entry 3338 (class 2606 OID 33109)
+-- TOC entry 3334 (class 2606 OID 33109)
 -- Name: region region_region_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -750,7 +736,7 @@ ALTER TABLE ONLY public.region
 
 
 --
--- TOC entry 3378 (class 2606 OID 33247)
+-- TOC entry 3370 (class 2606 OID 33247)
 -- Name: review review_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -759,7 +745,7 @@ ALTER TABLE ONLY public.review
 
 
 --
--- TOC entry 3374 (class 2606 OID 33231)
+-- TOC entry 3366 (class 2606 OID 33231)
 -- Name: shop_order shop_order_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -768,7 +754,7 @@ ALTER TABLE ONLY public.shop_order
 
 
 --
--- TOC entry 3370 (class 2606 OID 33217)
+-- TOC entry 3362 (class 2606 OID 33217)
 -- Name: shopping_cart shopping_cart_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -777,7 +763,7 @@ ALTER TABLE ONLY public.shopping_cart
 
 
 --
--- TOC entry 3372 (class 2606 OID 33224)
+-- TOC entry 3364 (class 2606 OID 33224)
 -- Name: shopping_cart_product shopping_cart_product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -786,16 +772,7 @@ ALTER TABLE ONLY public.shopping_cart_product
 
 
 --
--- TOC entry 3368 (class 2606 OID 33211)
--- Name: track_artist track_artist_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.track_artist
-    ADD CONSTRAINT track_artist_pkey PRIMARY KEY (track_id, artist_id);
-
-
---
--- TOC entry 3364 (class 2606 OID 33201)
+-- TOC entry 3360 (class 2606 OID 33201)
 -- Name: track track_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -804,16 +781,16 @@ ALTER TABLE ONLY public.track
 
 
 --
--- TOC entry 3366 (class 2606 OID 33206)
--- Name: track_record track_record_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3374 (class 2606 OID 42298)
+-- Name: track_product track_product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.track_record
-    ADD CONSTRAINT track_record_pkey PRIMARY KEY (track_id, record_id);
+ALTER TABLE ONLY public.track_product
+    ADD CONSTRAINT track_product_pkey PRIMARY KEY (track_id, product_id);
 
 
 --
--- TOC entry 3340 (class 2606 OID 33114)
+-- TOC entry 3336 (class 2606 OID 33114)
 -- Name: user_address user_address_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -822,7 +799,7 @@ ALTER TABLE ONLY public.user_address
 
 
 --
--- TOC entry 3332 (class 2606 OID 33091)
+-- TOC entry 3328 (class 2606 OID 33091)
 -- Name: app_user user_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -831,7 +808,7 @@ ALTER TABLE ONLY public.app_user
 
 
 --
--- TOC entry 3407 (class 2620 OID 33382)
+-- TOC entry 3399 (class 2620 OID 33382)
 -- Name: address address_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -839,7 +816,7 @@ CREATE TRIGGER address_updated_at BEFORE UPDATE ON public.address FOR EACH ROW E
 
 
 --
--- TOC entry 3410 (class 2620 OID 33385)
+-- TOC entry 3402 (class 2620 OID 33385)
 -- Name: artist artist_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -847,7 +824,7 @@ CREATE TRIGGER artist_updated_at BEFORE UPDATE ON public.artist FOR EACH ROW EXE
 
 
 --
--- TOC entry 3413 (class 2620 OID 33388)
+-- TOC entry 3405 (class 2620 OID 33388)
 -- Name: discount discount_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -855,7 +832,7 @@ CREATE TRIGGER discount_updated_at BEFORE UPDATE ON public.discount FOR EACH ROW
 
 
 --
--- TOC entry 3411 (class 2620 OID 33386)
+-- TOC entry 3403 (class 2620 OID 33386)
 -- Name: format format_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -863,7 +840,7 @@ CREATE TRIGGER format_updated_at BEFORE UPDATE ON public.format FOR EACH ROW EXE
 
 
 --
--- TOC entry 3414 (class 2620 OID 33389)
+-- TOC entry 3406 (class 2620 OID 33389)
 -- Name: genre genre_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -871,7 +848,7 @@ CREATE TRIGGER genre_updated_at BEFORE UPDATE ON public.genre FOR EACH ROW EXECU
 
 
 --
--- TOC entry 3412 (class 2620 OID 33387)
+-- TOC entry 3404 (class 2620 OID 33387)
 -- Name: product product_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -879,7 +856,7 @@ CREATE TRIGGER product_updated_at BEFORE UPDATE ON public.product FOR EACH ROW E
 
 
 --
--- TOC entry 3409 (class 2620 OID 33384)
+-- TOC entry 3401 (class 2620 OID 33384)
 -- Name: record record_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -887,7 +864,7 @@ CREATE TRIGGER record_updated_at BEFORE UPDATE ON public.record FOR EACH ROW EXE
 
 
 --
--- TOC entry 3408 (class 2620 OID 33383)
+-- TOC entry 3400 (class 2620 OID 33383)
 -- Name: region region_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -895,7 +872,7 @@ CREATE TRIGGER region_updated_at BEFORE UPDATE ON public.region FOR EACH ROW EXE
 
 
 --
--- TOC entry 3417 (class 2620 OID 33392)
+-- TOC entry 3409 (class 2620 OID 33392)
 -- Name: review review_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -903,7 +880,7 @@ CREATE TRIGGER review_updated_at BEFORE UPDATE ON public.review FOR EACH ROW EXE
 
 
 --
--- TOC entry 3416 (class 2620 OID 33391)
+-- TOC entry 3408 (class 2620 OID 33391)
 -- Name: shopping_cart_product shopping_cart_product_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -911,7 +888,7 @@ CREATE TRIGGER shopping_cart_product_updated_at BEFORE UPDATE ON public.shopping
 
 
 --
--- TOC entry 3415 (class 2620 OID 33390)
+-- TOC entry 3407 (class 2620 OID 33390)
 -- Name: track track_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -919,7 +896,7 @@ CREATE TRIGGER track_updated_at BEFORE UPDATE ON public.track FOR EACH ROW EXECU
 
 
 --
--- TOC entry 3406 (class 2620 OID 33381)
+-- TOC entry 3398 (class 2620 OID 33381)
 -- Name: app_user user_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -927,7 +904,7 @@ CREATE TRIGGER user_updated_at BEFORE UPDATE ON public.app_user FOR EACH ROW EXE
 
 
 --
--- TOC entry 3381 (class 2606 OID 33256)
+-- TOC entry 3375 (class 2606 OID 33256)
 -- Name: address address_region_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -936,7 +913,7 @@ ALTER TABLE ONLY public.address
 
 
 --
--- TOC entry 3387 (class 2606 OID 33286)
+-- TOC entry 3381 (class 2606 OID 33286)
 -- Name: artist_record artist_record_artist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -945,7 +922,7 @@ ALTER TABLE ONLY public.artist_record
 
 
 --
--- TOC entry 3388 (class 2606 OID 33291)
+-- TOC entry 3382 (class 2606 OID 33291)
 -- Name: artist_record artist_record_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -954,7 +931,7 @@ ALTER TABLE ONLY public.artist_record
 
 
 --
--- TOC entry 3386 (class 2606 OID 33281)
+-- TOC entry 3380 (class 2606 OID 33281)
 -- Name: discount discount_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -963,7 +940,7 @@ ALTER TABLE ONLY public.discount
 
 
 --
--- TOC entry 3391 (class 2606 OID 33311)
+-- TOC entry 3385 (class 2606 OID 33311)
 -- Name: genre_artist genre_artist_artist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -972,7 +949,7 @@ ALTER TABLE ONLY public.genre_artist
 
 
 --
--- TOC entry 3392 (class 2606 OID 33306)
+-- TOC entry 3386 (class 2606 OID 33306)
 -- Name: genre_artist genre_artist_genre_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -981,7 +958,7 @@ ALTER TABLE ONLY public.genre_artist
 
 
 --
--- TOC entry 3389 (class 2606 OID 33296)
+-- TOC entry 3383 (class 2606 OID 33296)
 -- Name: genre_record genre_record_genre_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -990,7 +967,7 @@ ALTER TABLE ONLY public.genre_record
 
 
 --
--- TOC entry 3390 (class 2606 OID 33301)
+-- TOC entry 3384 (class 2606 OID 33301)
 -- Name: genre_record genre_record_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -999,7 +976,7 @@ ALTER TABLE ONLY public.genre_record
 
 
 --
--- TOC entry 3402 (class 2606 OID 33366)
+-- TOC entry 3392 (class 2606 OID 33366)
 -- Name: order_line order_line_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1008,7 +985,7 @@ ALTER TABLE ONLY public.order_line
 
 
 --
--- TOC entry 3403 (class 2606 OID 33361)
+-- TOC entry 3393 (class 2606 OID 33361)
 -- Name: order_line order_line_shop_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1017,7 +994,7 @@ ALTER TABLE ONLY public.order_line
 
 
 --
--- TOC entry 3384 (class 2606 OID 33276)
+-- TOC entry 3378 (class 2606 OID 33276)
 -- Name: product product_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1026,7 +1003,7 @@ ALTER TABLE ONLY public.product
 
 
 --
--- TOC entry 3385 (class 2606 OID 33271)
+-- TOC entry 3379 (class 2606 OID 33271)
 -- Name: product product_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1035,7 +1012,7 @@ ALTER TABLE ONLY public.product
 
 
 --
--- TOC entry 3404 (class 2606 OID 33376)
+-- TOC entry 3394 (class 2606 OID 33376)
 -- Name: review review_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1044,7 +1021,7 @@ ALTER TABLE ONLY public.review
 
 
 --
--- TOC entry 3405 (class 2606 OID 33371)
+-- TOC entry 3395 (class 2606 OID 33371)
 -- Name: review review_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1053,7 +1030,7 @@ ALTER TABLE ONLY public.review
 
 
 --
--- TOC entry 3400 (class 2606 OID 33356)
+-- TOC entry 3390 (class 2606 OID 33356)
 -- Name: shop_order shop_order_status_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1062,7 +1039,7 @@ ALTER TABLE ONLY public.shop_order
 
 
 --
--- TOC entry 3401 (class 2606 OID 33351)
+-- TOC entry 3391 (class 2606 OID 33351)
 -- Name: shop_order shop_order_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1071,7 +1048,7 @@ ALTER TABLE ONLY public.shop_order
 
 
 --
--- TOC entry 3398 (class 2606 OID 33346)
+-- TOC entry 3388 (class 2606 OID 33346)
 -- Name: shopping_cart_product shopping_cart_product_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1080,7 +1057,7 @@ ALTER TABLE ONLY public.shopping_cart_product
 
 
 --
--- TOC entry 3399 (class 2606 OID 33341)
+-- TOC entry 3389 (class 2606 OID 33341)
 -- Name: shopping_cart_product shopping_cart_product_shopping_cart_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1089,7 +1066,7 @@ ALTER TABLE ONLY public.shopping_cart_product
 
 
 --
--- TOC entry 3397 (class 2606 OID 33336)
+-- TOC entry 3387 (class 2606 OID 33336)
 -- Name: shopping_cart shopping_cart_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1098,43 +1075,25 @@ ALTER TABLE ONLY public.shopping_cart
 
 
 --
--- TOC entry 3395 (class 2606 OID 33331)
--- Name: track_artist track_artist_artist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3396 (class 2606 OID 42299)
+-- Name: track_product track_product_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.track_artist
-    ADD CONSTRAINT track_artist_artist_id_fkey FOREIGN KEY (artist_id) REFERENCES public.artist(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
-
-
---
--- TOC entry 3396 (class 2606 OID 33326)
--- Name: track_artist track_artist_track_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.track_artist
-    ADD CONSTRAINT track_artist_track_id_fkey FOREIGN KEY (track_id) REFERENCES public.track(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+ALTER TABLE ONLY public.track_product
+    ADD CONSTRAINT track_product_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.product(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 
 --
--- TOC entry 3393 (class 2606 OID 33321)
--- Name: track_record track_record_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3397 (class 2606 OID 42304)
+-- Name: track_product track_product_track_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.track_record
-    ADD CONSTRAINT track_record_record_id_fkey FOREIGN KEY (record_id) REFERENCES public.record(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
-
-
---
--- TOC entry 3394 (class 2606 OID 33316)
--- Name: track_record track_record_track_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.track_record
-    ADD CONSTRAINT track_record_track_id_fkey FOREIGN KEY (track_id) REFERENCES public.track(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+ALTER TABLE ONLY public.track_product
+    ADD CONSTRAINT track_product_track_id_fkey FOREIGN KEY (track_id) REFERENCES public.track(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 
 --
--- TOC entry 3382 (class 2606 OID 33266)
+-- TOC entry 3376 (class 2606 OID 33266)
 -- Name: user_address user_address_address_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1143,15 +1102,13 @@ ALTER TABLE ONLY public.user_address
 
 
 --
--- TOC entry 3383 (class 2606 OID 33261)
+-- TOC entry 3377 (class 2606 OID 33261)
 -- Name: user_address user_address_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.user_address
     ADD CONSTRAINT user_address_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.app_user(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
-
--- Completed on 2024-03-28 21:09:22 UTC
 
 --
 -- PostgreSQL database dump complete

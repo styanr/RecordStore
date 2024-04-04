@@ -33,11 +33,11 @@ class Record:
         return f"Title: {self.title}\nDescription: {self.description}\nRelease Date: {self.release_date}\n"
 
 
+# It don't have no dataset_id yo.
 class Track:
-    def __init__(self, title, duration_seconds, dataset_id, database_id=None):
+    def __init__(self, title, duration_seconds, database_id=None):
         self.title = title
         self.duration = duration_seconds
-        self.dataset_id = dataset_id
         self.database_id = database_id
 
     def set_database_id(self, database_id):
@@ -66,23 +66,6 @@ class TrackArtist:
         return f"Track ID: {self.track_id}\nArtist ID: {self.artist_id}\n"
 
 
-class TrackRecord:
-    def __init__(self, track_id, record_id, track_order, record_database_id=None):
-        self.track_id = track_id
-        self.record_id = record_id
-        self.track_order = track_order
-        self.record_database_id = record_database_id
-
-    def set_record_database_id(self, record_database_id):
-        self.record_database_id = record_database_id
-
-    def __str__(self):
-        return f"Track ID: {self.track_id}\nRecord ID: {self.record_id}\nTrack Order: {self.track_order}\n"
-
-    def __repr__(self):
-        return f"Track ID: {self.track_id}\nRecord ID: {self.record_id}\nTrack Order: {self.track_order}\n"
-
-
 class ArtistRecord:
     """
     At the point of creation, the database id of artist and record should not be known.
@@ -109,21 +92,6 @@ class Genre:
         self.name = name
 
 
-class TrackGenre:
-    def __init__(self, track_id, genre_id):
-        self.track_id = track_id
-        self.genre_id = genre_id
-
-    def set_database_id(self, database_id):
-        self.database_id = database_id
-
-    def __str__(self):
-        return f"Track ID: {self.track_id}\nGenre ID: {self.genre_id}\n"
-
-    def __repr__(self):
-        return f"Track ID: {self.track_id}\nGenre ID: {self.genre_id}\n"
-
-
 class GenreRecord:
     def __init__(self, record_id, genre_id):
         self.record_id = record_id
@@ -146,3 +114,39 @@ class GenreArtist:
 
     def __repr__(self):
         return f"Artist ID: {self.artist_id}\nGenre ID: {self.genre_id}\n"
+
+
+class Product:
+    def __init__(self, record_id, formats, description, dataset_id, price, quantity, inactive=False, database_id=None):
+        self.record_id = record_id
+        self.formats = formats
+        self.description = description
+        self.dataset_id = dataset_id
+        self.price = price
+        self.quantity = quantity
+        self.inactive = inactive
+        self.database_id = database_id
+
+    def set_database_id(self, database_id):
+        self.database_id = database_id
+
+
+class TrackProduct:
+    def __init__(self, track_id, product_id, track_order, database_id=None):
+        self.track_id = track_id
+        self.product_id = product_id
+        self.track_order = track_order
+        self.database_id = database_id
+
+    def set_database_id(self, database_id):
+        self.database_id = database_id
+
+
+class RecordProduct:
+    def __init__(self, record_id, product_id, database_id=None):
+        self.record_id = record_id
+        self.product_id = product_id
+        self.database_id = database_id
+
+    def set_database_id(self, database_id):
+        self.database_id = database_id
