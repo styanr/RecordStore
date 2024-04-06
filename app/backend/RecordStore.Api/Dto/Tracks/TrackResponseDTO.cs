@@ -1,4 +1,4 @@
-﻿namespace RecordStore.Api.DTO.Tracks;
+﻿namespace RecordStore.Api.Dto.Tracks;
 
 public class TrackResponseDTO
 {

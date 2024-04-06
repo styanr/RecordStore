@@ -1,9 +1,9 @@
-﻿using RecordStore.Api.DTO.Artists;
-using RecordStore.Api.DTO.Formats;
-using RecordStore.Api.DTO.Genres;
-using RecordStore.Api.DTO.Tracks;
+﻿using RecordStore.Api.Dto.Artists;
+using RecordStore.Api.Dto.Formats;
+using RecordStore.Api.Dto.Genres;
+using RecordStore.Api.Dto.Tracks;
 
-namespace RecordStore.Api.DTO.Products;
+namespace RecordStore.Api.Dto.Products;
 
 /// <summary>
 /// Same as <see cref="ProductResponseDto"/> but also includes the track list.

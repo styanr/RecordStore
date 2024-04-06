@@ -4,8 +4,10 @@ import random
 random.seed(42)
 
 def remove_brackets(text):
-    pattern = r'\\?\[(l=|a=)(.+?)\\]'
-    return re.sub(pattern, r'\2', text)
+    pattern = r'\[\w=(.+?)\]'
+
+    # remove brackets, e.g. [w=100] -> 100
+    return re.sub(pattern, r'\1', text)
 
 
 def fix_date(date):

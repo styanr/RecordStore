@@ -1,4 +1,4 @@
-﻿namespace RecordStore.Api.DTO.Artists;
+﻿namespace RecordStore.Api.Dto.Artists;
 
 public class ArtistResponseDto
 {

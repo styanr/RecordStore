@@ -1,8 +1,8 @@
-﻿using RecordStore.Api.DTO.Artists;
-using RecordStore.Api.DTO.Formats;
-using RecordStore.Api.DTO.Genres;
+﻿using RecordStore.Api.Dto.Artists;
+using RecordStore.Api.Dto.Formats;
+using RecordStore.Api.Dto.Genres;
 
-namespace RecordStore.Api.DTO.Products;
+namespace RecordStore.Api.Dto.Products;
 
 public class ProductResponseDto
 {

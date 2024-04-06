@@ -1,8 +1,9 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using RecordStore.Api.DTO.Products;
+using RecordStore.Api.Dto.Products;
 using RecordStore.Api.Entities;
 using RecordStore.Api.RequestHelpers;
+using RecordStore.Api.RequestHelpers.QueryParams;
 
 namespace RecordStore.Api.Extensions;
 
@@ -112,6 +113,25 @@ public static class QueryExtensions
             "price" => query.OrderByBoolean(p => p.Price, sortAsc),
             "releaseDate" => query.OrderByBoolean(p => p.Record.ReleaseDate, sortAsc),
             _ => query.OrderByBoolean(p => p.Record.Title, sortAsc)
+        };
+        
+        return query;
+    }
+    
+    public static IQueryable<Artist> ApplyFiltersAndOrderBy(this IQueryable<Artist> query, GetArtistQueryParams queryParams)
+    {
+        if (!string.IsNullOrWhiteSpace(queryParams.Name))
+        {
+            string normalizedName = queryParams.Name.ToLower().Trim();
+            query = query.Where(a => a.Name.ToLower().Contains(normalizedName));
+        }
+        
+        bool sortAsc = queryParams.OrderDirection == "asc";
+
+        query = queryParams.OrderBy switch
+        {
+            "name" => query.OrderByBoolean(a => a.Name, sortAsc),
+            _ => query.OrderByBoolean(a => a.Name, sortAsc)
         };
         
         return query;

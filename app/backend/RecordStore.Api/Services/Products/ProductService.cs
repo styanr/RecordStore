@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
-using RecordStore.Api.DTO.Products;
+using RecordStore.Api.Dto.Products;
 using RecordStore.Api.Entities;
 using RecordStore.Api.Exceptions;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers;
+using RecordStore.Api.RequestHelpers.QueryParams;
 
 namespace RecordStore.Api.Services.Products;
 

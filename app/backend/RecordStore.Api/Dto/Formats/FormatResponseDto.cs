@@ -1,4 +1,4 @@
-﻿namespace RecordStore.Api.DTO.Formats;
+﻿namespace RecordStore.Api.Dto.Formats;
 
 public class FormatResponseDto
 {

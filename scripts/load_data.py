@@ -1,5 +1,4 @@
 import lxml.etree as ET
-from sqlobject.converters import sqlrepr
 from rich.progress import Progress, BarColumn, TimeRemainingColumn, TextColumn
 from model import *
 import psycopg2 as pg
@@ -35,10 +34,9 @@ def parse_artist_xml(file_path):
 
 
 def parse_artist(artist):
-    name = sqlrepr(artist.find('name').text, 'postgres')
+    name = artist.find('name').text
     profile = artist.find('profile').text
-    profile = sqlrepr(remove_brackets(profile),
-                      'postgres') if profile else None
+    profile = remove_brackets(profile) if profile else None
 
     return Artist(name, profile, int(artist.find('id').text))
 
@@ -125,7 +123,7 @@ def parse_record(xml_master, db_artists) -> tuple[Record, list[ArtistRecord]]:
         A tuple containing the record, a list of ArtistRecord objects, and a list of Genre objects.
     """
     # TODO: ADD TRACKS, MASTERS
-    title = sqlrepr(xml_master.find('title').text, 'postgres')
+    title = xml_master.find('title').text
 
     release_date = xml_master.find('year')
 

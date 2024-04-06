@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
 using RecordStore.Api.Filters;
+using RecordStore.Api.Services.Artists;
 using RecordStore.Api.Services.Products;
 using RecordStore.Api.Services.Records;
 
@@ -9,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<EntityNotFoundExceptionFilter>();
-    options.Filters.Add<GenericExceptionFilter>();
+    // options.Filters.Add<GenericExceptionFilter>();
 });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<RecordStoreContext>(options =>
 
 builder.Services.AddScoped<IRecordService, RecordService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IArtistService, ArtistService>();
 
 var app = builder.Build();
 

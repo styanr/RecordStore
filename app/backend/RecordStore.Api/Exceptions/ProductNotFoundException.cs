@@ -1,3 +1,3 @@
 ﻿namespace RecordStore.Api.Exceptions;
 
-public class ProductNotFoundException() : EntityNotFoundException("Product not found.");
+public class ProductNotFoundException() : EntityNotFoundException("Product not found");

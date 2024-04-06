@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using RecordStore.Api.DTO.Artists;
-using RecordStore.Api.DTO.Formats;
-using RecordStore.Api.DTO.Genres;
-using RecordStore.Api.DTO.Products;
-using RecordStore.Api.DTO.Tracks;
+using RecordStore.Api.Dto.Artists;
+using RecordStore.Api.Dto.Formats;
+using RecordStore.Api.Dto.Genres;
+using RecordStore.Api.Dto.Products;
+using RecordStore.Api.Dto.Tracks;
 using RecordStore.Api.Entities;
 
 namespace RecordStore.Api.RequestHelpers;
@@ -13,7 +13,10 @@ public class MappingProfiles : Profile
     public MappingProfiles()
     {
         CreateMap<Artist, ArtistResponseDto>();
+        CreateMap<Artist, ArtistFullResponseDto>();
+        
         CreateMap<Genre, GenreResposeDto>();
+        
         CreateMap<Format, FormatResponseDto>()
             .ForMember(s => s.Name, opt => opt.MapFrom(d => d.FormatName));
         CreateMap<TrackProduct, TrackResponseDTO>()
