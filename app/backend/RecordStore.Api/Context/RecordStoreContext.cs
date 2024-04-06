@@ -52,6 +52,10 @@ public partial class RecordStoreContext : DbContext
 
     public virtual DbSet<UserAddress> UserAddresses { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Server=localhost:5432;User Id=postgres;Password=Jd35B^1-Wa_/}0,;Database=RecordStoreDB");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("moddatetime");
@@ -134,9 +138,6 @@ public partial class RecordStoreContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
             entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.ImageUrl)
-                .HasMaxLength(150)
-                .HasColumnName("image_url");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("name");
@@ -356,9 +357,6 @@ public partial class RecordStoreContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
             entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.ImageUrl)
-                .HasMaxLength(150)
-                .HasColumnName("image_url");
             entity.Property(e => e.ReleaseDate).HasColumnName("release_date");
             entity.Property(e => e.Title)
                 .HasMaxLength(150)
@@ -526,7 +524,7 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.TrackId).HasColumnName("track_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.TrackOrder)
-                .HasMaxLength(10)
+                .HasMaxLength(20)
                 .HasColumnName("track_order");
 
             entity.HasOne(d => d.Product).WithMany(p => p.TrackProducts)

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
 using RecordStore.Api.DTO.Products;
 using RecordStore.Api.Entities;
+using RecordStore.Api.Exceptions;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers;
 
@@ -37,11 +38,11 @@ public class ProductService : IProductService
         var product = await _context.Products
             .AsQueryable()
             .ApplyIncludes()
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(p => p.Id == id);
         
         if (product is null)
         {
-            throw new KeyNotFoundException("Product not found");
+            throw new ProductNotFoundException();
         }
         
         var productDto = _mapper.Map<ProductFullResponseDto>(product);

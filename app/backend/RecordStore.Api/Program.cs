@@ -1,11 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
+using RecordStore.Api.Filters;
 using RecordStore.Api.Services.Products;
 using RecordStore.Api.Services.Records;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<EntityNotFoundExceptionFilter>();
+    options.Filters.Add<GenericExceptionFilter>();
+});
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

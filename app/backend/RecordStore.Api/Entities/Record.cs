@@ -11,8 +11,6 @@ public partial class Record
 
     public string? Description { get; set; }
 
-    public string? ImageUrl { get; set; }
-
     public DateOnly? ReleaseDate { get; set; }
 
     public DateTime CreatedAt { get; set; }
