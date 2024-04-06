@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
+using RecordStore.Api.DTO.Products;
 using RecordStore.Api.Entities;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers;
@@ -9,77 +11,50 @@ namespace RecordStore.Api.Services.Products;
 public class ProductService : IProductService
 {
     private readonly RecordStoreContext _context;
+    private readonly IMapper _mapper;
 
-    public ProductService(RecordStoreContext context)
+    public ProductService(RecordStoreContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
-    public async Task<List<Product>> GetAllAsync(GetProductQueryParams queryParams)
+    public async Task<List<ProductResponseDto>> GetAllAsync(GetProductQueryParams queryParams)
     {
-        var query = _context.Products.AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(queryParams.Genre))
-        {
-            query = query.Where(p => p.Record.Genres.Any(g => g.Name == queryParams.Genre));
-        }
-        if (queryParams.MinPrice is not null)
-        {
-            query = query.Where(p => p.Price >= queryParams.MinPrice);
-        }
-        if (queryParams.MaxPrice is not null)
-        {
-            query = query.Where(p => p.Price <= queryParams.MaxPrice);
-        }
+        var query = _context.Products
+            .AsQueryable()
+            .ApplyFiltersAndOrderBy(queryParams)
+            .ApplyIncludes();
         
-        bool sortAsc = queryParams.OrderDirection == "asc";
-
-        query = queryParams.OrderBy switch
-        {
-            "title" => query.OrderByBoolean(p => p.Record.Title, sortAsc),
-            "price" => query.OrderByBoolean(p => p.Price, sortAsc),
-            "releaseDate" => query.OrderByBoolean(p => p.Record.ReleaseDate, sortAsc),
-            _ => query.OrderByBoolean(p => p.Record.Title, sortAsc)
-        };
-
-        query = query
-            .Include(p => p.Record)
-                .ThenInclude(r => r.Genres)
-            .Include(p => p.Record)
-                .ThenInclude(r => r.Artists)
-            .Include(p => p.Format)
-            .Include(p => p.TrackProducts)
-                .ThenInclude(tp => tp.Track);
         PagedResult<Product> pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
         
-        return pagedResult.Results.ToList();
+        var productDtos = _mapper.Map<List<ProductResponseDto>>(pagedResult.Results);
+        
+        return productDtos;
     }
 
-    public async Task<Product> GetByIdAsync(int id)
+    public async Task<ProductFullResponseDto> GetByIdAsync(int id)
     {
         var product = await _context.Products
-            .Include(p => p.Record)
-                .ThenInclude(r => r.Genres)
-            .Include(p => p.Record)
-                .ThenInclude(r => r.Artists)
-            .Include(p => p.Format)
-            .Include(p => p.TrackProducts)
-                .ThenInclude(tp => tp.Track)
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .AsQueryable()
+            .ApplyIncludes()
+            .FirstOrDefaultAsync();
         
         if (product is null)
         {
             throw new KeyNotFoundException("Product not found");
         }
         
-        return product;
+        var productDto = _mapper.Map<ProductFullResponseDto>(product);
+        
+        return productDto;
     }
 
-    public Task<Product> CreateAsync(Product entity)
+    public Task<ProductFullResponseDto> CreateAsync(Product entity)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Product> UpdateAsync(Product entity)
+    public Task<ProductFullResponseDto> UpdateAsync(Product entity)
     {
         throw new NotImplementedException();
     }

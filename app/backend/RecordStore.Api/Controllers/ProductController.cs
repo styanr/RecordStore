@@ -13,20 +13,26 @@ namespace RecordStore.Api.Controllers;
 public class ProductController
 {
     private readonly IProductService _productService;
-    private readonly IMapper _mapper;
 
-    public ProductController(IProductService productService, IMapper mapper)
+    public ProductController(IProductService productService)
     {
         _productService = productService;
-        _mapper = mapper;
     }
     
     [HttpGet]
-    public async Task<ActionResult<List<ProductResponseDTO>>> GetAll([FromQuery] GetProductQueryParams queryParams)
+    public async Task<ActionResult<List<ProductResponseDto>>> GetAll([FromQuery] GetProductQueryParams queryParams)
     {
         var products = await _productService.GetAllAsync(queryParams);
-        var productsResponse = _mapper.Map<List<ProductResponseDTO>>(products);
         
-        return productsResponse;
+        return products;
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public async Task<ActionResult<ProductFullResponseDto>> GetById(int id)
+    {
+        var product = await _productService.GetByIdAsync(id);
+        
+        return product;
     }
 }
