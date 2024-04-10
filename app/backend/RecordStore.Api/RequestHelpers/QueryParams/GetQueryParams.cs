@@ -1,6 +1,6 @@
 ﻿namespace RecordStore.Api.RequestHelpers.QueryParams;
 
-public abstract class GetQueryParams
+public class GetQueryParams
 {
     public string? OrderBy { get; set; }
     public string? OrderDirection { get; set; } = "asc";

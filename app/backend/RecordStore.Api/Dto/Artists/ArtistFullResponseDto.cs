@@ -1,8 +1,6 @@
 ﻿namespace RecordStore.Api.Dto.Artists;
 
-public class ArtistFullResponseDto
+public class ArtistFullResponseDto : ArtistResponseDto
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
     public string Description { get; set; }
 }

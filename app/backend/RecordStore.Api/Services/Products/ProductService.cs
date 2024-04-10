@@ -51,6 +51,26 @@ public class ProductService : IProductService
         return productDto;
     }
 
+    public async Task<List<ProductResponseDto>> GetByRecordIdAsync(int recordId, GetRecordProductQueryParams queryParams)
+    {
+        var query = _context.Products
+            .AsQueryable()
+            .Where(p => p.RecordId == recordId)
+            .ApplyIncludes();
+
+        var sortAsc = queryParams.OrderDirection == "asc";
+
+        query = queryParams.OrderBy switch
+        {
+            "price" => query.OrderByBoolean(p => p.Price, sortAsc),
+            _ => query.OrderByBoolean(p => p.Id, sortAsc)
+        };
+        
+        PagedResult<Product> pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
+        
+        return _mapper.Map<List<ProductResponseDto>>(pagedResult.Results);
+    }
+
     public Task<ProductFullResponseDto> CreateAsync(Product entity)
     {
         throw new NotImplementedException();

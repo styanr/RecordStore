@@ -136,4 +136,40 @@ public static class QueryExtensions
         
         return query;
     }
+    
+    public static IQueryable<Record> ApplyFiltersAndOrderBy(this IQueryable<Record> query, GetRecordQueryParams queryParams)
+    {
+        if (!string.IsNullOrWhiteSpace(queryParams.Title))
+        {
+            string normalizedTitle = queryParams.Title.ToLower().Trim();
+            query = query.Where(r => r.Title.ToLower().Contains(normalizedTitle));
+        }
+        
+        if (queryParams.MinYear is not null)
+        {
+            query = query.Where(r => r.ReleaseDate >= new DateOnly(queryParams.MinYear.Value, 1, 1));
+        }
+        if (queryParams.MaxYear is not null)
+        {
+            query = query.Where(r => r.ReleaseDate <= new DateOnly(queryParams.MaxYear.Value, 12, 31));
+        }
+        
+        if (queryParams.HasProducts)
+        {
+            query = query
+                .Include(r => r.Products)
+                .Where(r => r.Products.Count > 0);
+        }
+        
+        bool sortAsc = queryParams.OrderDirection == "asc";
+
+        query = queryParams.OrderBy switch
+        {
+            "title" => query.OrderByBoolean(r => r.Title, sortAsc),
+            "releaseDate" => query.OrderByBoolean(r => r.ReleaseDate, sortAsc),
+            _ => query.OrderByBoolean(r => r.Title, sortAsc)
+        };
+        
+        return query;
+    }
 }

@@ -36,4 +36,13 @@ public class ProductController
         
         return product;
     }
+    
+    [Route("~/api/records/{recordId}/products")]
+    [HttpGet]
+    public async Task<ActionResult<List<ProductResponseDto>>> GetByRecordId(int recordId, [FromQuery] GetRecordProductQueryParams queryParams)
+    {
+        var products = await _productService.GetByRecordIdAsync(recordId, queryParams);
+        
+        return products;
+    }
 }

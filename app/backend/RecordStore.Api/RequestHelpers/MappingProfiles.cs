@@ -3,7 +3,9 @@ using RecordStore.Api.Dto.Artists;
 using RecordStore.Api.Dto.Formats;
 using RecordStore.Api.Dto.Genres;
 using RecordStore.Api.Dto.Products;
+using RecordStore.Api.Dto.Records;
 using RecordStore.Api.Dto.Tracks;
+using RecordStore.Api.Dto.Users;
 using RecordStore.Api.Entities;
 
 namespace RecordStore.Api.RequestHelpers;
@@ -15,7 +17,7 @@ public class MappingProfiles : Profile
         CreateMap<Artist, ArtistResponseDto>();
         CreateMap<Artist, ArtistFullResponseDto>();
         
-        CreateMap<Genre, GenreResposeDto>();
+        CreateMap<Genre, GenreResponseDto>();
         
         CreateMap<Format, FormatResponseDto>()
             .ForMember(s => s.Name, opt => opt.MapFrom(d => d.FormatName));
@@ -23,6 +25,11 @@ public class MappingProfiles : Profile
             .ForMember(s => s.Title, opt => opt.MapFrom(d => d.Track.Title))
             .ForMember(s => s.DurationSeconds, opt => opt.MapFrom(d => d.Track.DurationSeconds));
 
+        CreateMap<Record, RecordResponseDto>();
+        CreateMap<Record, RecordFullResponseDto>()
+            .ForMember(s => s.Artists, opt => opt.MapFrom(d => d.Artists))
+            .ForMember(s => s.Genres, opt => opt.MapFrom(d => d.Genres));
+        
         CreateMap<Product, ProductResponseDto>()
             .ForMember(s => s.Title, opt => opt.MapFrom(d => d.Record.Title))
             .ForMember(s => s.Artists, opt => opt.MapFrom(d => d.Record.Artists))

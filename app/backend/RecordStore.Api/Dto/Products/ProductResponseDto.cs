@@ -12,6 +12,6 @@ public class ProductResponseDto
     public DateOnly ReleaseDate { get; set; }
     
     public FormatResponseDto Format { get; set; }
-    public List<GenreResposeDto> Genres { get; set; }
+    public List<GenreResponseDto> Genres { get; set; }
     public List<ArtistResponseDto> Artists { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.Artists;
 using RecordStore.Api.RequestHelpers.QueryParams;
 using RecordStore.Api.Services.Artists;
@@ -7,6 +8,7 @@ namespace RecordStore.Api.Controllers;
 
 [ApiController]
 [Route("api/artists")]
+[Authorize]
 public class ArtistController
 {
     private readonly IArtistService _artistService;
