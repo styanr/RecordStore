@@ -36,7 +36,12 @@ public class UserService : IUserService
     
     public async Task<string> LoginAsync(UserLoginDto userLoginDto)
     {
-        var user = await _context.AppUsers.FirstOrDefaultAsync(u => u.Email == userLoginDto.Email);
+        
+        var user = await _context
+            .AppUsers
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Email == userLoginDto.Email);
+            
         
         if (user == null)
         {

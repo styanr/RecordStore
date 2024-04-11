@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RecordStore.Api.Context;
@@ -17,6 +18,8 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<EntityNotFoundExceptionFilter>();
     // options.Filters.Add<GenericExceptionFilter>();
 });
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddEndpointsApiExplorer();
@@ -46,9 +49,22 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-builder.Services.AddDbContext<RecordStoreContext>(options =>
+builder.Services.AddDbContext<RecordStoreContext>((services, optionsBuilder) =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("MasterConnection"));
+    var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
+    var role = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+
+
+    var connectionString = role switch
+    {
+        "user" => builder.Configuration.GetConnectionString("UserConnection"),
+        "manager" => builder.Configuration.GetConnectionString("ManagerConnection"),
+        "postgres" => builder.Configuration.GetConnectionString("MasterConnection"),
+        // TODO: use custom exception
+        _ => builder.Configuration.GetConnectionString("GuestConnection")
+    };
+    
+    optionsBuilder.UseNpgsql(connectionString);
 });
 
 builder.Services.AddScoped<IRecordService, RecordService>();

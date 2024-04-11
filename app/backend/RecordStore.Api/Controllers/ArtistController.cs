@@ -8,7 +8,6 @@ namespace RecordStore.Api.Controllers;
 
 [ApiController]
 [Route("api/artists")]
-[Authorize]
 public class ArtistController
 {
     private readonly IArtistService _artistService;

@@ -19,7 +19,11 @@ public partial class AppUser
 
     public DateTime UpdatedAt { get; set; }
 
+    public int RoleId { get; set; }
+
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<ShopOrder> ShopOrders { get; set; } = new List<ShopOrder>();
 

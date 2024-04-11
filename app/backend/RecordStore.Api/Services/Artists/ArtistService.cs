@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
 using RecordStore.Api.Dto.Artists;
 using RecordStore.Api.Entities;
