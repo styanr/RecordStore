@@ -52,12 +52,9 @@ public partial class RecordStoreContext : DbContext
 
     public virtual DbSet<TrackProduct> TrackProducts { get; set; }
 
-    public virtual DbSet<UserAddress> UserAddresses { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Server=localhost:5432;User Id=postgres;Password=Jd35B^1-Wa_/}0,;Database=RecordStoreDB");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -91,10 +88,16 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Region).WithMany(p => p.Addresses)
                 .HasForeignKey(d => d.RegionId)
                 .HasConstraintName("address_region_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Addresses)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("address_user_id_fkey");
         });
 
         modelBuilder.Entity<AppUser>(entity =>
@@ -557,25 +560,6 @@ public partial class RecordStoreContext : DbContext
             entity.HasOne(d => d.Track).WithMany(p => p.TrackProducts)
                 .HasForeignKey(d => d.TrackId)
                 .HasConstraintName("track_product_track_id_fkey");
-        });
-
-        modelBuilder.Entity<UserAddress>(entity =>
-        {
-            entity.HasKey(e => new { e.UserId, e.AddressId }).HasName("user_address_pkey");
-
-            entity.ToTable("user_address");
-
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.AddressId).HasColumnName("address_id");
-            entity.Property(e => e.IsDefault).HasColumnName("is_default");
-
-            entity.HasOne(d => d.Address).WithMany(p => p.UserAddresses)
-                .HasForeignKey(d => d.AddressId)
-                .HasConstraintName("user_address_address_id_fkey");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserAddresses)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("user_address_user_id_fkey");
         });
 
         OnModelCreatingPartial(modelBuilder);

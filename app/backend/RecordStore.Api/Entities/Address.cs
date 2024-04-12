@@ -21,7 +21,9 @@ public partial class Address
 
     public DateTime UpdatedAt { get; set; }
 
+    public int UserId { get; set; }
+
     public virtual Region? Region { get; set; }
 
-    public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
+    public virtual AppUser User { get; set; } = null!;
 }

@@ -21,6 +21,8 @@ public partial class AppUser
 
     public int RoleId { get; set; }
 
+    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual Role Role { get; set; } = null!;
@@ -28,6 +30,4 @@ public partial class AppUser
     public virtual ICollection<ShopOrder> ShopOrders { get; set; } = new List<ShopOrder>();
 
     public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new List<ShoppingCart>();
-
-    public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
 }

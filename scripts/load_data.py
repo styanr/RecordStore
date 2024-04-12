@@ -13,7 +13,7 @@ progress = Progress(
 # CONSTANTS
 DB_NAME = "RecordStoreDB"
 DB_USER = "postgres"
-DB_PASSWORD = "Jd35B^1-W\"a_/}0,"
+DB_PASSWORD = "Jd35B^1-Wa_/}0,"
 DB_HOST = "localhost"
 DB_PORT = "5432"
 

@@ -4,7 +4,10 @@ using Microsoft.OpenApi.Models;
 using RecordStore.Api.Context;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.Filters;
+using RecordStore.Api.Services.Addresses;
 using RecordStore.Api.Services.Artists;
+using RecordStore.Api.Services.Carts;
+using RecordStore.Api.Services.Orders;
 using RecordStore.Api.Services.Products;
 using RecordStore.Api.Services.Records;
 using RecordStore.Api.Services.Users;
@@ -16,6 +19,7 @@ builder.Services.AddJwt(builder.Configuration);
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<EntityNotFoundExceptionFilter>();
+    options.Filters.Add<PostgresExceptionFilter>();
     // options.Filters.Add<GenericExceptionFilter>();
 });
 
@@ -60,7 +64,6 @@ builder.Services.AddDbContext<RecordStoreContext>((services, optionsBuilder) =>
         "user" => builder.Configuration.GetConnectionString("UserConnection"),
         "manager" => builder.Configuration.GetConnectionString("ManagerConnection"),
         "postgres" => builder.Configuration.GetConnectionString("MasterConnection"),
-        // TODO: use custom exception
         _ => builder.Configuration.GetConnectionString("GuestConnection")
     };
     
@@ -70,7 +73,11 @@ builder.Services.AddDbContext<RecordStoreContext>((services, optionsBuilder) =>
 builder.Services.AddScoped<IRecordService, RecordService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IArtistService, ArtistService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var app = builder.Build();
 

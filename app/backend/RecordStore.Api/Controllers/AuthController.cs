@@ -6,20 +6,20 @@ namespace RecordStore.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : Controller
+public class AuthController : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly IAuthService _authService;
 
-    public AuthController(IUserService userService)
+    public AuthController(IAuthService authService)
     {
-        _userService = userService;
+        _authService = authService;
     }
     
     [HttpPost]
     [Route("register")]
     public async Task<ActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
     {
-        await _userService.RegisterAsync(userRegisterDto);
+        await _authService.RegisterAsync(userRegisterDto);
         
         return Ok();
     }
@@ -28,7 +28,7 @@ public class AuthController : Controller
     [Route("login")]
     public async Task<ActionResult> Login([FromBody] UserLoginDto userLoginDto)
     {
-        var token = await _userService.LoginAsync(userLoginDto);
+        var token = await _authService.LoginAsync(userLoginDto);
         
         return Ok(new { token });
     }

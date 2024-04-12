@@ -172,4 +172,30 @@ public static class QueryExtensions
         
         return query;
     }
+    
+    public static IQueryable<ShopOrder> ApplyIncludes(this IQueryable<ShopOrder> query)
+    {
+        return query
+            .Include(o => o.OrderLines)
+                .ThenInclude(ol => ol.Product)
+                .ThenInclude(p => p.Record)
+            .Include(o => o.OrderLines)
+                .ThenInclude(ol => ol.Product)
+                .ThenInclude(p => p.Format)
+            .Include(o => o.Status);
+    }
+    
+    public static IQueryable<ShopOrder> ApplyFiltersAndOrderBy(this IQueryable<ShopOrder> query, GetOrderQueryParams queryParams)
+    {
+        bool sortAsc = queryParams.OrderDirection == "asc";
+        
+        query = queryParams.OrderBy switch
+        {
+            "orderDate" => query.OrderByBoolean(o => o.CreatedAt, sortAsc),
+            "totalPrice" => query.OrderByBoolean(o => o.Total, sortAsc),
+            _ => query.OrderByBoolean(o => o.CreatedAt, sortAsc)
+        };
+        
+        return query;
+    }
 }
