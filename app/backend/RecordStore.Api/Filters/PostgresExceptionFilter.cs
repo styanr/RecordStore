@@ -15,5 +15,26 @@ public class PostgresExceptionFilter : ExceptionFilterAttribute
             };
             context.ExceptionHandled = true;
         }
+        else if (context.Exception.Message.Contains("P0001"))
+        {
+            context.Result = new ObjectResult(new { message = "Must have products in cart to place order." })
+            {
+                StatusCode = 400
+            };
+        }
+        else if (context.Exception.Message.Contains("P0002"))
+        {
+            context.Result = new ObjectResult(new { message = "Product is out of stock." })
+            {
+                StatusCode = 400
+            };
+        }
+        /*else
+        {
+            context.Result = new ObjectResult(new { message = "An error occurred." })
+            {
+                StatusCode = 500
+            };
+        }*/
     }
 }

@@ -26,7 +26,7 @@ public class AddressService : IAddressService
     {
         var user = await _userService.GetCurrentUserAsync();
 
-        if (user == null) throw new InvalidOperationException($"User with not found.");
+        if (user == null) throw new InvalidOperationException($"User not found.");
 
         var address = _mapper.Map<Address>(request);
 
@@ -41,7 +41,7 @@ public class AddressService : IAddressService
     {
         var user = await _userService.GetCurrentUserAsync();
 
-        if (user == null) throw new InvalidOperationException($"User with not found.");
+        if (user == null) throw new InvalidOperationException($"User not found.");
 
         var address = _context.Addresses.Find(request.Id);
 
@@ -63,7 +63,7 @@ public class AddressService : IAddressService
     {
         var user = await _userService.GetCurrentUserAsync();
 
-        if (user == null) throw new InvalidOperationException($"User with not found.");
+        if (user == null) throw new InvalidOperationException($"User not found.");
 
         var userId = user.Id;
 
@@ -83,7 +83,7 @@ public class AddressService : IAddressService
     {
         var user = await _userService.GetCurrentUserAsync();
 
-        if (user == null) throw new InvalidOperationException($"User with not found.");
+        if (user == null) throw new InvalidOperationException($"User not found.");
         
         var userId = user.Id;
 

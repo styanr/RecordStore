@@ -10,6 +10,7 @@ using RecordStore.Api.Services.Carts;
 using RecordStore.Api.Services.Orders;
 using RecordStore.Api.Services.Products;
 using RecordStore.Api.Services.Records;
+using RecordStore.Api.Services.Reviews;
 using RecordStore.Api.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,7 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<EntityNotFoundExceptionFilter>();
     options.Filters.Add<PostgresExceptionFilter>();
+    options.Filters.Add<UnauthorizedExceptionFilter>();
     // options.Filters.Add<GenericExceptionFilter>();
 });
 
@@ -78,6 +80,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 var app = builder.Build();
 

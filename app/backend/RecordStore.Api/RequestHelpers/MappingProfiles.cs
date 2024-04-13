@@ -7,6 +7,7 @@ using RecordStore.Api.Dto.Genres;
 using RecordStore.Api.Dto.Orders;
 using RecordStore.Api.Dto.Products;
 using RecordStore.Api.Dto.Records;
+using RecordStore.Api.Dto.Reviews;
 using RecordStore.Api.Dto.Tracks;
 using RecordStore.Api.Dto.Users;
 using RecordStore.Api.Entities;
@@ -69,5 +70,11 @@ public class MappingProfiles : Profile
         CreateMap<Address, AddressResponse>();
         CreateMap<AddressUpdateRequest, Address>()
             .ForMember(s => s.RegionId, opt => opt.MapFrom(d => d.RegionId));
+        
+        CreateMap<Review, ReviewResponse>()
+            .ForMember(s => s.UserFullName, opt => opt.MapFrom(d => d.User.FirstName + " " + d.User.LastName));
+        
+        
+        CreateMap<CreateReviewRequest, Review>();
     }
 }
