@@ -13,7 +13,5 @@ public partial class Genre
 
     public DateTime UpdatedAt { get; set; }
 
-    public virtual ICollection<Artist> Artists { get; set; } = new List<Artist>();
-
     public virtual ICollection<Record> Records { get; set; } = new List<Record>();
 }

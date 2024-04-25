@@ -36,5 +36,6 @@ public class PostgresExceptionFilter : ExceptionFilterAttribute
                 StatusCode = 500
             };
         }*/
+        context.ExceptionHandled = true;
     }
 }

@@ -30,7 +30,7 @@ public class AddressService : IAddressService
 
         var address = _mapper.Map<Address>(request);
 
-        address.User = user;
+        address.UserId = user.Id;
 
         _context.Addresses.Add(address);
 
@@ -52,7 +52,7 @@ public class AddressService : IAddressService
                 $"Address with ID {request.Id} does not belong to user with ID {user.Id}.");
 
         address = _mapper.Map(request, address);
-        address.User = user;
+        address.UserId = user.Id;
 
         await _context.SaveChangesAsync();
 
@@ -89,20 +89,9 @@ public class AddressService : IAddressService
 
         var addresses = await _context.Addresses
             .Where(a => a.UserId == userId)
-            .Include(a => a.Region)
             .ToListAsync();
 
         return _mapper.Map<List<AddressResponse>>(addresses);
     }
-
-    public async Task<List<RegionResponse>> GetRegionsAsync(string? name = null)
-    {
-        var regions = _context.Regions.AsQueryable();
-
-        if (!string.IsNullOrEmpty(name)) regions = regions.Where(r => r.RegionName.Contains(name));
-
-        return await regions
-            .Select(r => _mapper.Map<RegionResponse>(r))
-            .ToListAsync();
-    }
+    
 }

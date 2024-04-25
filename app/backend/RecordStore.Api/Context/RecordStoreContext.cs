@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using RecordStore.Api.Entities;
 
 namespace RecordStore.Api.Context;
@@ -22,21 +23,23 @@ public partial class RecordStoreContext : DbContext
 
     public virtual DbSet<Artist> Artists { get; set; }
 
-    public virtual DbSet<Discount> Discounts { get; set; }
-
     public virtual DbSet<Format> Formats { get; set; }
 
     public virtual DbSet<Genre> Genres { get; set; }
 
-    public virtual DbSet<OrderLine> OrderLines { get; set; }
+    public virtual DbSet<Inventory> Inventories { get; set; }
 
-    public virtual DbSet<OrderStatus> OrderStatuses { get; set; }
+    public virtual DbSet<InventoryEvent> InventoryEvents { get; set; }
+
+    public virtual DbSet<OrderLine> OrderLines { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
 
-    public virtual DbSet<Record> Records { get; set; }
+    public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
 
-    public virtual DbSet<Region> Regions { get; set; }
+    public virtual DbSet<PurchaseOrderLine> PurchaseOrderLines { get; set; }
+
+    public virtual DbSet<Record> Records { get; set; }
 
     public virtual DbSet<Review> Reviews { get; set; }
 
@@ -48,17 +51,20 @@ public partial class RecordStoreContext : DbContext
 
     public virtual DbSet<ShoppingCartProduct> ShoppingCartProducts { get; set; }
 
-    public virtual DbSet<Track> Tracks { get; set; }
-
-    public virtual DbSet<TrackProduct> TrackProducts { get; set; }
+    public virtual DbSet<Supplier> Suppliers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<OrderStatus>("order_status");
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<EventType>("event_type");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresExtension("moddatetime");
+        modelBuilder
+            .HasPostgresEnum("event_type", new[] { "Sale", "Purchase", "Cancel" })
+            .HasPostgresEnum("order_status", new[] { "Pending", "Paid", "Processing", "Shipped", "Delivered", "Canceled" })
+            .HasPostgresExtension("moddatetime");
 
         modelBuilder.Entity<Address>(entity =>
         {
@@ -81,7 +87,9 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
-            entity.Property(e => e.RegionId).HasColumnName("region_id");
+            entity.Property(e => e.Region)
+                .HasMaxLength(50)
+                .HasColumnName("region");
             entity.Property(e => e.Street)
                 .HasMaxLength(150)
                 .HasColumnName("street");
@@ -89,10 +97,6 @@ public partial class RecordStoreContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.Region).WithMany(p => p.Addresses)
-                .HasForeignKey(d => d.RegionId)
-                .HasConstraintName("address_region_id_fkey");
 
             entity.HasOne(d => d.User).WithMany(p => p.Addresses)
                 .HasForeignKey(d => d.UserId)
@@ -175,31 +179,6 @@ public partial class RecordStoreContext : DbContext
                     });
         });
 
-        modelBuilder.Entity<Discount>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("discount_pkey");
-
-            entity.ToTable("discount");
-
-            entity.Property(e => e.Id)
-                .UseIdentityAlwaysColumn()
-                .HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("created_at");
-            entity.Property(e => e.DiscountPercent).HasColumnName("discount_percent");
-            entity.Property(e => e.EndDate).HasColumnName("end_date");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.StartDate).HasColumnName("start_date");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("updated_at");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.Discounts)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("discount_product_id_fkey");
-        });
-
         modelBuilder.Entity<Format>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("format_pkey");
@@ -243,23 +222,6 @@ public partial class RecordStoreContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
 
-            entity.HasMany(d => d.Artists).WithMany(p => p.Genres)
-                .UsingEntity<Dictionary<string, object>>(
-                    "GenreArtist",
-                    r => r.HasOne<Artist>().WithMany()
-                        .HasForeignKey("ArtistId")
-                        .HasConstraintName("genre_artist_artist_id_fkey"),
-                    l => l.HasOne<Genre>().WithMany()
-                        .HasForeignKey("GenreId")
-                        .HasConstraintName("genre_artist_genre_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("GenreId", "ArtistId").HasName("genre_artist_pkey");
-                        j.ToTable("genre_artist");
-                        j.IndexerProperty<int>("GenreId").HasColumnName("genre_id");
-                        j.IndexerProperty<int>("ArtistId").HasColumnName("artist_id");
-                    });
-
             entity.HasMany(d => d.Records).WithMany(p => p.Genres)
                 .UsingEntity<Dictionary<string, object>>(
                     "GenreRecord",
@@ -278,6 +240,50 @@ public partial class RecordStoreContext : DbContext
                     });
         });
 
+        modelBuilder.Entity<Inventory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("inventory_pkey");
+
+            entity.ToTable("inventory");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.Location)
+                .HasMaxLength(255)
+                .HasColumnName("location");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.RestockLevel).HasColumnName("restock_level");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.Inventories)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("inventory_product_id_fkey");
+        });
+
+        modelBuilder.Entity<InventoryEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("inventory_event_pkey");
+
+            entity.ToTable("inventory_event");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.QuantityChange).HasColumnName("quantity_change");
+            entity.Property(e => e.EventType).HasColumnName("event_type");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.InventoryEvents)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("inventory_event_product_id_fkey");
+        });
+
         modelBuilder.Entity<OrderLine>(entity =>
         {
             entity.HasKey(e => new { e.ShopOrderId, e.ProductId }).HasName("order_line_pkey");
@@ -290,7 +296,7 @@ public partial class RecordStoreContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
             entity.Property(e => e.Price)
-                .HasColumnType("money")
+                .HasPrecision(12, 2)
                 .HasColumnName("price");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
 
@@ -302,21 +308,6 @@ public partial class RecordStoreContext : DbContext
             entity.HasOne(d => d.ShopOrder).WithMany(p => p.OrderLines)
                 .HasForeignKey(d => d.ShopOrderId)
                 .HasConstraintName("order_line_shop_order_id_fkey");
-        });
-
-        modelBuilder.Entity<OrderStatus>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("order_status_pkey");
-
-            entity.ToTable("order_status");
-
-            entity.Property(e => e.Id)
-                .UseIdentityAlwaysColumn()
-                .HasColumnName("id");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Name)
-                .HasMaxLength(15)
-                .HasColumnName("name");
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -333,13 +324,9 @@ public partial class RecordStoreContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.FormatId).HasColumnName("format_id");
-            entity.Property(e => e.Inactive)
-                .HasDefaultValue(false)
-                .HasColumnName("inactive");
             entity.Property(e => e.Price)
-                .HasColumnType("money")
+                .HasPrecision(12, 2)
                 .HasColumnName("price");
-            entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.RecordId).HasColumnName("record_id");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
@@ -354,6 +341,55 @@ public partial class RecordStoreContext : DbContext
                 .HasForeignKey(d => d.RecordId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("product_record_id_fkey");
+        });
+
+        modelBuilder.Entity<PurchaseOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("purchase_order_pkey");
+
+            entity.ToTable("purchase_order");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
+            entity.Property(e => e.Total)
+                .HasPrecision(12, 2)
+                .HasColumnName("total");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.PurchaseOrders)
+                .HasForeignKey(d => d.SupplierId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("purchase_order_supplier_id_fkey");
+        });
+
+        modelBuilder.Entity<PurchaseOrderLine>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("purchase_order_product_pkey");
+
+            entity.ToTable("purchase_order_line");
+
+            entity.HasIndex(e => new { e.ProductId, e.Id }, "purchase_order_line_product_id_id_key").IsUnique();
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.PurchaseOrderId).HasColumnName("purchase_order_id");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.PurchaseOrderLines)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("purchase_order_product_product_id_fkey");
+
+            entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.PurchaseOrderLines)
+                .HasForeignKey(d => d.PurchaseOrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("purchase_order_product_purchase_order_id_fkey");
         });
 
         modelBuilder.Entity<Record>(entity =>
@@ -376,22 +412,6 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
-        });
-
-        modelBuilder.Entity<Region>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("region_pkey");
-
-            entity.ToTable("region");
-
-            entity.HasIndex(e => e.RegionName, "region_region_name_key").IsUnique();
-
-            entity.Property(e => e.Id)
-                .UseIdentityAlwaysColumn()
-                .HasColumnName("id");
-            entity.Property(e => e.RegionName)
-                .HasMaxLength(50)
-                .HasColumnName("region_name");
         });
 
         modelBuilder.Entity<Review>(entity =>
@@ -459,19 +479,14 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
-            entity.Property(e => e.StatusId).HasColumnName("status_id");
+            entity.Property(e => e.Region)
+                .HasMaxLength(50)
+                .HasColumnName("region");
             entity.Property(e => e.Street)
                 .HasMaxLength(150)
                 .HasColumnName("street");
-            entity.Property(e => e.Total)
-                .HasColumnType("money")
-                .HasColumnName("total");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.Status).WithMany(p => p.ShopOrders)
-                .HasForeignKey(d => d.StatusId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("shop_order_status_id_fkey");
+            entity.Property(e => e.Status).HasColumnName("status");
 
             entity.HasOne(d => d.User).WithMany(p => p.ShopOrders)
                 .HasForeignKey(d => d.UserId)
@@ -520,46 +535,24 @@ public partial class RecordStoreContext : DbContext
                 .HasConstraintName("shopping_cart_product_shopping_cart_id_fkey");
         });
 
-        modelBuilder.Entity<Track>(entity =>
+        modelBuilder.Entity<Supplier>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("track_pkey");
+            entity.HasKey(e => e.Id).HasName("supplier_pkey");
 
-            entity.ToTable("track");
+            entity.ToTable("supplier");
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("created_at");
-            entity.Property(e => e.DurationSeconds).HasColumnName("duration_seconds");
-            entity.Property(e => e.Title)
-                .HasColumnType("character varying")
-                .HasColumnName("title");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("updated_at");
-        });
-
-        modelBuilder.Entity<TrackProduct>(entity =>
-        {
-            entity.HasKey(e => new { e.TrackId, e.ProductId }).HasName("track_product_pkey");
-
-            entity.ToTable("track_product");
-
-            entity.Property(e => e.TrackId).HasColumnName("track_id");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.TrackOrder)
+            entity.Property(e => e.Address)
+                .HasMaxLength(1024)
+                .HasColumnName("address");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
+            entity.Property(e => e.Phone)
                 .HasMaxLength(20)
-                .HasColumnName("track_order");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.TrackProducts)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("track_product_product_id_fkey");
-
-            entity.HasOne(d => d.Track).WithMany(p => p.TrackProducts)
-                .HasForeignKey(d => d.TrackId)
-                .HasConstraintName("track_product_track_id_fkey");
+                .HasColumnName("phone");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -20,7 +20,7 @@ public class ProductService : IProductService
         _context = context;
         _mapper = mapper;
     }
-    public async Task<List<ProductResponseDto>> GetAllAsync(GetProductQueryParams queryParams)
+    public async Task<PagedResult<ProductResponseDto>> GetAllAsync(GetProductQueryParams queryParams)
     {
         var query = _context.Products
             .AsQueryable()
@@ -29,9 +29,9 @@ public class ProductService : IProductService
         
         PagedResult<Product> pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
         
-        var productDtos = _mapper.Map<List<ProductResponseDto>>(pagedResult.Results);
+        PagedResult<ProductResponseDto> pagedResultDto = _mapper.Map<PagedResult<ProductResponseDto>>(pagedResult);
         
-        return productDtos;
+        return pagedResultDto;
     }
 
     public async Task<ProductFullResponseDto> GetByIdAsync(int id)
@@ -66,9 +66,9 @@ public class ProductService : IProductService
             _ => query.OrderByBoolean(p => p.Id, sortAsc)
         };
         
-        PagedResult<Product> pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
+        var products = await query.ToListAsync();
         
-        return _mapper.Map<List<ProductResponseDto>>(pagedResult.Results);
+        return _mapper.Map<List<ProductResponseDto>>(products);
     }
 
     public Task<ProductFullResponseDto> CreateAsync(Product entity)
@@ -79,6 +79,15 @@ public class ProductService : IProductService
     public Task<ProductFullResponseDto> UpdateAsync(Product entity)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<PriceMinMaxResponse> GetPriceMinMaxAsync()
+    {
+        return new PriceMinMaxResponse
+        {
+            MinPrice = await _context.Products.MinAsync(p => p.Price),
+            MaxPrice = await _context.Products.MaxAsync(p => p.Price)
+        };
     }
 
     public Task<bool> DeleteAsync(int id)

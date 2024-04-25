@@ -8,5 +8,5 @@ public interface IAddressService
     public Task<AddressResponse> UpdateAddressAsync(AddressUpdateRequest request);
     public Task DeleteAddressAsync(int id);
     public Task<List<AddressResponse>> GetAllAsync();
-    public Task<List<RegionResponse>> GetRegionsAsync(string? name = null);
+    /*public Task<List<RegionResponse>> GetRegionsAsync(string? name = null);*/
 }

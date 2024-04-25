@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.Products;
 using RecordStore.Api.Entities;
+using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers;
 using RecordStore.Api.RequestHelpers.QueryParams;
 using RecordStore.Api.Services.Products;
@@ -21,7 +22,7 @@ public class ProductController
     }
     
     [HttpGet]
-    public async Task<ActionResult<List<ProductResponseDto>>> GetAll([FromQuery] GetProductQueryParams queryParams)
+    public async Task<ActionResult<PagedResult<ProductResponseDto>>> GetAll([FromQuery] GetProductQueryParams queryParams)
     {
         var products = await _productService.GetAllAsync(queryParams);
         
@@ -44,5 +45,14 @@ public class ProductController
         var products = await _productService.GetByRecordIdAsync(recordId, queryParams);
         
         return products;
+    }
+    
+    [HttpGet]
+    [Route("prices")]
+    public async Task<ActionResult<PriceMinMaxResponse>> GetPriceMinMax()
+    {
+        var priceMinMax = await _productService.GetPriceMinMaxAsync();
+        
+        return priceMinMax;
     }
 }

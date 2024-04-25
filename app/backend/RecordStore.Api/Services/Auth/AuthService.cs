@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
 using RecordStore.Api.Dto.Users;
 using RecordStore.Api.Entities;
+using RecordStore.Api.Exceptions;
 using RecordStore.Api.RequestHelpers;
 
 namespace RecordStore.Api.Services.Users;
@@ -21,6 +22,12 @@ public class AuthService : IAuthService
     public async Task RegisterAsync(UserRegisterDto userRegisterDto)
     {
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userRegisterDto.Password);
+        var roleId = _context.Roles.FirstOrDefault(r => r.RoleName == "user")?.Id;
+        
+        if (roleId == null)
+        {
+            throw new InvalidOperationException("Role not found");
+        }
         
         var user = new AppUser
         {
@@ -28,6 +35,7 @@ public class AuthService : IAuthService
             Password = hashedPassword,
             FirstName = userRegisterDto.FirstName,
             LastName = userRegisterDto.LastName,
+            RoleId = roleId.Value
         };
         
         _context.AppUsers.Add(user);
@@ -45,7 +53,7 @@ public class AuthService : IAuthService
         
         if (user == null)
         {
-            throw new Exception("User not found");
+            throw new UserNotFoundException();
         }
         
         if (!BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user.Password))

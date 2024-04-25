@@ -7,10 +7,13 @@ using RecordStore.Api.Filters;
 using RecordStore.Api.Services.Addresses;
 using RecordStore.Api.Services.Artists;
 using RecordStore.Api.Services.Carts;
+using RecordStore.Api.Services.Formats;
+using RecordStore.Api.Services.Genres;
 using RecordStore.Api.Services.Orders;
 using RecordStore.Api.Services.Products;
 using RecordStore.Api.Services.Records;
 using RecordStore.Api.Services.Reviews;
+using RecordStore.Api.Services.Stats;
 using RecordStore.Api.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +25,7 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<EntityNotFoundExceptionFilter>();
     options.Filters.Add<PostgresExceptionFilter>();
     options.Filters.Add<UnauthorizedExceptionFilter>();
+    options.Filters.Add<InvalidOperationExceptionFilter>();
     // options.Filters.Add<GenericExceptionFilter>();
 });
 
@@ -65,7 +69,7 @@ builder.Services.AddDbContext<RecordStoreContext>((services, optionsBuilder) =>
     {
         "user" => builder.Configuration.GetConnectionString("UserConnection"),
         "manager" => builder.Configuration.GetConnectionString("ManagerConnection"),
-        "postgres" => builder.Configuration.GetConnectionString("MasterConnection"),
+        "admin" => builder.Configuration.GetConnectionString("MasterConnection"),
         _ => builder.Configuration.GetConnectionString("GuestConnection")
     };
     
@@ -81,6 +85,19 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IFormatService, FormatService>();
+builder.Services.AddScoped<IGenreService, GenreService>();
+builder.Services.AddScoped<IStatsService, StatsService>();
+
+builder.Services.AddCors(opt =>
+    {
+    opt.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowAnyOrigin();
+    });
+});
 
 var app = builder.Build();
 
@@ -95,5 +112,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.UseHttpsRedirection();
+app.UseCors();
 
 app.Run();

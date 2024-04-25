@@ -35,8 +35,8 @@ public class AddressController : ControllerBase
         return response;
     }
     
-    [HttpDelete]
-    public async Task<IActionResult> DeleteAddress(int id)
+    [HttpDelete ("{id}")]
+    public async Task<IActionResult> DeleteAddress([FromRoute] int id)
     {
         await _addressService.DeleteAddressAsync(id);
 
@@ -51,12 +51,12 @@ public class AddressController : ControllerBase
         return addresses;
     }
     
-    [HttpGet]
-    [Route("/regions")]
+    /*[HttpGet]
+    [Route("regions")]
     public async Task<List<RegionResponse>> GetRegions(string? name = null)
     {
         var regions = await _addressService.GetRegionsAsync(name);
         
         return regions;
-    }
+    }*/
 }

@@ -9,4 +9,6 @@ public class CreateOrderRequest
     public string Building { get; set; } = null!;
 
     public string? Apartment { get; set; }
+    
+    public string? Region { get; set; }
 }

@@ -12,5 +12,5 @@ public class AddressUpdateRequest
 
     public string? Apartment { get; set; }
 
-    public int? RegionId { get; set; }
+    public string? Region { get; set; }
 }

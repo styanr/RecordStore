@@ -12,6 +12,6 @@ public class AddressResponse
 
     public string? Apartment { get; set; }
 
-    public RegionResponse? Region { get; set; }
+    public string? Region { get; set; }
 
 }

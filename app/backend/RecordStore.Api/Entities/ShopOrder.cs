@@ -9,8 +9,6 @@ public partial class ShopOrder
 
     public int UserId { get; set; }
 
-    public decimal Total { get; set; }
-
     public string City { get; set; } = null!;
 
     public string Street { get; set; } = null!;
@@ -19,13 +17,14 @@ public partial class ShopOrder
 
     public string? Apartment { get; set; }
 
-    public int StatusId { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
-    public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
+    public string Region { get; set; } = null!;
+    
+    public OrderStatus Status { get; set; }
+    public decimal Total => OrderLines.Sum(ol => ol.Price * ol.Quantity);
 
-    public virtual OrderStatus Status { get; set; } = null!;
+    public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
 
     public virtual AppUser User { get; set; } = null!;
 }

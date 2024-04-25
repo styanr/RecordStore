@@ -11,6 +11,7 @@ public class GenericExceptionFilter : ExceptionFilterAttribute
         {
             StatusCode = 500
         };
+        context.ExceptionHandled = true;
         base.OnException(context);
     }
 }

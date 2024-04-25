@@ -15,15 +15,13 @@ public partial class Address
 
     public string? Apartment { get; set; }
 
-    public int? RegionId { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
 
     public int UserId { get; set; }
 
-    public virtual Region? Region { get; set; }
+    public string? Region { get; set; }
 
     public virtual AppUser User { get; set; } = null!;
 }

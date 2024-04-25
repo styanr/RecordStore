@@ -62,15 +62,13 @@ public static class QueryExtensions
     /// </summary>
     public static IQueryable<Product> ApplyIncludes(this IQueryable<Product> query)
     {
-        
+
         return query
             .Include(p => p.Record)
-                .ThenInclude(r => r.Genres)
+            .ThenInclude(r => r.Genres)
             .Include(p => p.Record)
-                .ThenInclude(r => r.Artists)
-            .Include(p => p.Format)
-            .Include(p => p.TrackProducts.OrderBy(c => string.IsNullOrEmpty(c.TrackOrder)))
-                .ThenInclude(tp => tp.Track);
+            .ThenInclude(r => r.Artists)
+            .Include(p => p.Format);
     }
 
     public static IQueryable<Product> ApplyFiltersAndOrderBy(this IQueryable<Product> query, GetProductQueryParams queryParams)
@@ -83,7 +81,8 @@ public static class QueryExtensions
         
         if (!string.IsNullOrWhiteSpace(queryParams.Artist))
         {
-            query = query.Where(p => p.Record.Artists.Any(a => a.Name == queryParams.Artist));
+            string normalizedArtist = queryParams.Artist.ToLower().Trim();
+            query = query.Where(p => p.Record.Artists.Any(a => a.Name.ToLower().Contains(normalizedArtist)));
         }
         
         if (!string.IsNullOrWhiteSpace(queryParams.Genre))
@@ -177,12 +176,11 @@ public static class QueryExtensions
     {
         return query
             .Include(o => o.OrderLines)
-                .ThenInclude(ol => ol.Product)
-                .ThenInclude(p => p.Record)
+            .ThenInclude(ol => ol.Product)
+            .ThenInclude(p => p.Record)
             .Include(o => o.OrderLines)
-                .ThenInclude(ol => ol.Product)
-                .ThenInclude(p => p.Format)
-            .Include(o => o.Status);
+            .ThenInclude(ol => ol.Product)
+            .ThenInclude(p => p.Format);
     }
     
     public static IQueryable<ShopOrder> ApplyFiltersAndOrderBy(this IQueryable<ShopOrder> query, GetOrderQueryParams queryParams)

@@ -1,15 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NpgsqlTypes;
 
 namespace RecordStore.Api.Entities;
 
-public partial class OrderStatus
+public enum OrderStatus
 {
-    public int Id { get; set; }
-
-    public string Name { get; set; } = null!;
-
-    public string? Description { get; set; }
-
-    public virtual ICollection<ShopOrder> ShopOrders { get; set; } = new List<ShopOrder>();
+    [PgName("Pending")]
+    Pending,
+    [PgName("Paid")]
+    Paid,
+    [PgName("Processing")]
+    Processing,
+    [PgName("Shipped")]
+    Shipped,
+    [PgName("Delivered")]
+    Delivered,
+    [PgName("Cancelled")]
+    Cancelled
 }

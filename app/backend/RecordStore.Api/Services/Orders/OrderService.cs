@@ -27,10 +27,13 @@ public class OrderService : IOrderService
 
     public async Task<List<OrderResponse>> GetAllAsync(GetOrderQueryParams queryParams)
     {
+        var user = await _userService.GetCurrentUserAsync();
+        var userId = user.Id;
+        
         var query = _context.ShopOrders
             .ApplyIncludes()
-            .ApplyFiltersAndOrderBy(queryParams);
-
+            .ApplyFiltersAndOrderBy(queryParams)
+            .Where(o => o.UserId == userId);
 
         var pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
 
@@ -43,7 +46,7 @@ public class OrderService : IOrderService
     {
         var user = await _userService.GetCurrentUserAsync();
         var userId = user.Id;
-        var sql = "call create_order (@UserId, @City, @Street, @Building, @Apartment)";
+        var sql = "call create_order (@UserId, @City, @Street, @Building, @Apartment, @Region)";
         
         var rowsAffected = await _context.Database.ExecuteSqlRawAsync(sql,
         [
@@ -76,6 +79,12 @@ public class OrderService : IOrderService
                 ParameterName = "Apartment",
                 NpgsqlDbType = NpgsqlDbType.Varchar,
                 Value = createOrderRequest.Apartment ?? (object)DBNull.Value,
+            },
+            new NpgsqlParameter
+            {
+                ParameterName = "Region",
+                NpgsqlDbType = NpgsqlDbType.Varchar,
+                Value = createOrderRequest.Region ?? (object)DBNull.Value,
             }
         ]);
 

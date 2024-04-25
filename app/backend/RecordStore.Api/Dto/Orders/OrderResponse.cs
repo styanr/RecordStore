@@ -14,11 +14,9 @@ public class OrderResponse
 
     public string? Apartment { get; set; }
 
-    public int StatusId { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public ICollection<OrderLineResponse> OrderLines { get; set; } = new List<OrderLineResponse>();
 
-    public OrderStatusResponse Status { get; set; } = null!;
+    public string Status { get; set; } = null!;
 }

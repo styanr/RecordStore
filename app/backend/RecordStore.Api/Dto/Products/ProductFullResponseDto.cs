@@ -10,5 +10,7 @@ namespace RecordStore.Api.Dto.Products;
 /// </summary>
 public class ProductFullResponseDto : ProductResponseDto
 {
+    public int RecordId { get; set; }
+    public string Description { get; set; }
     public List<TrackResponseDTO> Tracklist { get; set; }
 }

@@ -11,6 +11,7 @@ using RecordStore.Api.Dto.Reviews;
 using RecordStore.Api.Dto.Tracks;
 using RecordStore.Api.Dto.Users;
 using RecordStore.Api.Entities;
+using RecordStore.Api.Extensions;
 
 namespace RecordStore.Api.RequestHelpers;
 
@@ -46,9 +47,7 @@ public class MappingProfiles : Profile
             .ForMember(s => s.Artists, opt => opt.MapFrom(d => d.Record.Artists))
             .ForMember(s => s.Genres, opt => opt.MapFrom(d => d.Record.Genres))
             .ForMember(s => s.Format, opt => opt.MapFrom(d => d.Format))
-            .ForMember(s => s.ReleaseDate, opt => opt.MapFrom(d => d.Record.ReleaseDate))
-            .ForMember(s => s.Tracklist, opt => opt.MapFrom(d => d.TrackProducts));
-
+            .ForMember(s => s.ReleaseDate, opt => opt.MapFrom(d => d.Record.ReleaseDate));
         CreateMap<OrderStatus, OrderStatusResponse>();
         CreateMap<OrderLine, OrderLineResponse>()
             .ForMember(s => s.Product, opt => opt.MapFrom(d => d.Product));
@@ -63,18 +62,19 @@ public class MappingProfiles : Profile
                 opt.MapFrom(d => d.ShoppingCartProducts))
             .ForMember(s => s.TotalPrice, opt => 
                 opt.MapFrom(d => d.ShoppingCartProducts.Sum(p => p.Product.Price * p.Quantity)));
-
-        CreateMap<Region, RegionResponse>();
         
         CreateMap<AddressRequest, Address>();
         CreateMap<Address, AddressResponse>();
-        CreateMap<AddressUpdateRequest, Address>()
-            .ForMember(s => s.RegionId, opt => opt.MapFrom(d => d.RegionId));
+        CreateMap<AddressUpdateRequest, Address>();
+            
         
         CreateMap<Review, ReviewResponse>()
             .ForMember(s => s.UserFullName, opt => opt.MapFrom(d => d.User.FirstName + " " + d.User.LastName));
         
-        
         CreateMap<CreateReviewRequest, Review>();
+
+        CreateMap<PagedResult<Product>, PagedResult<ProductResponseDto>>();
+
+        CreateMap<AppUser, UserResponse>().ForMember(s => s.Role, opt => opt.MapFrom(d => d.Role.RoleName));
     }
 }
