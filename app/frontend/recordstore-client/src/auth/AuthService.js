@@ -33,10 +33,6 @@ class AuthService {
     );
     console.log(response.data);
 
-    if (response.status === 401) {
-      return null;
-    }
-
     return response.data;
   };
 }

@@ -34,6 +34,11 @@ class ProductService {
     });
     return response.data;
   };
+
+  getReviews = async (productId) => {
+    const response = await axios.get(api_url + '/' + productId + '/reviews');
+    return response.data;
+  }
 }
 
 const productService = new ProductService();

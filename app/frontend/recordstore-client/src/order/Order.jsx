@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Flex,
+  Text,
   Heading,
   Step,
   StepDescription,
@@ -13,13 +14,21 @@ import {
   StepTitle,
   Stepper,
   useSteps,
+  Button,
+  useToast,
 } from '@chakra-ui/react';
 
 import useAuth from '../auth/useAuth';
 
 import useCart from '../cart/useCart';
+
+import useAddress from '../profile/useAddress';
+
+import useOrders from './useOrders';
+
 import CartItems from './CartItems';
 import ContactInfo from './ContactInfo';
+import AddressForm from '../common/AddressForm';
 
 const steps = [
   { title: 'Кошик', description: 'Перевірте ваше замовлення' },
@@ -36,8 +45,57 @@ const Order = () => {
     count: steps.length,
   });
 
+  const toast = useToast();
+
   const { cart } = useCart();
   const { user } = useAuth();
+  const { addresses } = useAddress();
+  const { createOrder } = useOrders();
+
+  const [newAddress, setNewAddress] = useState({
+    city: '',
+    street: '',
+    building: '',
+    apartment: '',
+    region: '',
+  });
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setNewAddress({ ...newAddress, [name]: value });
+  };
+
+  const handleSubmit = async () => {
+    const { success, error } = await createOrder(newAddress);
+
+    if (success) {
+      toast({
+        title: 'Замовлення успішно оформлено',
+        description: 'Для перегляду статусу замовлення перейдіть у ваш профіль',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: 'Помилка при оформленні замовлення',
+        description: error,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const onClose = () => {
+    setNewAddress({
+      city: '',
+      street: '',
+      building: '',
+      apartment: '',
+      region: '',
+    });
+  };
 
   return (
     <Box mt={5} mx={10}>
@@ -84,6 +142,38 @@ const Order = () => {
                 Контактна інформація
               </Heading>
               <ContactInfo user={user} />
+            </>
+          )}
+          {activeStep === 2 && (
+            <>
+              <Heading as='h3' size='lg'>
+                Адреса доставки
+              </Heading>
+              <Text mt={3}>
+                Виберіть збережену адресу або вкажіть нову адресу доставки
+              </Text>
+              <Flex gap={2}>
+                {addresses.map((address) => (
+                  <Button
+                    key={address.id}
+                    colorScheme='blue'
+                    variant='outline'
+                    mt={3}
+                    onClick={() => setNewAddress(address)}
+                  >
+                    {address.city}, {address.street}, {address.building}
+                    {address.apartment ? `, кв. ${address.apartment}` : ''}
+                  </Button>
+                ))}
+              </Flex>
+              <Box mt={3}>
+                <AddressForm
+                  newAddress={newAddress}
+                  handleAddressChange={handleAddressChange}
+                  handleSubmit={handleSubmit}
+                  onClose={onClose}
+                />
+              </Box>
             </>
           )}
         </Box>

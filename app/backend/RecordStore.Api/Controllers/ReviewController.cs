@@ -17,9 +17,10 @@ public class ReviewController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetReviews([FromQuery] GetReviewQueryParams queryParams)
+    [Route("~/api/products/{productId}/reviews")]
+    public async Task<IActionResult> GetReviews(int productId, [FromQuery] GetReviewQueryParams queryParams)
     {
-        var reviews = await _reviewService.GetAllAsync(queryParams);
+        var reviews = await _reviewService.GetAllAsync(productId, queryParams);
 
         return Ok(reviews);
     }

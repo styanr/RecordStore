@@ -114,7 +114,7 @@ export default function AddressSection({
             <AddressForm
               newAddress={newAddress}
               handleAddressChange={handleAddressChange}
-              handleAddAddress={handleAddAddress}
+              handleSubmit={handleAddAddress}
               onClose={() => setIsOpen(false)}
             />
           </ModalBody>

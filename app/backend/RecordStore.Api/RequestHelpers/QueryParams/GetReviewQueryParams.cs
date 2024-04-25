@@ -2,5 +2,5 @@
 
 public class GetReviewQueryParams : GetQueryParams
 {
-    public int ProductId { get; set; }
+    
 }

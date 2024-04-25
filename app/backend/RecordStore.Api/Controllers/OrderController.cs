@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.Orders;
+using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers.QueryParams;
 using RecordStore.Api.Services.Orders;
 
@@ -16,9 +17,10 @@ public class OrderController : ControllerBase
         _orderService = orderService;
     }
     [HttpGet]
-    public async Task<ActionResult<List<OrderResponse>>> Get([FromQuery] GetOrderQueryParams queryParams)
+    public async Task<ActionResult<PagedResult<OrderResponse>>> Get([FromQuery] GetOrderQueryParams queryParams)
     {
         var orders = await _orderService.GetAllAsync(queryParams);
+        
         return orders;
     }
     

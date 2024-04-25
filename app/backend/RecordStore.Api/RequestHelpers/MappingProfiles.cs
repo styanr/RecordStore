@@ -52,7 +52,8 @@ public class MappingProfiles : Profile
         CreateMap<OrderLine, OrderLineResponse>()
             .ForMember(s => s.Product, opt => opt.MapFrom(d => d.Product));
 
-        CreateMap<ShopOrder, OrderResponse>();
+        CreateMap<ShopOrder, OrderResponse>()
+            .ForMember(s => s.Items, opt => opt.MapFrom(d => d.OrderLines));
         
         CreateMap<ShoppingCartProduct, CartItemResponse>()
             .ForMember(s => s.Product, opt => opt.MapFrom(d => d.Product));
@@ -74,7 +75,9 @@ public class MappingProfiles : Profile
         CreateMap<CreateReviewRequest, Review>();
 
         CreateMap<PagedResult<Product>, PagedResult<ProductResponseDto>>();
-
+        CreateMap<PagedResult<ShopOrder>, PagedResult<OrderResponse>>();
+        
+        
         CreateMap<AppUser, UserResponse>().ForMember(s => s.Role, opt => opt.MapFrom(d => d.Role.RoleName));
     }
 }

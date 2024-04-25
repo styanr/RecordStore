@@ -9,17 +9,6 @@ const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
 
   useEffect(() => {
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   const decodedToken = jwtDecode(token);
-    //   const user = getUserFromToken(decodedToken);
-    //   setUser(user);
-    //   authService.setToken(token);
-    //   setIsAuthenticated(true);
-    //   return;
-    // }
-    // setIsAuthenticated(false);
-
     const token = localStorage.getItem('token');
     if (token) {
       authService.setToken(token);
@@ -27,13 +16,18 @@ const useAuth = () => {
       setIsAuthenticated(false);
       return;
     }
-    const user = getUser();
 
-    if (user) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-    }
+    const fetchUser = async () => {
+      try {
+        await getUser();
+        console.log(user);
+        setIsAuthenticated(true);
+      } catch (err) {
+        setIsAuthenticated(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   const handleAuthSuccess = (token) => {
@@ -84,9 +78,7 @@ const useAuth = () => {
 
     try {
       const data = await authService.getUser();
-      console.log(data);
       setUser(data);
-    } catch (err) {
     } finally {
       setLoading(false);
     }

@@ -190,7 +190,7 @@ public static class QueryExtensions
         query = queryParams.OrderBy switch
         {
             "orderDate" => query.OrderByBoolean(o => o.CreatedAt, sortAsc),
-            "totalPrice" => query.OrderByBoolean(o => o.Total, sortAsc),
+            "totalPrice" => query.OrderByBoolean(o => o.OrderLines.Sum(ol => ol.Product.Price * ol.Quantity), sortAsc),
             _ => query.OrderByBoolean(o => o.CreatedAt, sortAsc)
         };
         

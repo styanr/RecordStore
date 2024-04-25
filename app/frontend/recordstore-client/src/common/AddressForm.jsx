@@ -4,7 +4,7 @@ import { FormControl, FormLabel, Input, Button } from '@chakra-ui/react';
 const AddressForm = ({
   newAddress,
   handleAddressChange,
-  handleAddAddress,
+  handleSubmit,
   onClose,
 }) => {
   return (
@@ -49,7 +49,7 @@ const AddressForm = ({
           onChange={handleAddressChange}
         />
       </FormControl>
-      <Button colorScheme='blue' mr={3} onClick={handleAddAddress}>
+      <Button colorScheme='blue' mr={3} onClick={handleSubmit}>
         ОК
       </Button>
       <Button variant='ghost' onClick={onClose}>

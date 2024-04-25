@@ -7,5 +7,5 @@ public interface IReviewService
 {
     public Task CreateAsync(CreateReviewRequest createReviewRequest);
     public Task DeleteAsync(int id);
-    public Task<List<ReviewResponse>> GetAllAsync(GetReviewQueryParams queryParams);
+    public Task<List<ReviewResponse>> GetAllAsync(int id, GetReviewQueryParams queryParams);
 }

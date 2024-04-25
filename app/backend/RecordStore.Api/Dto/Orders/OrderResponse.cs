@@ -16,7 +16,7 @@ public class OrderResponse
 
     public DateTime CreatedAt { get; set; }
 
-    public ICollection<OrderLineResponse> OrderLines { get; set; } = new List<OrderLineResponse>();
+    public ICollection<OrderLineResponse> Items { get; set; } = new List<OrderLineResponse>();
 
     public string Status { get; set; } = null!;
 }

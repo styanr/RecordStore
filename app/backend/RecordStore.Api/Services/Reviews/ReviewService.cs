@@ -62,10 +62,10 @@ public class ReviewService : IReviewService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<ReviewResponse>> GetAllAsync(GetReviewQueryParams queryParams)
+    public async Task<List<ReviewResponse>> GetAllAsync(int id, GetReviewQueryParams queryParams)
     {
         var reviews = await _context.Reviews
-            .Where(review => review.ProductId == queryParams.ProductId)
+            .Where(review => review.ProductId == id)
             .Include(r => r.User)
             .ToListAsync();
 

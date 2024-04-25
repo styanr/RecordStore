@@ -25,7 +25,7 @@ public class OrderService : IOrderService
         _userService = userService;
     }
 
-    public async Task<List<OrderResponse>> GetAllAsync(GetOrderQueryParams queryParams)
+    public async Task<PagedResult<OrderResponse>> GetAllAsync(GetOrderQueryParams queryParams)
     {
         var user = await _userService.GetCurrentUserAsync();
         var userId = user.Id;
@@ -37,7 +37,7 @@ public class OrderService : IOrderService
 
         var pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
 
-        var orders = _mapper.Map<List<OrderResponse>>(pagedResult.Results);
+        var orders = _mapper.Map<PagedResult<OrderResponse>>(pagedResult);
 
         return orders;
     }

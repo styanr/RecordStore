@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Flex, Box, Avatar, Text, Button } from '@chakra-ui/react';
 import CustomBadge from './CustomBadge';
+
 import useAuth from '../auth/useAuth';
 import useAddress from './useAddress';
+import useOrders from '../order/useOrders';
+
 import stringToColor from '../utils/stringToColor';
 import AddressSection from './AddressSection';
+import OrderSection from './OrderSection';
 
 import { HiX } from 'react-icons/hi';
 
@@ -14,6 +18,7 @@ export default function Profile() {
   const { user } = useAuth();
   const [roleColor, setRoleColor] = useState('gray');
   const { addresses, addAddress, deleteAddress } = useAddress();
+  const { orders, fetchOrders } = useOrders();
 
   const navigate = useNavigate();
 
@@ -23,8 +28,16 @@ export default function Profile() {
     setRoleColor(stringToColor(user.role));
   }, [user]);
 
+  useEffect(() => {
+    console.log(orders);
+  }, [orders]);
+
+  const getOrders = async (params) => {
+    await fetchOrders(params);
+  };
+
   return (
-    <Flex justify='center' align='start' h='100vh'>
+    <Flex justify='center' align='start'>
       {user ? (
         <Box p={6} m={20} w='100%'>
           <Flex justify='space-between' align='center' mb={4}>
@@ -48,11 +61,14 @@ export default function Profile() {
             </Button>
           </Flex>
           {user.role === 'user' && (
-            <AddressSection
-              addresses={addresses}
-              addAddress={addAddress}
-              deleteAddress={deleteAddress}
-            />
+            <>
+              <OrderSection orders={orders} fetchOrders={getOrders} />
+              <AddressSection
+                addresses={addresses}
+                addAddress={addAddress}
+                deleteAddress={deleteAddress}
+              />
+            </>
           )}
         </Box>
       ) : (

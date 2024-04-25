@@ -21,7 +21,10 @@ import {
   RangeSliderFilledTrack,
   RangeSliderThumb,
   Button,
+  Container,
 } from '@chakra-ui/react';
+
+import { SearchIcon } from '@chakra-ui/icons';
 
 import {
   AutoComplete,
@@ -137,73 +140,66 @@ const Home = () => {
   };
 
   return (
-    <>
+    <Box bg='gray.100' minH='100vh' py={12}>
       {isLoading ? (
         <Center>
-          <CircularProgress isIndeterminate />
+          <CircularProgress isIndeterminate size='60px' color='blue.500' />
         </Center>
       ) : (
-        <>
-          <Text mt={4} ms={4}>
-            Знайдено {totalCount} записів.
-          </Text>
-          <Flex direction='row' pt={10}>
-            <Box w='20%'>
-              <Box borderWidth={1} p={4}>
-                <Heading as='h3' size='md' mb={2}>
-                  Назва
-                </Heading>
-                <Flex direction='row'>
-                  <Input
-                    type='text'
-                    placeholder='Введіть назву'
-                    value={title}
-                    onChange={(e) => {
-                      setTitle(e.target.value);
-                      handleSearch();
-                    }}
-                  />
-                </Flex>
-              </Box>
-              <Box borderWidth={1} p={4} mb={4}>
-                <Heading as='h3' size='md' mb={2}>
-                  Виконавець
-                </Heading>
-                <Flex direction='row'>
-                  <Input
-                    type='text'
-                    placeholder='Введіть виконавця'
-                    value={artist}
-                    onChange={(e) => {
-                      setArtist(e.target.value);
-                      handleSearch();
-                    }}
-                  />
-                </Flex>
-              </Box>
-
-              <Box borderWidth={1} p={4} mb={4}>
-                <Heading as='h3' size='md' mb={2}>
-                  Формат
-                </Heading>
-                <AutoComplete openOnFocus isLoading={isGenreLoading}>
+        <Container maxW='7xl'>
+          <Flex justify='space-between' align='center' mb={8}>
+            <Heading size='xl' fontWeight='bold'>
+              Знайдено {totalCount} записів
+            </Heading>
+            <Button
+              colorScheme='blue'
+              onClick={handleSearch}
+              rightIcon={<SearchIcon />}
+            >
+              Пошук
+            </Button>
+          </Flex>
+          <Flex>
+            <Box
+              bg='white'
+              borderRadius='md'
+              boxShadow='md'
+              p={6}
+              mr={8}
+              minW='280px'
+            >
+              <Heading size='md' mb={4}>
+                Фільтри
+              </Heading>
+              <Input
+                placeholder='Назва'
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                mb={4}
+              />
+              <Input
+                placeholder='Виконавець'
+                value={artist}
+                onChange={(e) => setArtist(e.target.value)}
+                mb={4}
+              />
+              <Flex gap={4} mb={4}>
+                <AutoComplete openOnFocus isLoading={isGenreLoading} mb={4}>
                   <AutoCompleteInput
+                    variant='filled'
+                    placeholder='Формат'
                     onChange={(e) => {
                       if (e.target.value === '') {
                         setFormat('');
-                        handleSearch();
                       }
                       setFormatSearch(e.target.value);
                     }}
                   />
                   <AutoCompleteList>
-                    {formatOptions.map((option) => (
+                    {formatOptions.map((option, index) => (
                       <AutoCompleteItem
-                        key={option.name}
-                        onClick={() => {
-                          setFormat(option.name);
-                          handleSearch();
-                        }}
+                        key={index}
+                        onClick={() => setFormat(option.name)}
                         value={option.name}
                       >
                         {option.name}
@@ -211,17 +207,12 @@ const Home = () => {
                     ))}
                   </AutoCompleteList>
                 </AutoComplete>
-              </Box>
-              <Box borderWidth={1} p={4} mb={4}>
-                <Heading as='h3' size='md' mb={2}>
-                  Жанр
-                </Heading>
-                <AutoComplete openOnFocus isLoading={isGenreLoading}>
+                <AutoComplete openOnFocus isLoading={isGenreLoading} mb={4}>
                   <AutoCompleteInput
+                    placeholder='Жанр'
                     onChange={(e) => {
                       if (e.target.value === '') {
                         setGenre('');
-                        handleSearch();
                       }
                       setGenreSearch(e.target.value);
                     }}
@@ -230,10 +221,7 @@ const Home = () => {
                     {genreOptions.map((option) => (
                       <AutoCompleteItem
                         key={option.name}
-                        onClick={() => {
-                          setGenre(option.name);
-                          handleSearch();
-                        }}
+                        onClick={() => setGenre(option.name)}
                         value={option.name}
                       >
                         {option.name}
@@ -241,94 +229,104 @@ const Home = () => {
                     ))}
                   </AutoCompleteList>
                 </AutoComplete>
-              </Box>
-              <Box borderWidth={1} p={4} mb={4}>
-                <Heading as='h3' size='md' mb={2}>
-                  Ціна
-                </Heading>
-                <Flex direction='row' justifyContent='space-between'>
-                  <Text>{minPrice} ₴</Text>
-                  <Text>{maxPrice} ₴</Text>
-                </Flex>
-                <RangeSlider
-                  min={prices.minPrice}
-                  max={prices.maxPrice}
-                  step={1}
-                  defaultValue={[minPrice, maxPrice]}
-                  onChange={(values) => {
-                    setMinPrice(values[0]);
-                    setMaxPrice(values[1]);
-                  }}
-                >
-                  <RangeSliderTrack>
-                    <RangeSliderFilledTrack />
-                  </RangeSliderTrack>
-                  <RangeSliderThumb index={0} />
-                  <RangeSliderThumb index={1} />
-                </RangeSlider>
-                <Button
-                  mt={4}
-                  colorScheme='blue'
-                  onClick={() => {
-                    handleSearch();
-                  }}
-                >
-                  ОК
-                </Button>
-              </Box>
+              </Flex>
+              <Flex justify='space-between' align='center' mb={4}>
+                <Text>Ціна: {minPrice} ₴</Text>
+                <Text>{maxPrice} ₴</Text>
+              </Flex>
+              <RangeSlider
+                min={prices.minPrice}
+                max={prices.maxPrice}
+                step={1}
+                defaultValue={[minPrice, maxPrice]}
+                onChange={(values) => {
+                  setMinPrice(values[0]);
+                  setMaxPrice(values[1]);
+                }}
+                mb={4}
+              >
+                <RangeSliderTrack>
+                  <RangeSliderFilledTrack bg='blue.500' />
+                </RangeSliderTrack>
+                <RangeSliderThumb boxSize={6} index={0} />
+                <RangeSliderThumb boxSize={6} index={1} />
+              </RangeSlider>
             </Box>
-            <Grid templateColumns='repeat(5, 1fr)' gap={6} w='80%' px={15}>
+            <Grid
+              templateColumns={[
+                'repeat(1, 1fr)',
+                'repeat(2, 1fr)',
+                'repeat(3, 1fr)',
+              ]}
+              gap={6}
+              flex='1'
+            >
               {products.length === 0 && (
                 <Center>
                   <Text>Нічого не знайдено</Text>
                 </Center>
               )}
               {products.map((product, index) => (
-                <GridItem key={index}>
+                <Box
+                  bg='white'
+                  borderRadius='md'
+                  boxShadow='md'
+                  overflow='hidden'
+                  key={index}
+                  _hover={{ boxShadow: 'xl', transform: 'translateY(-5px)' }}
+                  transition={'all 0.2s ease-in-out'}
+                >
                   <LinkBox as='article'>
-                    <Card
-                      _hover={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}
-                      maxW='md'
+                    <Image
+                      src={product.image_url}
+                      fallbackSrc='https://via.placeholder.com/150'
+                      alt='product image'
+                      objectFit='cover'
+                      maxH='240px'
+                      w='100%'
+                    />
+                    <LinkOverlay
+                      as={ReactRouterLink}
+                      to={`/product/${product.id}`}
                     >
-                      <Center>
-                        <Image
-                          src={product.image_url}
-                          fallbackSrc='https://via.placeholder.com/150'
-                          alt='product image'
-                          boxSize={250}
-                          objectFit='cover'
-                        />
-                      </Center>
-                      <LinkOverlay
-                        as={ReactRouterLink}
-                        to={`/product/${product.id}`}
-                      >
-                        <CardHeader>
-                          <Heading as='h4' size='sm' fontWeight='semibold'>
-                            {product.title}
-                          </Heading>
-                          <Text fontSize='sm' mt={4} color='gray.500'>
-                            {product.format.name}
-                          </Text>
-                        </CardHeader>
-                      </LinkOverlay>
-                      <CardBody>
-                        {product.artists.map((artist) =>
-                          artist.name === product.artists[0].name
-                            ? artist.name
-                            : `, ${artist.name}`
-                        )}
-                      </CardBody>
-                      <CardFooter>{product.price} ₴</CardFooter>
-                    </Card>
+                      <Box p={4}>
+                        <Heading size='sm' fontWeight='semibold'>
+                          {product.title}
+                        </Heading>
+                        <Text fontSize='sm' mt={1} color='gray.500'>
+                          {product.format.name}
+                        </Text>
+                        <Text fontSize='sm' mt={1}>
+                          {product.artists.map((artist, index) =>
+                            index === 0 ? (
+                              <span key={index}>{artist.name}</span>
+                            ) : (
+                              <span key={index}>, {artist.name}</span>
+                            )
+                          )}
+                        </Text>
+                      </Box>
+                    </LinkOverlay>
+                    <Flex
+                      align='center'
+                      justify='space-between'
+                      bg='gray.50'
+                      p={4}
+                      borderTopWidth={1}
+                      borderTopColor='gray.200'
+                    >
+                      <Text color='blue.500' fontWeight='bold'>
+                        {product.price} ₴
+                      </Text>
+                    </Flex>
                   </LinkBox>
-                </GridItem>
+                </Box>
               ))}
             </Grid>
           </Flex>
-        </>
+        </Container>
       )}
-    </>
+    </Box>
   );
 };
 
