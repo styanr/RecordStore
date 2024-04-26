@@ -9,4 +9,7 @@ public class ReviewResponse
     public int Rating { get; set; }
 
     public string? Description { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 }

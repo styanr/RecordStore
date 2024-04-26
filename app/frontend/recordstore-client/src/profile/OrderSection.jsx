@@ -29,7 +29,7 @@ const orderDirectionOptions = [
 const OrderSection = ({ orders, fetchOrders }) => {
   const [params, setParams] = useState({
     orderBy: orderByOptions[0].value,
-    orderDirection: orderDirectionOptions[0].value,
+    orderDirection: orderDirectionOptions[1].value,
     page: 1,
   });
 

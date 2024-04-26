@@ -2,7 +2,9 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import productService from '../home/ProductService';
-import authService from '../auth/AuthService';
+
+import useAuth from '../auth/useAuth';
+
 import useCart from '../cart/useCart';
 import formatCurrency from '../utils/formatCurrency';
 
@@ -16,15 +18,30 @@ import {
   Divider,
   Image,
   Flex,
+  Textarea,
+  useToast,
 } from '@chakra-ui/react';
+
+import { CheckIcon, StarIcon } from '@chakra-ui/icons';
+
+import ReviewList from './ReviewList';
 
 import { Link } from 'react-router-dom';
 
 const Product = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
+  const { isAuthenticated } = useAuth();
 
   const { id } = useParams();
+
+  const [reviewRating, setReviewRating] = useState(1);
+
+  const [review, setReview] = useState({
+    content: '',
+    rating: 1,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,6 +51,7 @@ const Product = () => {
         setProduct(response);
 
         const reviewsResponse = await productService.getReviews(id);
+        console.log(reviewsResponse);
         setReviews(reviewsResponse);
         console.log(reviews);
       } catch (error) {
@@ -60,8 +78,8 @@ const Product = () => {
 
   const handleAddToCart = async () => {
     console.log('Add to cart clicked');
-    console.log(authService.isAuthenticated());
-    if (!authService.isAuthenticated()) {
+    console.log(isAuthenticated);
+    if (!isAuthenticated) {
       navigate('/login', { state: { from: location.pathname } });
     }
 
@@ -70,6 +88,35 @@ const Product = () => {
       console.log(response);
     } catch (error) {
       console.error('Error:', error);
+    }
+  };
+
+  const handleCreateReview = async () => {
+    try {
+      const response = await productService.addReview(product.id, review);
+      console.log(response);
+
+      const reviewsResponse = await productService.getReviews(id);
+      setReviews(reviewsResponse);
+
+      setReview({ content: '', rating: 1 });
+
+      toast({
+        title: 'Успіх',
+        description: 'Відгук успішно опубліковано.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      const message = error.response.data.message;
+      toast({
+        title: 'Помилка',
+        description: 'Не вдалося опублікувати відгук. ' + message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -177,6 +224,9 @@ const Product = () => {
                     ? product.genres.map((genre) => genre.name).join(', ')
                     : 'Loading...'}
                 </Text>
+                <Text mb={1} color='orange.500' fontWeight='bold' fontSize='xl'>
+                  {product.price} ₴
+                </Text>
               </Box>
               <Divider borderColor='gray.300' />
               <Box>
@@ -193,7 +243,7 @@ const Product = () => {
                   Інші версії
                 </Heading>
                 <VStack align='start' spacing={2}>
-                  {otherProducts.length > 0 ? (
+                  {otherProducts.length > 1 ? ( // 1 because the current product is included in the list
                     otherProducts
                       .filter((p) => p.id !== product.id)
                       .map((p) => (
@@ -220,12 +270,12 @@ const Product = () => {
                         </Link>
                       ))
                   ) : (
-                    <Text color='gray.500'>No other versions available</Text>
+                    <Text color='gray.500'>Інших версій немає</Text>
                   )}
                 </VStack>
               </Box>
               <Divider borderColor='gray.300' />
-              <Box>
+              <Box mt={4}>
                 <Button
                   colorScheme='blue'
                   onClick={(e) => handleAddToCart()}
@@ -234,6 +284,76 @@ const Product = () => {
                 >
                   Додати до кошика
                 </Button>
+              </Box>
+              <Divider />
+              <Box>
+                <Heading size='md' mb={2}>
+                  Відгуки
+                </Heading>
+                <Box bg='gray.100' p={6} borderRadius='md'>
+                  <Heading size='sm' mb={4}>
+                    Залишити відгук
+                  </Heading>
+                  {isAuthenticated ? (
+                    <>
+                      <Box mb={4}>
+                        <Heading size='xs' mb={2}>
+                          Оцінка
+                        </Heading>
+                        <HStack>
+                          {[1, 2, 3, 4, 5].map((rating) => (
+                            <StarIcon
+                              key={rating}
+                              color={
+                                rating <= review.rating
+                                  ? 'yellow.500'
+                                  : 'gray.300'
+                              }
+                              boxSize={6}
+                              cursor='pointer'
+                              onClick={() => setReview({ ...review, rating })}
+                            />
+                          ))}
+                        </HStack>
+                      </Box>
+                      <Textarea
+                        placeholder='Напишіть свій відгук...'
+                        rows={4}
+                        mb={4}
+                        value={review.content || ''}
+                        onChange={(e) =>
+                          setReview({ ...review, content: e.target.value })
+                        }
+                      />
+                      <Button
+                        colorScheme='blue'
+                        isDisabled={
+                          review.content.trim() === '' || review.rating === 0
+                        }
+                        onClick={handleCreateReview}
+                        rightIcon={<CheckIcon />}
+                      >
+                        Опублікувати
+                      </Button>
+                    </>
+                  ) : (
+                    <Text color='gray.500'>
+                      Ви маєте{' '}
+                      <Text
+                        color='blue.500'
+                        as={Link}
+                        to='/login'
+                        _hover={{
+                          textDecoration: 'underline',
+                        }}
+                      >
+                        увійти
+                      </Text>
+                      , щоб залишити відгук.
+                    </Text>
+                  )}
+                </Box>
+                <ReviewList reviews={reviews} />
               </Box>
             </VStack>
           </HStack>

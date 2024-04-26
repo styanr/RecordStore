@@ -22,24 +22,26 @@ public class ReviewService : IReviewService
         _userService = userService;
     }
 
-    public async Task CreateAsync(CreateReviewRequest createReviewRequest)
+    public async Task CreateAsync(int id, CreateReviewRequest createReviewRequest)
     {
         var user = await _userService.GetCurrentUserAsync();
 
         var userOrderedProduct = _context.ShopOrders.Any(order =>
+            order.Status == OrderStatus.Delivered &&
             order.UserId == user.Id &&
-            order.OrderLines.Any(orderLine => orderLine.ProductId == createReviewRequest.ProductId));
+            order.OrderLines.Any(orderLine => orderLine.ProductId == id));
 
-        if (!userOrderedProduct) throw new UnauthorizedException("User can't review a product they haven't ordered");
+        if (!userOrderedProduct) throw new UnauthorizedAccessException("User hasn't ordered this product");
         
         var userReviewedProduct = _context.Reviews.Any(review =>
             review.UserId == user.Id &&
-            review.ProductId == createReviewRequest.ProductId);
+            review.ProductId == id);
         
         if (userReviewedProduct) throw new InvalidOperationException("User has already reviewed this product"); 
         
         var review = _mapper.Map<Review>(createReviewRequest);
 
+        review.ProductId = id;
         review.UserId = user.Id;
 
         _context.Reviews.Add(review);

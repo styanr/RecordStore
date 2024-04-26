@@ -26,9 +26,10 @@ public class ReviewController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateReview([FromBody] CreateReviewRequest createReviewRequest)
+    [Route("~/api/products/{productId}/reviews")]
+    public async Task<IActionResult> CreateReview(int productId, [FromBody] CreateReviewRequest createReviewRequest)
     {
-        await _reviewService.CreateAsync(createReviewRequest);
+        await _reviewService.CreateAsync(productId, createReviewRequest);
 
         return Ok();
     }

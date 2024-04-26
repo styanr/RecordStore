@@ -26,6 +26,7 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<PostgresExceptionFilter>();
     options.Filters.Add<UnauthorizedExceptionFilter>();
     options.Filters.Add<InvalidOperationExceptionFilter>();
+    options.Filters.Add<UnauthorizedAccessFilter>();
     // options.Filters.Add<GenericExceptionFilter>();
 });
 

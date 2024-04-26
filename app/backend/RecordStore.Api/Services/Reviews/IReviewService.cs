@@ -5,7 +5,7 @@ namespace RecordStore.Api.Services.Reviews;
 
 public interface IReviewService
 {
-    public Task CreateAsync(CreateReviewRequest createReviewRequest);
+    public Task CreateAsync(int id, CreateReviewRequest createReviewRequest);
     public Task DeleteAsync(int id);
     public Task<List<ReviewResponse>> GetAllAsync(int id, GetReviewQueryParams queryParams);
 }

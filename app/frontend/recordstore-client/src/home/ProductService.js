@@ -38,7 +38,15 @@ class ProductService {
   getReviews = async (productId) => {
     const response = await axios.get(api_url + '/' + productId + '/reviews');
     return response.data;
-  }
+  };
+
+  addReview = async (productId, review) => {
+    const response = await axios.post(api_url + '/' + productId + '/reviews', {
+      rating: review.rating,
+      description: review.content,
+    });
+    return response.data;
+  };
 }
 
 const productService = new ProductService();
