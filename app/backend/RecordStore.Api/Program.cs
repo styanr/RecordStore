@@ -69,7 +69,7 @@ builder.Services.AddDbContext<RecordStoreContext>((services, optionsBuilder) =>
     var connectionString = role switch
     {
         "user" => builder.Configuration.GetConnectionString("UserConnection"),
-        "manager" => builder.Configuration.GetConnectionString("ManagerConnection"),
+        "employee" => builder.Configuration.GetConnectionString("EmployeeConnection"),
         "admin" => builder.Configuration.GetConnectionString("MasterConnection"),
         _ => builder.Configuration.GetConnectionString("GuestConnection")
     };

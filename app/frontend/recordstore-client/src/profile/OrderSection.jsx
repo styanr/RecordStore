@@ -26,7 +26,13 @@ const orderDirectionOptions = [
   { value: 'desc', label: 'За спаданням' },
 ];
 
-const OrderSection = ({ orders, fetchOrders }) => {
+const OrderSection = ({
+  orders,
+  fetchOrders,
+  manage = false,
+  statusOptions = null,
+  updateStatus = null, // orderId, status
+}) => {
   const [params, setParams] = useState({
     orderBy: orderByOptions[0].value,
     orderDirection: orderDirectionOptions[1].value,
@@ -96,7 +102,13 @@ const OrderSection = ({ orders, fetchOrders }) => {
         {orders !== null && orders.results.length > 0 ? (
           <>
             {orders.results.map((order) => (
-              <OrderListItem key={order.id} order={order} />
+              <OrderListItem
+                key={order.id}
+                order={order}
+                manage={manage}
+                statusOptions={statusOptions}
+                updateStatus={updateStatus}
+              />
             ))}
             <HStack mt={4} justify='center'>
               <Button

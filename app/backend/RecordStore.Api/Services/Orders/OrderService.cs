@@ -6,6 +6,8 @@ using Npgsql;
 using NpgsqlTypes;
 using RecordStore.Api.Context;
 using RecordStore.Api.Dto.Orders;
+using RecordStore.Api.Entities;
+using RecordStore.Api.Exceptions;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers.QueryParams;
 using RecordStore.Api.Services.Users;
@@ -25,7 +27,7 @@ public class OrderService : IOrderService
         _userService = userService;
     }
 
-    public async Task<PagedResult<OrderResponse>> GetAllAsync(GetOrderQueryParams queryParams)
+    public async Task<PagedResult<OrderResponse>> GetAllForUserAsync(GetOrderQueryParams queryParams)
     {
         var user = await _userService.GetCurrentUserAsync();
         var userId = user.Id;
@@ -40,6 +42,27 @@ public class OrderService : IOrderService
         var orders = _mapper.Map<PagedResult<OrderResponse>>(pagedResult);
 
         return orders;
+    }
+
+    public async Task<PagedResult<OrderResponse>> GetAllAsync(GetOrderQueryParams queryParams)
+    {
+        var query = _context.ShopOrders
+            .ApplyIncludes()
+            .ApplyFiltersAndOrderBy(queryParams);
+
+        var pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
+        
+        var orders = _mapper.Map<PagedResult<OrderResponse>>(pagedResult);
+        
+        return orders; 
+    }
+
+    public List<string> GetOrderStatusesAsync()
+    {
+        return Enum.GetValues(typeof(OrderStatus))
+            .Cast<OrderStatus>()
+            .Select(s => s.ToString())
+            .ToList();
     }
 
     public async Task CreateAsync(CreateOrderRequest createOrderRequest)
@@ -89,5 +112,24 @@ public class OrderService : IOrderService
         ]);
 
         if (rowsAffected == 0) throw new Exception("Order was not created");
+    }
+    
+    public async Task<OrderResponse> UpdateStatusAsync(int orderId, OrderStatusDto status)
+    {
+        var statusExists = Enum.TryParse<OrderStatus>(status.Name, out _);
+        
+        if (!statusExists) throw new EntityNotFoundException("Status not found");
+        
+        var order = await _context.ShopOrders.FindAsync(orderId);
+        
+        if (order == null) throw new EntityNotFoundException("Order not found");
+        
+        var orderStatus = Enum.Parse<OrderStatus>(status.Name);
+        
+        order.Status = orderStatus;
+        
+        await _context.SaveChangesAsync();
+        
+        return _mapper.Map<OrderResponse>(order);
     }
 }

@@ -55,6 +55,7 @@ public partial class RecordStoreContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        optionsBuilder.LogTo(Console.WriteLine);
         NpgsqlConnection.GlobalTypeMapper.MapEnum<OrderStatus>("order_status");
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EventType>("event_type");
     }
@@ -62,8 +63,8 @@ public partial class RecordStoreContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .HasPostgresEnum("event_type", new[] { "Sale", "Purchase", "Cancel" })
-            .HasPostgresEnum("order_status", new[] { "Pending", "Paid", "Processing", "Shipped", "Delivered", "Canceled" })
+            .HasPostgresEnum("event_type", ["Sale", "Purchase", "Cancel"])
+            .HasPostgresEnum("order_status", ["Pending", "Paid", "Processing", "Shipped", "Delivered", "Canceled"])
             .HasPostgresExtension("moddatetime");
 
         modelBuilder.Entity<Address>(entity =>

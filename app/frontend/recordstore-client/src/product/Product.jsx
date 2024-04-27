@@ -20,11 +20,14 @@ import {
   Flex,
   Textarea,
   useToast,
+  IconButton,
+  Icon,
 } from '@chakra-ui/react';
 
-import { CheckIcon, StarIcon } from '@chakra-ui/icons';
+import { CheckIcon, StarIcon, EditIcon } from '@chakra-ui/icons';
 
 import ReviewList from './ReviewList';
+import EditProductForm from './EditProductForm';
 
 import { Link } from 'react-router-dom';
 
@@ -32,16 +35,49 @@ const Product = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const isEmployee =
+    user && (user.role === 'employee' || user.role === 'admin');
 
   const { id } = useParams();
 
-  const [reviewRating, setReviewRating] = useState(1);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleEditProduct = async (id, updatedData) => {
+    try {
+      const updatedProduct = await productService.updateProduct(
+        id,
+        updatedData
+      );
+      console.log(updatedProduct);
+
+      setProduct(updatedProduct);
+      setIsEditModalOpen(false);
+      toast({
+        title: 'Успіх',
+        description: 'Продукт успішно оновлено.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Помилка',
+        description: 'Не вдалося оновити продукт. ' + error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
 
   const [review, setReview] = useState({
     content: '',
     rating: 1,
   });
+
+  const isUserUser = user && user.role === 'user';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -181,6 +217,19 @@ const Product = () => {
                 objectFit='cover'
                 boxSize='300px'
               />
+              {isEmployee && (
+                <IconButton
+                  aria-label='Edit product'
+                  icon={<Icon as={EditIcon} />}
+                  position='absolute'
+                  top={2}
+                  right={2}
+                  bg='blue.500'
+                  color='white'
+                  _hover={{ bg: 'blue.600' }}
+                  onClick={() => setIsEditModalOpen(true)}
+                />
+              )}
             </Box>
             <VStack spacing={6} align='stretch' flex='1' p={8}>
               <Box>
@@ -275,27 +324,31 @@ const Product = () => {
                 </VStack>
               </Box>
               <Divider borderColor='gray.300' />
-              <Box mt={4}>
-                <Button
-                  colorScheme='blue'
-                  onClick={(e) => handleAddToCart()}
-                  _hover={{ bg: 'blue.600' }}
-                  transition='background-color 0.2s ease-in-out'
-                >
-                  Додати до кошика
-                </Button>
-              </Box>
-              <Divider />
+              {isUserUser && (
+                <>
+                  <Box mt={4}>
+                    <Button
+                      colorScheme='blue'
+                      onClick={(e) => handleAddToCart()}
+                      _hover={{ bg: 'blue.600' }}
+                      transition='background-color 0.2s ease-in-out'
+                    >
+                      Додати до кошика
+                    </Button>
+                  </Box>
+                  <Divider borderColor='gray.300' />
+                </>
+              )}
               <Box>
                 <Heading size='md' mb={2}>
                   Відгуки
                 </Heading>
-                <Box bg='gray.100' p={6} borderRadius='md'>
-                  <Heading size='sm' mb={4}>
-                    Залишити відгук
-                  </Heading>
-                  {isAuthenticated ? (
-                    <>
+                {isAuthenticated ? (
+                  isUserUser && (
+                    <Box bg='gray.100' p={6} borderRadius='md'>
+                      <Heading size='sm' mb={4}>
+                        Залишити відгук
+                      </Heading>
                       <Box mb={4}>
                         <Heading size='xs' mb={2}>
                           Оцінка
@@ -335,30 +388,38 @@ const Product = () => {
                       >
                         Опублікувати
                       </Button>
-                    </>
-                  ) : (
-                    <Text color='gray.500'>
-                      Ви маєте{' '}
-                      <Text
-                        color='blue.500'
-                        as={Link}
-                        to='/login'
-                        _hover={{
-                          textDecoration: 'underline',
-                        }}
-                      >
-                        увійти
-                      </Text>
-                      , щоб залишити відгук.
+                    </Box>
+                  )
+                ) : (
+                  <Text color='gray.500'>
+                    Ви маєте{' '}
+                    <Text
+                      color='blue.500'
+                      as={Link}
+                      to='/login'
+                      _hover={{
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      увійти
                     </Text>
-                  )}
-                </Box>
-                <ReviewList reviews={reviews} />
+                    , щоб залишити відгук.
+                  </Text>
+                )}
               </Box>
+              <ReviewList reviews={reviews} />
             </VStack>
           </HStack>
         )}
       </Flex>
+      {isEmployee && (
+        <EditProductForm
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          product={product}
+          onSubmit={handleEditProduct}
+        />
+      )}
     </Box>
   );
 };

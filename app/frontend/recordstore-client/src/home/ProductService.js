@@ -22,6 +22,12 @@ class ProductService {
     return response.data;
   };
 
+  updateProduct = async (id, product) => {
+    console.log(product);
+    const response = await axios.put(api_url + '/' + id, product);
+    return response.data;
+  };
+
   getMinMaxPrices = async () => {
     const response = await axios.get(api_url + '/prices');
     return response.data;

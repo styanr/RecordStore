@@ -12,7 +12,7 @@ public interface IProductService
     Task<ProductFullResponseDto> GetByIdAsync(int id);
     Task<List<ProductResponseDto>> GetByRecordIdAsync(int recordId, GetRecordProductQueryParams queryParams);
     Task<ProductFullResponseDto> CreateAsync(Product entity);
-    Task<ProductFullResponseDto> UpdateAsync(Product entity);
+    Task<ProductFullResponseDto> UpdateAsync(int id, ProductUpdateRequest entity);
     
     Task<PriceMinMaxResponse> GetPriceMinMaxAsync();
     Task<bool> DeleteAsync(int id);

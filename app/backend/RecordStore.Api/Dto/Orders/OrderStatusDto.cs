@@ -1,6 +1,6 @@
 ﻿namespace RecordStore.Api.Dto.Orders;
 
-public class OrderStatusResponse
+public class OrderStatusDto
 {
     public string Name { get; set; } = null!;
 }

@@ -113,7 +113,7 @@ const Home = () => {
 
   useEffect(() => {
     const fetchFormats = async () => {
-      const formats = await formatService.getFormats(formatSearch);
+      const formats = await formatService.searchFormats(formatSearch);
       console.log(formats);
       setFormatOptions(formats);
     };
@@ -160,14 +160,7 @@ const Home = () => {
             </Button>
           </Flex>
           <Flex>
-            <Box
-              bg='white'
-              borderRadius='md'
-              boxShadow='md'
-              p={6}
-              mr={8}
-              minW='280px'
-            >
+            <Box bg='white' borderRadius='md' boxShadow='md' p={6} mr={8}>
               <Heading size='md' mb={4}>
                 Фільтри
               </Heading>
@@ -186,7 +179,6 @@ const Home = () => {
               <Flex gap={4} mb={4}>
                 <AutoComplete openOnFocus isLoading={isGenreLoading} mb={4}>
                   <AutoCompleteInput
-                    variant='filled'
                     placeholder='Формат'
                     onChange={(e) => {
                       if (e.target.value === '') {

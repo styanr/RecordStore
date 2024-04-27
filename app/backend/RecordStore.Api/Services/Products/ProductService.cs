@@ -76,10 +76,45 @@ public class ProductService : IProductService
         throw new NotImplementedException();
     }
 
-    public Task<ProductFullResponseDto> UpdateAsync(Product entity)
+    public async Task<ProductFullResponseDto> UpdateAsync(int id, ProductUpdateRequest entity)
     {
-        throw new NotImplementedException();
-    }
+        var product = await _context.Products
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product is null)
+        {
+            throw new ProductNotFoundException();
+        }
+
+        _context.Products.Entry(product).CurrentValues.SetValues(entity);
+
+        var format = await _context.Formats
+            .FirstOrDefaultAsync(f => f.FormatName == entity.Format);
+
+        if (format is null)
+        {
+            format = new Format
+            {
+                FormatName = entity.Format
+            };
+            _context.Formats.Add(format);
+            
+            await _context.SaveChangesAsync();
+        }
+        
+        product.Format = format;
+        
+        await _context.SaveChangesAsync();
+        
+        var productFull = await _context.Products
+            .AsQueryable()
+            .ApplyIncludes()
+            .FirstOrDefaultAsync(p => p.Id == id);
+        
+        var productDto = _mapper.Map<ProductFullResponseDto>(productFull);
+        
+        return productDto;
+}
 
     public async Task<PriceMinMaxResponse> GetPriceMinMaxAsync()
     {

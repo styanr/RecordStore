@@ -48,7 +48,8 @@ public class MappingProfiles : Profile
             .ForMember(s => s.Genres, opt => opt.MapFrom(d => d.Record.Genres))
             .ForMember(s => s.Format, opt => opt.MapFrom(d => d.Format))
             .ForMember(s => s.ReleaseDate, opt => opt.MapFrom(d => d.Record.ReleaseDate));
-        CreateMap<OrderStatus, OrderStatusResponse>();
+        
+        CreateMap<OrderStatus, OrderStatusDto>();
         CreateMap<OrderLine, OrderLineResponse>()
             .ForMember(s => s.Product, opt => opt.MapFrom(d => d.Product));
 
@@ -73,7 +74,7 @@ public class MappingProfiles : Profile
             .ForMember(s => s.UserFullName, opt => opt.MapFrom(d => d.User.FirstName + " " + d.User.LastName));
         
         CreateMap<CreateReviewRequest, Review>();
-
+        
         CreateMap<PagedResult<Product>, PagedResult<ProductResponseDto>>();
         CreateMap<PagedResult<ShopOrder>, PagedResult<OrderResponse>>();
         

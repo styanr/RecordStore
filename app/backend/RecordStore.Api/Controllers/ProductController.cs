@@ -55,4 +55,13 @@ public class ProductController
         
         return priceMinMax;
     }
+    
+    [HttpPut]
+    [Route("{id}")]
+    public async Task<ActionResult<ProductFullResponseDto>> Update(int id, ProductUpdateRequest productUpdateRequest)
+    {
+        var product = await _productService.UpdateAsync(id, productUpdateRequest);
+        
+        return product;
+    }
 }

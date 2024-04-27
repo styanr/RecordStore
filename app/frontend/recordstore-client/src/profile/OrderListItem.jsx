@@ -6,14 +6,14 @@ import {
   Text,
   Collapse,
   useDisclosure,
-  List,
-  ListItem,
-  ListIcon,
-  OrderedList,
   UnorderedList,
+  Select,
+  ListItem,
+  useToast,
 } from '@chakra-ui/react';
-
 import { Link } from 'react-router-dom';
+
+import { useState } from 'react';
 
 const statusMap = {
   Pending: { color: 'gray', text: 'Очікується' },
@@ -27,8 +27,36 @@ const statusMap = {
 import formatDate from '../utils/formatDate';
 import formatCurrency from '../utils/formatCurrency';
 
-const OrderListItem = ({ order }) => {
+const OrderListItem = ({
+  order,
+  manage = false,
+  statusOptions,
+  updateStatus,
+  setOrder,
+}) => {
   const { isOpen, onToggle } = useDisclosure();
+  const [thisOrder, setThisOrder] = useState(order);
+
+  const toast = useToast();
+
+  const handleStatusChange = async (event) => {
+    const newStatus = {
+      Name: event.target.value,
+    };
+    const response = await updateStatus(order.id, newStatus);
+
+    console.log(response);
+    if (response.success !== true) {
+      toast({
+        title: 'Помилка',
+        description:
+          'Не вдалося оновити статус замовлення. ' + response.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
 
   return (
     <Flex
@@ -41,23 +69,44 @@ const OrderListItem = ({ order }) => {
       bg='white'
       _hover={{ boxShadow: 'xl', transform: 'translateY(-2px)' }}
       transition='all 0.3s ease-in-out'
+      cursor='pointer'
+      onClick={onToggle}
     >
-      <Box onClick={onToggle} cursor='pointer' w='full'>
+      <Box w='full'>
         <Flex justify='space-between' align='center' mb={4}>
           <Heading size='md' color='gray.700'>
             Замовлення №{order.id}
           </Heading>
-          <Badge
-            colorScheme={statusMap[order.status].color || 'gray'}
-            px={3}
-            py={1}
-            borderRadius='full'
-            fontSize='sm'
-            textTransform='uppercase'
-            letterSpacing='wider'
-          >
-            {statusMap[order.status].text || order.status}
-          </Badge>
+          {manage ? (
+            <Select
+              value={order.status}
+              onChange={handleStatusChange}
+              maxW='200px'
+              borderRadius='full'
+              fontSize='sm'
+              textTransform='uppercase'
+              letterSpacing='wider'
+              onClick={(e) => e.stopPropagation()}
+            >
+              {statusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {statusMap[status]?.text || status}
+                </option>
+              ))}
+            </Select>
+          ) : (
+            <Badge
+              colorScheme={statusMap[order.status].color || 'gray'}
+              px={3}
+              py={1}
+              borderRadius='full'
+              fontSize='sm'
+              textTransform='uppercase'
+              letterSpacing='wider'
+            >
+              {statusMap[order.status].text || order.status}
+            </Badge>
+          )}
         </Flex>
         <Text color='gray.500' mb={2}>
           {formatDate(order.createdAt)}

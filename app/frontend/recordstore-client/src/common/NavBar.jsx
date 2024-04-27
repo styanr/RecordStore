@@ -49,6 +49,17 @@ const adminLinks = [
   },
 ];
 
+const employeeLinks = [
+  {
+    name: 'Головна сторінка',
+    path: '/employee-dashboard',
+  },
+  {
+    name: 'Продукти',
+    path: '/products',
+  },
+];
+
 const guestLinks = [
   {
     name: 'Головна сторінка',
@@ -99,6 +110,9 @@ export default function Simple() {
   useEffect(() => {
     if (user && user.role === 'admin') {
       setLinks(adminLinks);
+    }
+    if (user && user.role === 'employee') {
+      setLinks(employeeLinks);
     } else if (!isAuthenticated) {
       setLinks(guestLinks);
     } else {

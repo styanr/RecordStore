@@ -21,6 +21,7 @@ public class PostgresExceptionFilter : ExceptionFilterAttribute
             {
                 StatusCode = 400
             };
+            context.ExceptionHandled = true;
         }
         else if (context.Exception.Message.Contains("P0002"))
         {
@@ -28,6 +29,7 @@ public class PostgresExceptionFilter : ExceptionFilterAttribute
             {
                 StatusCode = 400
             };
+            context.ExceptionHandled = true;
         }
         /*else
         {
@@ -36,6 +38,5 @@ public class PostgresExceptionFilter : ExceptionFilterAttribute
                 StatusCode = 500
             };
         }*/
-        context.ExceptionHandled = true;
     }
 }

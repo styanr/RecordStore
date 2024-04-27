@@ -14,6 +14,6 @@ public enum OrderStatus
     Shipped,
     [PgName("Delivered")]
     Delivered,
-    [PgName("Cancelled")]
-    Cancelled
+    [PgName("Canceled")]
+    Canceled
 }
