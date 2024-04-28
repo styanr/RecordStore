@@ -21,7 +21,7 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<UserResponse?> GetCurrentUserAsync()
+    public async Task<UserResponse> GetCurrentUserAsync()
     {
         var userIdString = _contextAccessor.HttpContext.User.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
 

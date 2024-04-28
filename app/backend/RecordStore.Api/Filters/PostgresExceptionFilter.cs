@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace RecordStore.Api.Filters;
 
@@ -7,36 +9,32 @@ public class PostgresExceptionFilter : ExceptionFilterAttribute
 {
     public override void OnException(ExceptionContext context)
     {
-        if (context.Exception.Message.Contains("42501"))
+        if (context.Exception is PostgresException postgresException)
         {
-            context.Result = new ObjectResult(new { message = "You do not have permission to perform this action." })
-            {
-                StatusCode = 403
-            };
-            context.ExceptionHandled = true;
+            HandlePostgresException(context, postgresException);
         }
-        else if (context.Exception.Message.Contains("P0001"))
+        if (context.Exception is DbUpdateException dbUpdateException)
         {
-            context.Result = new ObjectResult(new { message = "Must have products in cart to place order." })
+            if (dbUpdateException.InnerException is PostgresException innerPostgresException)
             {
-                StatusCode = 400
-            };
-            context.ExceptionHandled = true;
+                HandlePostgresException(context, innerPostgresException);
+            }
         }
-        else if (context.Exception.Message.Contains("P0002"))
+    }
+
+    private void HandlePostgresException(ExceptionContext context, PostgresException postgresException)
+    {
+        context.Result = postgresException.SqlState switch
         {
-            context.Result = new ObjectResult(new { message = "Product is out of stock." })
-            {
-                StatusCode = 400
-            };
-            context.ExceptionHandled = true;
-        }
-        /*else
-        {
-            context.Result = new ObjectResult(new { message = "An error occurred." })
-            {
-                StatusCode = 500
-            };
-        }*/
+            "23505" => new ConflictObjectResult(postgresException.Message),
+            "42501" => new ObjectResult(new { message = "You do not have permission to perform this action." })
+                { StatusCode = 403 },
+            "P0001" => new ObjectResult(new { message = "Must have products in cart to place order." })
+                { StatusCode = 400 },
+            "P0002" => new ObjectResult(new { message = "Product is out of stock." }) { StatusCode = 400 },
+            _ => new BadRequestObjectResult(postgresException.Message)
+        };
+
+        context.ExceptionHandled = true;
     }
 }

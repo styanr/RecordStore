@@ -279,7 +279,7 @@ const Home = () => {
                     />
                     <LinkOverlay
                       as={ReactRouterLink}
-                      to={`/product/${product.id}`}
+                      to={`/products/${product.id}`}
                     >
                       <Box p={4}>
                         <Heading size='sm' fontWeight='semibold'>

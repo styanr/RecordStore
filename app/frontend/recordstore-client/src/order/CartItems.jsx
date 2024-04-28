@@ -12,7 +12,7 @@ const CartItems = ({ cart }) => {
             size='md'
             my='3'
             as={Link}
-            to={`/product/${item.product.id}`}
+            to={`/products/${item.product.id}`}
           >
             {renderArtistNames(item.product.artists)} &mdash;{' '}
             {item.product.title}

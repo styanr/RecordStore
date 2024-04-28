@@ -10,4 +10,6 @@ public interface IPurchaseOrderService
     Task CreatePurchaseOrderAsync(PurchaseOrderCreateRequest purchaseOrderCreateRequest);
     
     Task<PagedResult<PurchaseOrderResponse>> GetPurchaseOrdersAsync(GetPurchaseOrderQueryParams queryParams);
+    
+    Task DeletePurchaseOrderAsync(int id);
 }

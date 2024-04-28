@@ -5,5 +5,5 @@ namespace RecordStore.Api.Services.Users;
 
 public interface IUserService
 {
-    Task<UserResponse?> GetCurrentUserAsync();
+    Task<UserResponse> GetCurrentUserAsync();
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.PurchaseOrders;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers.QueryParams;
@@ -8,6 +9,7 @@ namespace RecordStore.Api.Controllers;
 
 [ApiController]
 [Route("api/purchase-orders")]
+[Authorize(Roles = ("admin, employee"))]
 public class PurchaseOrderController : ControllerBase
 {
     private readonly IPurchaseOrderService _purchaseOrderService;
@@ -36,5 +38,12 @@ public class PurchaseOrderController : ControllerBase
     {
         var suppliers = await _purchaseOrderService.GetSuppliersAsync();
         return suppliers;
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeletePurchaseOrderAsync(int id)
+    {
+        await _purchaseOrderService.DeletePurchaseOrderAsync(id);
+        return NoContent();
     }
 }

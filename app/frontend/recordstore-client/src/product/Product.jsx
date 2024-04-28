@@ -236,6 +236,20 @@ const Product = () => {
                 <Heading size='xl' mb={2}>
                   {product.title}
                 </Heading>
+                {isEmployee && (
+                  <Box
+                    color='white'
+                    fontSize='sm'
+                    mb={2}
+                    bg='blue.500'
+                    py={1}
+                    px={3}
+                    display={'inline-block'}
+                    borderRadius='md'
+                  >
+                    {product.quantity} шт. на складі
+                  </Box>
+                )}
                 <Text color='gray.600' fontSize='sm'>
                   {product.artists
                     ? product.artists.map((artist) => artist.name).join(', ')
@@ -297,7 +311,7 @@ const Product = () => {
                       .filter((p) => p.id !== product.id)
                       .map((p) => (
                         <Link
-                          to={`/product/${p.id}`}
+                          to={`/products/${p.id}`}
                           key={p.id}
                           _hover={{ textDecoration: 'none' }}
                         >

@@ -58,6 +58,10 @@ const employeeLinks = [
     name: 'Продукти',
     path: '/products',
   },
+  {
+    name: 'Закупівлі',
+    path: '/purchase-orders',
+  }
 ];
 
 const guestLinks = [

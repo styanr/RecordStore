@@ -1,8 +1,8 @@
 import { Box, Container, Heading } from '@chakra-ui/react';
 
-import OrderSection from '../profile/OrderSection';
+import OrderSection from '../../profile/OrderSection';
 
-import useOrders from '../order/useOrders';
+import useOrders from '../../order/useOrders';
 
 const OrdersManage = () => {
   const { orders, statusOptions, fetchOrders, updateOrderStatus } =

@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
 using RecordStore.Api.Dto.Products;
+using RecordStore.Api.Dto.Users;
 using RecordStore.Api.Entities;
 using RecordStore.Api.Exceptions;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers;
 using RecordStore.Api.RequestHelpers.QueryParams;
+using RecordStore.Api.Services.Users;
 
 namespace RecordStore.Api.Services.Products;
 
@@ -14,11 +16,13 @@ public class ProductService : IProductService
 {
     private readonly RecordStoreContext _context;
     private readonly IMapper _mapper;
+    private readonly IUserService _userService;
 
-    public ProductService(RecordStoreContext context, IMapper mapper)
+    public ProductService(RecordStoreContext context, IMapper mapper, IUserService userService)
     {
         _context = context;
         _mapper = mapper;
+        _userService = userService;
     }
     public async Task<PagedResult<ProductResponseDto>> GetAllAsync(GetProductQueryParams queryParams)
     {
@@ -47,6 +51,24 @@ public class ProductService : IProductService
         }
         
         var productDto = _mapper.Map<ProductFullResponseDto>(product);
+        
+        UserResponse currentUser;
+        try
+        {
+            currentUser = await _userService.GetCurrentUserAsync();
+        }
+        catch (InvalidOperationException)
+        {
+            currentUser = null;
+        }
+        
+        if (currentUser?.Role is "admin" or "employee")
+        {
+            // TODO: should extract that to a separate method
+            productDto.Quantity = _context.Inventories
+                .Where(i => i.ProductId == id)
+                .Sum(i => i.Quantity);
+        }
         
         return productDto;
     }

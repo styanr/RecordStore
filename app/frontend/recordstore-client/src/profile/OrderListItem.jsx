@@ -131,7 +131,7 @@ const OrderListItem = ({
                 >
                   <Text
                     as={Link}
-                    to={`/product/${item.product.id}`}
+                    to={`/products/${item.product.id}`}
                     className='hover:text-blue-600 text-blue-600 font-semibold'
                   >
                     {item.product.title}

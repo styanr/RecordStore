@@ -12,5 +12,5 @@ public class ProductFullResponseDto : ProductResponseDto
 {
     public int RecordId { get; set; }
     public string Description { get; set; }
-    public List<TrackResponseDTO> Tracklist { get; set; }
+    public int? Quantity { get; set; }
 }

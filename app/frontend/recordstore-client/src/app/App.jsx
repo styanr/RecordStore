@@ -16,7 +16,9 @@ import ProtectedAdminRoute from '../common/ProtectedAdminRoute';
 import Dashboard from '../admin/Dashboard';
 import Logout from '../common/Logout';
 import Order from '../order/Order';
-import OrdersManage from '../employee-orders/OrdersManage';
+import OrdersManage from '../employee/employee-orders/OrdersManage';
+import PurchaseOrders from '../employee/purchase-orders/PurchaseOrders';
+import CreatePurchaseOrder from '../employee/purchase-orders/new/CreatePurchaseOrder';
 
 import useAuth from '../auth/useAuth';
 
@@ -87,7 +89,7 @@ const App = () => {
           element: <Login />,
         },
         {
-          path: '/product/:id',
+          path: '/products/:id',
           element: <Product />,
         },
         {
@@ -109,6 +111,14 @@ const App = () => {
         {
           path: '/employee-dashboard',
           element: <ProtectedEmployeeRoute element={<OrdersManage />} />,
+        },
+        {
+          path: '/purchase-orders',
+          element: <ProtectedEmployeeRoute element={<PurchaseOrders />} />,
+        },
+        {
+          path: '/purchase-orders/new',
+          element: <ProtectedEmployeeRoute element={<CreatePurchaseOrder />} />,
         },
       ],
     },

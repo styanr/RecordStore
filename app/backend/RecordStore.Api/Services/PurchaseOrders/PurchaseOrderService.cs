@@ -42,4 +42,11 @@ public class PurchaseOrderService : IPurchaseOrderService
         
         return purchaseOrderResponses;
     }
+
+    public Task DeletePurchaseOrderAsync(int id)
+    {
+        var purchaseOrder = new PurchaseOrder { Id = id };
+        _context.PurchaseOrders.Remove(purchaseOrder);
+        return _context.SaveChangesAsync();
+    }
 }
