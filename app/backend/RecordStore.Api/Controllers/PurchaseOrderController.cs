@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.PurchaseOrders;
+using RecordStore.Api.Extensions;
+using RecordStore.Api.RequestHelpers.QueryParams;
 using RecordStore.Api.Services.PurchaseOrders;
 
 namespace RecordStore.Api.Controllers;
@@ -14,6 +16,14 @@ public class PurchaseOrderController : ControllerBase
     {
         _purchaseOrderService = purchaseOrderService;
     }
+    
+    [HttpGet]
+    public async Task<ActionResult<PagedResult<PurchaseOrderResponse>>> GetPurchaseOrdersAsync([FromQuery] GetPurchaseOrderQueryParams queryParams)
+    {
+        var purchaseOrders = await _purchaseOrderService.GetPurchaseOrdersAsync(queryParams);
+        return purchaseOrders;
+    }
+    
     [HttpPost]
     public async Task<ActionResult> CreatePurchaseOrderAsync([FromBody] PurchaseOrderCreateRequest purchaseOrderCreateRequest)
     {

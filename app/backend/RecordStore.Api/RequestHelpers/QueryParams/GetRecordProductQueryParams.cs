@@ -1,5 +1,3 @@
 ﻿namespace RecordStore.Api.RequestHelpers.QueryParams;
 
-public class GetRecordProductQueryParams : GetQueryParams
-{
-}
+public class GetRecordProductQueryParams : GetQueryParams;

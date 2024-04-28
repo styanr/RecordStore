@@ -91,5 +91,6 @@ public class MappingProfiles : Profile
         {
             order.PurchaseOrderLines.ToList().ForEach(p => p.PurchaseOrderId = order.Id);
         });
+        CreateMap<PagedResult<PurchaseOrder>, PagedResult<PurchaseOrderResponse>>();
     }
 }
