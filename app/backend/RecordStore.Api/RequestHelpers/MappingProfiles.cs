@@ -6,6 +6,7 @@ using RecordStore.Api.Dto.Formats;
 using RecordStore.Api.Dto.Genres;
 using RecordStore.Api.Dto.Orders;
 using RecordStore.Api.Dto.Products;
+using RecordStore.Api.Dto.PurchaseOrders;
 using RecordStore.Api.Dto.Records;
 using RecordStore.Api.Dto.Reviews;
 using RecordStore.Api.Dto.Tracks;
@@ -78,7 +79,17 @@ public class MappingProfiles : Profile
         CreateMap<PagedResult<Product>, PagedResult<ProductResponseDto>>();
         CreateMap<PagedResult<ShopOrder>, PagedResult<OrderResponse>>();
         
-        
         CreateMap<AppUser, UserResponse>().ForMember(s => s.Role, opt => opt.MapFrom(d => d.Role.RoleName));
+
+        CreateMap<Supplier, SupplierResponse>();
+        
+        CreateMap<PurchaseOrderLine, PurchaseOrderLineResponse>();
+        CreateMap<PurchaseOrder, PurchaseOrderResponse>();
+        
+        CreateMap<PurchaseOrderLineCreateRequest, PurchaseOrderLine>();
+        CreateMap<PurchaseOrderCreateRequest, PurchaseOrder>().AfterMap((request, order) =>
+        {
+            order.PurchaseOrderLines.ToList().ForEach(p => p.PurchaseOrderId = order.Id);
+        });
     }
 }

@@ -11,6 +11,7 @@ using RecordStore.Api.Services.Formats;
 using RecordStore.Api.Services.Genres;
 using RecordStore.Api.Services.Orders;
 using RecordStore.Api.Services.Products;
+using RecordStore.Api.Services.PurchaseOrders;
 using RecordStore.Api.Services.Records;
 using RecordStore.Api.Services.Reviews;
 using RecordStore.Api.Services.Stats;
@@ -89,6 +90,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IFormatService, FormatService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 
 builder.Services.AddCors(opt =>
     {
