@@ -102,6 +102,7 @@ const Artists = () => {
           results: artists.results.map((artist) =>
             artist.id === selectedArtist.id ? savedArtist : artist
           ),
+          rowCount: artists.rowCount + 1,
         });
       }
     } catch (error) {
@@ -119,10 +120,24 @@ const Artists = () => {
 
   const handleDeleteArtist = async () => {
     setIsLoading(true);
-    await deleteArtist(selectedArtist.id);
-    setArtists(
-      artists.results.filter((artist) => artist.id !== selectedArtist.id)
-    );
+    try {
+      await deleteArtist(selectedArtist.id);
+      setArtists({
+        ...artists,
+        results: artists.results.filter(
+          (artist) => artist.id !== selectedArtist.id
+        ),
+        rowCount: artists.rowCount - 1,
+      });
+    } catch (error) {
+      toast({
+        title: 'Помилка видалення виконавця',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
     onClose();
     setIsLoading(false);
   };

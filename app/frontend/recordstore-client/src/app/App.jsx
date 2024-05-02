@@ -43,6 +43,7 @@ const ProtectedUserRoute = ({ element }) => {
 
   // If authentication state is still being determined, show a loading indicator
   if (isAuthenticated === undefined || loading) {
+    console.log(isAuthenticated, loading);
     return <div>Loading...</div>;
   }
 

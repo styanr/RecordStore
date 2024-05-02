@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.Artists;
 using RecordStore.Api.Extensions;
@@ -9,7 +10,7 @@ namespace RecordStore.Api.Controllers;
 
 [ApiController]
 [Route("api/artists")]
-public class ArtistController
+public class ArtistController : ControllerBase
 {
     private readonly IArtistService _artistService;
 
@@ -44,5 +45,12 @@ public class ArtistController
     {
         var artist = await _artistService.UpdateAsync(id, entity);
         return artist;
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id)
+    {
+        await _artistService.DeleteAsync(id);
+        return NoContent();
     }
 }

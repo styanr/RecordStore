@@ -36,8 +36,7 @@ const useArtists = () => {
   };
 
   const deleteArtist = async (id) => {
-    const response = await axios.delete(api_url + '/' + id);
-    return response.data;
+    await axios.delete(api_url + '/' + id);
   };
 
   return { getArtists, getArtist, createArtist, updateArtist, deleteArtist };

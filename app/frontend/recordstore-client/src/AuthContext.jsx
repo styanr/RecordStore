@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
     console.log('AuthContext useEffect');
     const token = localStorage.getItem('token');
     console.log(token);
@@ -33,6 +34,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       setIsAuthenticated(false);
     }
+    setLoading(false);
   }, []);
 
   const handleAuthSuccess = (token) => {
