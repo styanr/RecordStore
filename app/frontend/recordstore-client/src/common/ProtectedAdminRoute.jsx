@@ -1,17 +1,18 @@
 import { Navigate } from 'react-router-dom';
-import useAuth from '../auth/useAuth';
 import { useEffect } from 'react';
-
+import useAuth from '../hooks/useAuth';
 const ProtectedAdminRoute = ({ element }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
-  if (isAuthenticated === undefined) {
+  if (loading) {
     return <div>Loading...</div>;
-  } else if (isAuthenticated && user.role === 'admin') {
-    return element;
-  } else {
-    return <Navigate to='/login' />;
   }
+
+  if (isAuthenticated && user && user.role === 'admin') {
+    return element;
+  }
+
+  return <Navigate to='/' />;
 };
 
 export default ProtectedAdminRoute;

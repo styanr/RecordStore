@@ -26,7 +26,7 @@ import { Link } from 'react-router-dom';
 import { FaExternalLinkAlt, FaSearch } from 'react-icons/fa';
 import { useState, useRef } from 'react';
 
-import productService from '../../../home/ProductService';
+import productService from '../../../hooks/ProductService';
 import usePurchaseOrders from '../usePurchaseOrders';
 
 import formatCurrency from '../../../utils/formatCurrency';
@@ -132,7 +132,7 @@ const CreatePurchaseOrder = () => {
   };
 
   return (
-    <Box bg='gray.100' minH='100vh' py={12}>
+    <Box bg='gray.100' py={12} flexGrow={1}>
       <Container maxW='7xl'>
         <Heading color='teal.600' mb={4}>
           Створити нову закупівлю

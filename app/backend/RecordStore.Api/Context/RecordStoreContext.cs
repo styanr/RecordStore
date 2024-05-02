@@ -55,7 +55,7 @@ public partial class RecordStoreContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.LogTo(Console.WriteLine);
+        // optionsBuilder.LogTo(Console.WriteLine);
         NpgsqlConnection.GlobalTypeMapper.MapEnum<OrderStatus>("order_status");
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EventType>("event_type");
     }
@@ -320,6 +320,8 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
+            entity.Property(e => e.ImageUrl).HasColumnName("image_url")
+                .HasMaxLength(512);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");

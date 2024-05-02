@@ -8,7 +8,7 @@ public interface IOrderService
 {
     Task<PagedResult<OrderResponse>> GetAllForUserAsync(GetOrderQueryParams queryParams);
     Task<PagedResult<OrderResponse>> GetAllAsync(GetOrderQueryParams queryParams);
-    
+    Task<MemoryStream> GetOrdersReportAsync(GetOrdersReportQueryParams queryParams);
     List<string> GetOrderStatusesAsync();
     Task CreateAsync(CreateOrderRequest createOrderRequest);
     Task<OrderResponse> UpdateStatusAsync(int orderId, OrderStatusDto orderStatusDto);

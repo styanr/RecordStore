@@ -12,7 +12,7 @@ namespace RecordStore.Api.Controllers;
 
 [ApiController]
 [Route("api/products")]
-public class ProductController
+public class ProductController : ControllerBase
 {
     private readonly IProductService _productService;
 
@@ -22,7 +22,7 @@ public class ProductController
     }
     
     [HttpGet]
-    public async Task<ActionResult<PagedResult<ProductResponseDto>>> GetAll([FromQuery] GetProductQueryParams queryParams)
+    public async Task<ActionResult<PagedResult<ProductShortResponseDto>>> GetAll([FromQuery] GetProductQueryParams queryParams)
     {
         var products = await _productService.GetAllAsync(queryParams);
         
@@ -31,7 +31,7 @@ public class ProductController
 
     [HttpGet]
     [Route("{id}")]
-    public async Task<ActionResult<ProductFullResponseDto>> GetById(int id)
+    public async Task<ActionResult<ProductResponseDto>> GetById(int id)
     {
         var product = await _productService.GetByIdAsync(id);
         
@@ -40,7 +40,7 @@ public class ProductController
     
     [Route("~/api/records/{recordId}/products")]
     [HttpGet]
-    public async Task<ActionResult<List<ProductResponseDto>>> GetByRecordId(int recordId, [FromQuery] GetRecordProductQueryParams queryParams)
+    public async Task<ActionResult<List<ProductShortResponseDto>>> GetByRecordId(int recordId, [FromQuery] GetRecordProductQueryParams queryParams)
     {
         var products = await _productService.GetByRecordIdAsync(recordId, queryParams);
         
@@ -56,9 +56,17 @@ public class ProductController
         return priceMinMax;
     }
     
+    [HttpPost]
+    public async Task<ActionResult<ProductResponseDto>> Create(ProductCreateRequest productCreateRequest)
+    {
+        var product = await _productService.CreateAsync(productCreateRequest);
+        
+        return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+    }
+    
     [HttpPut]
     [Route("{id}")]
-    public async Task<ActionResult<ProductFullResponseDto>> Update(int id, ProductUpdateRequest productUpdateRequest)
+    public async Task<ActionResult<ProductResponseDto>> Update(int id, ProductUpdateRequest productUpdateRequest)
     {
         var product = await _productService.UpdateAsync(id, productUpdateRequest);
         

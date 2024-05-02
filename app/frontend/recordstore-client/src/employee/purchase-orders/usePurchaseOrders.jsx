@@ -67,9 +67,12 @@ const usePurchaseOrders = (purchaseOrderParams = {}, supplierParams = {}) => {
   const deletePurchaseOrder = async (purchaseOrderId) => {
     try {
       await axios.delete(`${api_url}purchase-orders/${purchaseOrderId}`);
-      setPurchaseOrders(
-        purchaseOrders.filter((order) => order.id !== purchaseOrderId)
-      );
+      setPurchaseOrders({
+        ...purchaseOrders,
+        results: purchaseOrders.results.filter(
+          (order) => order.id !== purchaseOrderId
+        ),
+      });
       return { success: true };
     } catch (error) {
       console.error('Error deleting purchase order:', error);

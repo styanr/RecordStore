@@ -22,6 +22,11 @@ class ProductService {
     return response.data;
   };
 
+  createProduct = async (product) => {
+    const response = await axios.post(api_url, product);
+    return response.data;
+  };
+
   updateProduct = async (id, product) => {
     console.log(product);
     const response = await axios.put(api_url + '/' + id, product);

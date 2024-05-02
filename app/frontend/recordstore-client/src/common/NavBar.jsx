@@ -29,8 +29,8 @@ import { DeleteIcon } from '@chakra-ui/icons';
 
 import { Link } from 'react-router-dom';
 
-import useAuth from '../auth/useAuth';
-import useCart from '../cart/useCart';
+import useAuth from '../hooks/useAuth';
+import useCart from '../hooks/useCart';
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -47,12 +47,13 @@ const adminLinks = [
     name: 'Головна сторінка',
     path: '/dashboard',
   },
-];
-
-const employeeLinks = [
   {
-    name: 'Головна сторінка',
-    path: '/employee-dashboard',
+    name: 'Замовлення',
+    path: '/orders-manage',
+  },
+  {
+    name: 'Записи',
+    path: '/records',
   },
   {
     name: 'Продукти',
@@ -61,7 +62,34 @@ const employeeLinks = [
   {
     name: 'Закупівлі',
     path: '/purchase-orders',
-  }
+  },
+  {
+    name: 'Виконавці',
+    path: '/artists',
+  },
+];
+
+const employeeLinks = [
+  {
+    name: 'Головна сторінка',
+    path: '/orders-manage',
+  },
+  {
+    name: 'Записи',
+    path: '/records',
+  },
+  {
+    name: 'Продукти',
+    path: '/products',
+  },
+  {
+    name: 'Закупівлі',
+    path: '/purchase-orders',
+  },
+  {
+    name: 'Виконавці',
+    path: '/artists',
+  },
 ];
 
 const guestLinks = [
@@ -112,16 +140,23 @@ export default function Simple() {
   //   const Links = user && user.role === 'admin' ? adminLinks : links;
 
   useEffect(() => {
+    console.log(user);
     if (user && user.role === 'admin') {
       setLinks(adminLinks);
+      return;
     }
+
     if (user && user.role === 'employee') {
       setLinks(employeeLinks);
-    } else if (!isAuthenticated) {
-      setLinks(guestLinks);
-    } else {
-      setLinks(links);
+      return;
     }
+
+    if (!isAuthenticated) {
+      setLinks(guestLinks);
+      return;
+    }
+
+    setLinks(links);
   }, [user]);
 
   return (
@@ -188,7 +223,13 @@ export default function Simple() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>
+      <Box
+        bg={useColorModeValue('gray.100', 'gray.900')}
+        px={4}
+        position='fixed'
+        w='100%'
+        zIndex={9999}
+      >
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
           <HStack spacing={8} alignItems={'center'}>
             <Box>Record Store</Box>
@@ -205,12 +246,14 @@ export default function Simple() {
           <Flex alignItems={'center'}>
             {isAuthenticated && (
               <Menu>
-                <IconButton
-                  aria-label='Кошик'
-                  icon={<FaCartShopping />}
-                  ref={btnRef}
-                  onClick={onOpen}
-                />
+                {user && user.role === 'user' && (
+                  <IconButton
+                    aria-label='Кошик'
+                    icon={<FaCartShopping />}
+                    ref={btnRef}
+                    onClick={onOpen}
+                  />
+                )}
                 <IconButton
                   aria-label='Профіль'
                   icon={<HiUser />}

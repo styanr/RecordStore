@@ -7,6 +7,7 @@ using RecordStore.Api.Dto.Cart;
 using RecordStore.Api.Entities;
 using RecordStore.Api.Exceptions;
 using RecordStore.Api.Services.Products;
+using RecordStore.Api.Services.Users;
 
 namespace RecordStore.Api.Services.Carts;
 public class CartService : ICartService
@@ -15,25 +16,26 @@ public class CartService : ICartService
     private readonly RecordStoreContext _context;
     private readonly IMapper _mapper;
     private readonly IProductService _productService;
+    private readonly IUserService _userService;
 
     public CartService(
         IHttpContextAccessor contextAccessor, 
         RecordStoreContext context, 
         IMapper mapper, 
-        IProductService productService
+        IProductService productService,
+        IUserService userService
         )
     {
         _contextAccessor = contextAccessor;
         _context = context;
         _mapper = mapper;
         _productService = productService;
+        _userService = userService;
     }
     
     public async Task<CartResponse> GetCartAsync()
     {
-        var userIdString = _contextAccessor.HttpContext.User.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
-        
-        var userId = int.Parse(userIdString);
+        var userId = await GetUserId();
 
         var cart = await _context.ShoppingCarts
             .Include(sc => sc.ShoppingCartProducts)
@@ -43,6 +45,9 @@ public class CartService : ICartService
             .Include(sc => sc.ShoppingCartProducts)
                 .ThenInclude(scp => scp.Product)
                     .ThenInclude(p => p.Format)
+            .Include(sc => sc.ShoppingCartProducts)
+                .ThenInclude(scp => scp.Product)
+                    .ThenInclude(p => p.Reviews)
             .FirstOrDefaultAsync(c => c.UserId == userId);
 
         if (cart is null)
@@ -55,7 +60,7 @@ public class CartService : ICartService
     
     public async Task AddToCartAsync(CartItemRequest request)
     {
-        var userId = int.Parse(_contextAccessor.HttpContext.User.FindFirst(JwtRegisteredClaimNames.NameId).Value);
+        var userId = await GetUserId();
 
         var cart = await _context.ShoppingCarts
             .Include(sc => sc.ShoppingCartProducts)
@@ -100,7 +105,7 @@ public class CartService : ICartService
     
     public async Task EditCartAsync(CartItemRequest request)
     {
-        var userId = int.Parse(_contextAccessor.HttpContext.User.FindFirst(JwtRegisteredClaimNames.NameId).Value);
+        var userId = await GetUserId();
 
         var cart = await _context.ShoppingCarts
             .Include(sc => sc.ShoppingCartProducts)
@@ -125,7 +130,7 @@ public class CartService : ICartService
     
     public async Task RemoveFromCartAsync(int productId)
     {
-        var userId = int.Parse(_contextAccessor.HttpContext.User.FindFirst(JwtRegisteredClaimNames.NameId).Value);
+        var userId = await GetUserId();
 
         var cart = await _context.ShoppingCarts
             .Include(sc => sc.ShoppingCartProducts)
@@ -146,5 +151,22 @@ public class CartService : ICartService
         cart.ShoppingCartProducts.Remove(shoppingCartProduct);
 
         await _context.SaveChangesAsync();
+    }
+    
+    private async Task<int> GetUserId()
+    {
+        var user = await _userService.GetCurrentUserAsync();
+
+        if (user is null)
+        {
+            throw new UserNotFoundException();
+        }
+        
+        if (user.Role is not "user")
+        {
+            throw new UnauthorizedAccessException();
+        }
+        
+        return user.Id;
     }
 }

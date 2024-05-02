@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
-import { ChakraProvider } from '@chakra-ui/react';
+import { Box, Flex, ChakraProvider } from '@chakra-ui/react';
 import {
   createBrowserRouter,
   RouterProvider,
   Outlet,
   Navigate,
 } from 'react-router-dom';
+
+import { AuthProvider } from '../AuthContext';
+
 import Simple from '../common/NavBar';
 import Login from '../auth/Login';
 import Home from '../home/Home';
@@ -19,14 +22,26 @@ import Order from '../order/Order';
 import OrdersManage from '../employee/employee-orders/OrdersManage';
 import PurchaseOrders from '../employee/purchase-orders/PurchaseOrders';
 import CreatePurchaseOrder from '../employee/purchase-orders/new/CreatePurchaseOrder';
+import Artists from '../employee/employee-artists/Artists';
+import Artist from '../artist/Artist';
 
-import useAuth from '../auth/useAuth';
+import useAuth from '../hooks/useAuth';
+import CreateProduct from '../employee/products/CreateProduct';
+
+import Records from '../employee/records/new/Records';
+import CreateRecord from '../employee/records/new/CreateRecord';
+import EditRecord from '../employee/records/new/EditRecord';
+import CreateUser from '../admin/CreateUser';
 
 const ProtectedUserRoute = ({ element }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
+
+  useEffect(() => {
+    console.log('ProtectedUserRoute');
+  }, []);
 
   // If authentication state is still being determined, show a loading indicator
-  if (isAuthenticated === undefined) {
+  if (isAuthenticated === undefined || loading) {
     return <div>Loading...</div>;
   }
 
@@ -36,30 +51,33 @@ const ProtectedUserRoute = ({ element }) => {
   }
 
   if (user && user.role === 'employee') {
-    return <Navigate to='/employee-dashboard' />;
+    return <Navigate to='/orders-manage' />;
   }
 
   // If the user is authenticated and not an admin, allow access
-  if (user && user.role !== 'admin') {
-    return element;
+  if (user && user.role === 'admin') {
+    return <Navigate to='/dashboard' />;
   }
 
-  // If the user is authenticated and is an admin, redirect to the dashboard
-  return <Navigate to='/dashboard' />;
+  return element;
 };
 
 const ProtectedEmployeeRoute = ({ element }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
 
-  if (isAuthenticated === undefined) {
+  useEffect(() => {
+    console.log('ProtectedEmployeeRoute');
+  }, []);
+
+  if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to='/login' />;
-  }
-
-  if (user && user.role === 'employee') {
+  if (
+    isAuthenticated &&
+    user &&
+    (user.role === 'employee' || user.role === 'admin')
+  ) {
     return element;
   }
 
@@ -70,10 +88,14 @@ const App = () => {
   const router = createBrowserRouter([
     {
       element: (
-        <>
-          <Simple />
-          <Outlet />
-        </>
+        <AuthProvider>
+          <Flex direction='column' minH='100vh'>
+            <Simple />
+            <Box mt={16} flexGrow={1} display={'flex'} flexDir={'column'}>
+              <Outlet />
+            </Box>
+          </Flex>
+        </AuthProvider>
       ),
       children: [
         {
@@ -81,12 +103,16 @@ const App = () => {
           element: <ProtectedUserRoute element={<Home />} />,
         },
         {
+          path: '/login',
+          element: <Login />,
+        },
+        {
           path: '/products',
           element: <Home />,
         },
         {
-          path: '/login',
-          element: <Login />,
+          path: '/products/new',
+          element: <ProtectedEmployeeRoute element={<CreateProduct />} />,
         },
         {
           path: '/products/:id',
@@ -109,7 +135,7 @@ const App = () => {
           element: <ProtectedUserRoute element={<Order />} />,
         },
         {
-          path: '/employee-dashboard',
+          path: '/orders-manage',
           element: <ProtectedEmployeeRoute element={<OrdersManage />} />,
         },
         {
@@ -119,6 +145,30 @@ const App = () => {
         {
           path: '/purchase-orders/new',
           element: <ProtectedEmployeeRoute element={<CreatePurchaseOrder />} />,
+        },
+        {
+          path: '/artists',
+          element: <ProtectedEmployeeRoute element={<Artists />} />,
+        },
+        {
+          path: '/artists/:id',
+          element: <Artist />,
+        },
+        {
+          path: '/records',
+          element: <ProtectedEmployeeRoute element={<Records />} />,
+        },
+        {
+          path: '/records/new',
+          element: <ProtectedEmployeeRoute element={<CreateRecord />} />,
+        },
+        {
+          path: '/records/:id/edit',
+          element: <ProtectedEmployeeRoute element={<EditRecord />} />,
+        },
+        {
+          path: '/users/new',
+          element: <ProtectedAdminRoute element={<CreateUser />} />,
         },
       ],
     },

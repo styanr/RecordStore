@@ -1,21 +1,23 @@
 import { Navigate } from 'react-router-dom';
-import useAuth from '../auth/useAuth';
+import useAuth from '../hooks/useAuth';
 import { useEffect } from 'react';
 
 const ProtectedRoute = ({ element }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
-    console.log(isAuthenticated);
-  }, [isAuthenticated]);
+    console.log('ProtectedRoute');
+  }, []);
 
-  if (isAuthenticated === undefined) {
+  if (loading) {
     return <div>Loading...</div>;
-  } else if (isAuthenticated) {
-    return element;
-  } else {
-    return <Navigate to='/login' />;
   }
+
+  if (isAuthenticated) {
+    return element;
+  }
+
+  return <Navigate to='/login' />;
 };
 
 export default ProtectedRoute;

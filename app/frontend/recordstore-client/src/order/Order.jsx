@@ -18,13 +18,13 @@ import {
   useToast,
 } from '@chakra-ui/react';
 
-import useAuth from '../auth/useAuth';
+import useAuth from '../hooks/useAuth';
 
-import useCart from '../cart/useCart';
+import useCart from '../hooks/useCart';
 
-import useAddress from '../profile/useAddress';
+import useAddress from '../hooks/useAddress';
 
-import useOrders from './useOrders';
+import useOrders from '../hooks/useOrders';
 
 import CartItems from './CartItems';
 import ContactInfo from './ContactInfo';
@@ -98,7 +98,7 @@ const Order = () => {
   };
 
   return (
-    <Box mt={5} mx={10}>
+    <Box mt={5} mx={10} flexGrow={1}>
       <Heading as='h2' size='xl'>
         Оформлення замовлення
       </Heading>

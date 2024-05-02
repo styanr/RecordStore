@@ -43,10 +43,17 @@ public class PurchaseOrderService : IPurchaseOrderService
         return purchaseOrderResponses;
     }
 
-    public Task DeletePurchaseOrderAsync(int id)
+    public async Task DeletePurchaseOrderAsync(int id)
     {
-        var purchaseOrder = new PurchaseOrder { Id = id };
+        var purchaseOrder = await _context.PurchaseOrders.FirstOrDefaultAsync(po => po.Id == id);
+        
+        if (purchaseOrder is null)
+        {
+            throw new InvalidOperationException("Purchase order not found");
+        }
+        
         _context.PurchaseOrders.Remove(purchaseOrder);
-        return _context.SaveChangesAsync();
+        
+        await _context.SaveChangesAsync();
     }
 }

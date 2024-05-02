@@ -29,7 +29,7 @@ class AuthService {
   };
   getUser = async () => {
     const response = await axios.get(
-      import.meta.env.VITE_API_URL + 'user/current'
+      import.meta.env.VITE_API_URL + 'users/current'
     );
     console.log(response.data);
 

@@ -1,23 +1,147 @@
-import { Box, Container, Heading } from '@chakra-ui/react';
-
 import OrderSection from '../../profile/OrderSection';
 
-import useOrders from '../../order/useOrders';
+import useOrders from '../../hooks/useOrders';
+
+import { useState } from 'react';
+
+import {
+  Box,
+  Container,
+  Heading,
+  useToast,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Select,
+  Input,
+} from '@chakra-ui/react';
 
 const OrdersManage = () => {
-  const { orders, statusOptions, fetchOrders, updateOrderStatus } =
-    useOrders('employee');
+  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [exportParams, setExportParams] = useState({
+    format: 'json',
+    from: '',
+    to: '',
+  });
+
+  const {
+    orders,
+    statusOptions,
+    fetchOrders,
+    updateOrderStatus,
+    exportOrders,
+  } = useOrders('employee');
+
+  const handleUpdateStatus = async (orderId, status) => {
+    const response = await updateOrderStatus(orderId, status);
+    console.log(response);
+    if (response.success === true) {
+      toast({
+        title: 'Статус замовлення оновлено',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+    if (response.success === false) {
+      toast({
+        title: 'Помилка оновлення статусу замовлення',
+        description: response.error,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+
+    return response;
+  };
+
+  const handleExport = async () => {
+    const response = await exportOrders(exportParams);
+    if (response.success === true) {
+      toast({
+        title: 'Дані експортовано',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+    if (response.success === false) {
+      toast({
+        title: 'Помилка експорту даних',
+        description: response.error,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+    onClose();
+  };
 
   return (
-    <Box bg='gray.100' minH='100vh' py={12}>
+    <Box bg='gray.100' py={12} flexGrow={1}>
       <Container maxW='7xl'>
         <Heading>Керування замовленнями</Heading>
+        <Button onClick={onOpen} mb={4}>
+          Export Orders
+        </Button>
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Експорт даних</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Select
+                value={exportParams.format}
+                onChange={(e) =>
+                  setExportParams({ ...exportParams, format: e.target.value })
+                }
+                mb={4}
+              >
+                <option value='json'>JSON</option>
+                <option value='xml'>XML</option>
+                <option value='csv'>CSV</option>
+              </Select>
+              <Input
+                type='date'
+                value={exportParams.from}
+                onChange={(e) =>
+                  setExportParams({ ...exportParams, from: e.target.value })
+                }
+                mb={4}
+              />
+              <Input
+                type='date'
+                value={exportParams.to}
+                onChange={(e) =>
+                  setExportParams({ ...exportParams, to: e.target.value })
+                }
+                mb={4}
+              />
+            </ModalBody>
+            <ModalFooter>
+              <Button colorScheme='blue' mr={3} onClick={handleExport}>
+                Експортувати
+              </Button>
+              <Button variant='ghost' onClick={onClose}>
+                Скасувати
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
         <OrderSection
           orders={orders}
           fetchOrders={fetchOrders}
           manage
           statusOptions={statusOptions}
-          updateStatus={updateOrderStatus}
+          updateStatus={handleUpdateStatus}
         />
       </Container>
     </Box>

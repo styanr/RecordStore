@@ -17,10 +17,18 @@ p {
 .sidebar-items {
   color: gray;
   font-size: large;
+  padding: 1rem;
+  width: 100%;
+  border-radius: 15px;
 }
 
 .sidebar-items p {
   margin-left: 1em;
+}
+
+.sidebar-items:hover {
+  cursor: pointer;
+  background-color: #b1b1b118;
 }
 
 .sidebar-items:hover p {
@@ -29,6 +37,18 @@ p {
 
 .sidebar-items:hover svg {
   color: #b57295;
+}
+
+.sidebar-items.active {
+  background-color: #b1b1b12d;
+}
+
+.active svg {
+  color: #b57295;
+}
+
+.active p {
+  color: white;
 }
 
 .sidebar-items:not(:last-child) {

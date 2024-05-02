@@ -1,34 +1,83 @@
-import { Flex, Heading, Link, Icon, Text, Box } from '@chakra-ui/react';
+import {
+  FormLabel,
+  FormControl,
+  Input,
+  Button,
+  Flex,
+  Heading,
+  Link,
+  Icon,
+  Text,
+  Box,
+  IconButton,
+} from '@chakra-ui/react';
+
+import { Select, SelectItem, BarChart } from '@tremor/react';
+
 import { HiHome, HiCube, HiMiniUserGroup } from 'react-icons/hi2';
-import { useStats } from './useStats';
+
+import { HiSearch } from 'react-icons/hi';
+
+import { useStats } from '../hooks/useStats';
 
 import { useState, useEffect } from 'react';
-
-import {
-  AreaChart,
-  MultiSelect,
-  MultiSelectItem,
-  SearchSelect,
-  SearchSelectItem,
-  Select,
-  SelectItem,
-} from '@tremor/react';
+import LineChart from './LineChart';
 
 import formatCurrency from '../utils/formatCurrency';
+import Users from './Users';
 
 const Dashboard = () => {
-  const [activePage, setActivePage] = useState('overview');
+  const [activePage, setActivePage] = useState('Огляд');
   const {
     financialStats,
     financialChartStats,
+    orderChartStats,
     loading,
     error,
     period,
     setPeriod,
+    fetchOrderChartStatsById,
+    fetchQuantityChartStats,
+    fetchAverageOrderValueChartStats,
+    fetchFinancialStats,
+    fetchFinancialChartStats,
+    fetchOrderChartStats,
+    quantityChartStats,
+    averageOrderValueChartStats,
+    ordersPerRegion,
   } = useStats();
 
+  const [orderId, setOrderId] = useState(0);
+
+  const Links = [
+    {
+      name: 'Огляд',
+      icon: HiHome,
+      path: '/admin',
+    },
+    {
+      name: 'Замовлення',
+      icon: HiCube,
+      path: '/admin/orders',
+    },
+    {
+      name: 'Користувачі',
+      icon: HiMiniUserGroup,
+      path: '/admin/users',
+    },
+  ];
+
+  const handleFetchOrderStats = (id) => {
+    console.log(id);
+    if (!id) {
+      return fetchOrderChartStats(period);
+    }
+    fetchOrderChartStatsById(id, period);
+    fetchQuantityChartStats(id, period);
+  };
+
   return (
-    <Flex h='100vh' flexDir='row' overflow='hidden' maxW='2000px'>
+    <Box bg='gray.100' flexGrow={1} display={'flex'} flexDir={'row'}>
       {/* col1 */}
       <Flex
         w='15%'
@@ -37,49 +86,45 @@ const Dashboard = () => {
         backgroundColor='#020202'
         color='#fff'
       >
-        <Flex flexDir='column' justifyContent='space-between'>
+        <Flex
+          flexDir='column'
+          justifyContent='space-between'
+          position={'fixed'}
+        >
           <Flex
             flexDir='column'
             alignItems='flex-start'
             justifyContent='center'
             mt='50'
           >
-            <Flex className='sidebar-items'>
-              <Link>
-                <Icon as={HiHome} fontSize='2xl'></Icon>
-              </Link>
-              <Link _hover={{ textDecoration: 'none' }}>
-                <Text>Огляд</Text>
-              </Link>
-            </Flex>
-            <Flex className='sidebar-items'>
-              <Link>
-                <Icon as={HiCube} fontSize='2xl'></Icon>
-              </Link>
-              <Link _hover={{ textDecoration: 'none' }}>
-                <Text>Замовлення</Text>
-              </Link>
-            </Flex>
-            <Flex className='sidebar-items'>
-              <Link>
-                <Icon as={HiMiniUserGroup} fontSize='2xl'></Icon>
-              </Link>
-              <Link _hover={{ textDecoration: 'none' }}>
-                <Text>Користувачі</Text>
-              </Link>
-            </Flex>
+            {Links.map((link) => (
+              <Flex
+                className={
+                  'sidebar-items' + (activePage === link.name ? ' active' : '')
+                }
+                key={link.name}
+                onClick={() => setActivePage(link.name)}
+              >
+                <Link>
+                  <Icon as={link.icon} fontSize='2xl'></Icon>
+                </Link>
+                <Link _hover={{ textDecoration: 'none' }}>
+                  <Text>{link.name}</Text>
+                </Link>
+              </Flex>
+            ))}
           </Flex>
         </Flex>
       </Flex>
       {/* col2 */}
-      <Flex p='10' flexDir='column' w='85%'>
+      <Flex p='10' flexDir='column' flexGrow={1} px='15rem'>
         <Heading>Інформаційна панель</Heading>
-        {activePage === 'overview' && (
+        {activePage === 'Огляд' && (
           <>
-            <Heading as='h3' size='lg' mt='5'>
+            <Heading as='h3' size='lg' mt='5' mb='4'>
               Огляд
             </Heading>
-            <Box w='100%'>
+            <Box>
               {loading && <p>Loading...</p>}
               {error && <p>Error: {error.message}</p>}
               <Flex w='100%' mt='4' gap='4'>
@@ -132,27 +177,111 @@ const Dashboard = () => {
                       </Select>
                     </div>
                   </Flex>
-                  <AreaChart
-                    className='mt-4 h-72'
+                  <LineChart
                     data={financialChartStats}
-                    index='date'
-                    yAxisWidth={90}
-                    categories={['totalIncome', 'totalExpenses', 'netIncome']}
-                    colors={['indigo', 'rose', 'green']}
-                    seriesField='type'
                     valueFormatter={formatCurrency}
-                    height={300}
-                    padding={40}
                   />
                 </>
               )}
             </Box>
           </>
         )}
+        {activePage === 'Замовлення' && (
+          <>
+            <Heading as='h3' size='lg' mt='5' mb='4'>
+              Замовлення
+            </Heading>
+            <Box>
+              <Flex
+                flexDir='row'
+                justifyContent='space-between'
+                alignItems='center'
+                w='100%'
+              >
+                <div>
+                  <h3 className='text-tremor-default text-tremor-content mt-4'>
+                    Замовлення
+                  </h3>
+                  <p className='text-tremor-metric text-tremor-content-strong font-semibold'>
+                    {Intl.NumberFormat('uk-UA').format(
+                      financialStats.totalOrders
+                    )}
+                  </p>
+                </div>
+                <div className='w-100'>
+                  <Select value={period} onChange={setPeriod}>
+                    <SelectItem value='week'>Тиждень</SelectItem>
+                    <SelectItem value='month'>Місяць</SelectItem>
+                    <SelectItem value='year'>Рік</SelectItem>
+                  </Select>
+                </div>
+              </Flex>
+              <FormControl>
+                <FormLabel htmlFor='order-id' mt='4'>
+                  <Text fontSize='md' as='b'>
+                    ID продукту
+                  </Text>
+                </FormLabel>
+                <Flex w='100%' gap='4'>
+                  <Input
+                    id='order-id'
+                    type='number'
+                    value={orderId}
+                    onChange={(e) => {
+                      if (e.target.value === '') {
+                        setOrderId(0);
+                      }
+
+                      const value = parseInt(e.target.value);
+                      if (!isNaN(value)) {
+                        setOrderId(value);
+                      }
+                    }}
+                  />
+                  <IconButton
+                    aria-label='Пошук'
+                    icon={<HiSearch />}
+                    onClick={() => handleFetchOrderStats(orderId)}
+                    colorScheme='green'
+                  />
+                </Flex>
+              </FormControl>
+              <Heading as='h4' size='md' mt='6'>
+                Кількість замовлень за обраний період
+              </Heading>
+              <LineChart data={orderChartStats} />
+              {quantityChartStats && quantityChartStats.length > 0 ? (
+                <>
+                  <Heading as='h4' size='md' mt='6'>
+                    Кількість проданих одиниць за обраний період
+                  </Heading>
+                  <LineChart data={quantityChartStats} />
+                </>
+              ) : (
+                <>
+                  <Heading as='h4' size='md' mt='10'>
+                    Середня вартість замовлень за обраний період
+                  </Heading>
+                  <LineChart
+                    data={averageOrderValueChartStats}
+                    valueFormatter={formatCurrency}
+                  />
+                  <Heading as='h4' size='md' mt='10'>
+                    Замовлення за областями
+                  </Heading>
+                  <BarChart
+                    data={ordersPerRegion}
+                    index='region'
+                    categories={['ordersCount']}
+                  />
+                </>
+              )}
+            </Box>
+          </>
+        )}
+        {activePage === 'Користувачі' && <Users />}
       </Flex>
-      {/* col3 */}
-      <Flex></Flex>
-    </Flex>
+    </Box>
   );
 };
 

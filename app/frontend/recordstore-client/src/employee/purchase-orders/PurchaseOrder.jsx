@@ -12,7 +12,7 @@ import {
 import { FaTrashAlt, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { useState } from 'react';
 
-import useAuth from '../../auth/useAuth';
+import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 import formatCurrency from '../../utils/formatCurrency';
@@ -92,7 +92,7 @@ const PurchaseOrder = ({ purchaseOrder, onDelete, onExpand }) => {
                     key={line.productId}
                     _hover={{ bg: 'teal.50', cursor: 'pointer' }}
                     transition='background-color 0.3s ease'
-                    onClick={() => navigate(`/products/${line.productId}`)}
+                    onClick={() => window.open(`/products/${line.productId}`)}
                   >
                     <Td>{line.productId}</Td>
                     <Td>{line.quantity}</Td>

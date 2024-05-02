@@ -42,7 +42,10 @@ class OrderService {
       return { success: true, data: response.data };
     } catch (error) {
       console.error('Error updating order status:', error);
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        error: error.response.data.message || error.message,
+      };
     }
   }
 
@@ -55,6 +58,13 @@ class OrderService {
       return { success: false, error: error.message };
     }
   }
-}
 
+  async exportOrders(params) {
+    const response = await axios.get(admin_api_url + '/report', {
+      params,
+    });
+
+    return response;
+  }
+}
 export default new OrderService();

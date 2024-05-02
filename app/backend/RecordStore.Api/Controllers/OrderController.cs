@@ -60,4 +60,19 @@ public class OrderController : ControllerBase
         var orderResponse = await _orderService.UpdateStatusAsync(orderId, orderStatusDto);
         return orderResponse;
     }
+    
+    [HttpGet]
+    [Route("~/api/admin/orders/report")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> GetOrdersReport([FromQuery] GetOrdersReportQueryParams queryParams)
+    {
+        var report = await _orderService.GetOrdersReportAsync(queryParams);
+        
+        var result = new FileContentResult(report.ToArray(), "application/octet-stream")
+        {
+            FileDownloadName = $"orders-report.{queryParams.Format.ToFileExtension()}"
+        };
+        
+        return result;
+    }
 }

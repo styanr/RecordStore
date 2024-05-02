@@ -28,7 +28,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import usePurchaseOrders from './usePurchaseOrders';
-import usePages from '../../common/usePages';
+import usePages from '../../hooks/usePages';
 
 import PurchaseOrder from './PurchaseOrder';
 
@@ -54,6 +54,8 @@ const PurchaseOrders = () => {
   const { page, totalPages, setTotalPages, nextPage, prevPage, goToPage } =
     usePages();
 
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+
   useEffect(() => {
     setTotalPages(purchaseOrders.pageCount);
   }, [purchaseOrders.pageCount]);
@@ -66,12 +68,14 @@ const PurchaseOrders = () => {
   }, [page]);
 
   const handleDeleteClick = (order) => {
-    setOrderToDelete(order);
+    setOrderToDelete(order.id);
     onOpen();
   };
 
-  const handleDelete = () => {
-    const response = deletePurchaseOrder(orderToDelete.id);
+  const handleDelete = async () => {
+    setIsDeleteLoading(true);
+
+    const response = await deletePurchaseOrder(orderToDelete.id);
     if (response.success) {
       toast({
         title: 'Закупівлю успішно видалено',
@@ -89,6 +93,8 @@ const PurchaseOrders = () => {
       });
       onClose();
     }
+
+    setIsDeleteLoading(false);
   };
 
   const handleExpand = (order, expanded) => {
@@ -102,7 +108,7 @@ const PurchaseOrders = () => {
         display='flex'
         justifyContent='center'
         alignItems='center'
-        minH='100vh'
+        flexGrow={1}
       >
         <Spinner
           size='xl'
@@ -116,7 +122,7 @@ const PurchaseOrders = () => {
   }
 
   return (
-    <Box bg='gray.100' minH='100vh' py={12}>
+    <Box bg='gray.100' py={12} flexGrow={1}>
       <Container maxW='7xl'>
         <Heading color='teal.600' mb={4}>
           Керування закупівлями

@@ -37,25 +37,11 @@ const OrderListItem = ({
   const { isOpen, onToggle } = useDisclosure();
   const [thisOrder, setThisOrder] = useState(order);
 
-  const toast = useToast();
-
   const handleStatusChange = async (event) => {
     const newStatus = {
       Name: event.target.value,
     };
-    const response = await updateStatus(order.id, newStatus);
-
-    console.log(response);
-    if (response.success !== true) {
-      toast({
-        title: 'Помилка',
-        description:
-          'Не вдалося оновити статус замовлення. ' + response.message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    }
+    await updateStatus(order.id, newStatus);
   };
 
   return (

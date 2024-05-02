@@ -4,7 +4,7 @@ namespace RecordStore.Api.Dto.Orders;
 
 public class OrderLineResponse
 {
-    public ProductResponseDto Product { get; set; }
+    public ProductShortResponseDto Product { get; set; }
     
     public int Quantity { get; set; }
 

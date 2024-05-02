@@ -20,15 +20,15 @@ public class RecordService : IRecordService
         _mapper = mapper;
     }
     
-    public async Task<IEnumerable<RecordResponseDto>> GetAllAsync(GetRecordQueryParams queryParams)
+    public async Task<PagedResult<RecordResponseDto>> GetAllAsync(GetRecordQueryParams queryParams)
     {
         PagedResult<Record> pagedResult = await _context.Records
             .ApplyFiltersAndOrderBy(queryParams)
-            .GetPagedAsync(1, 15);
+            .GetPagedAsync(queryParams.Page, queryParams.PageSize);
 
         IList<Record> results = pagedResult.Results;
         
-        return _mapper.Map<List<RecordResponseDto>>(results);
+        return _mapper.Map<PagedResult<RecordResponseDto>>(pagedResult);
     }
 
     public async Task<RecordFullResponseDto> GetByIdAsync(int id)
@@ -57,18 +57,84 @@ public class RecordService : IRecordService
         return _mapper.Map<List<RecordResponseDto>>(pagedResult.Results);
     }
 
-    public Task<Record> CreateAsync(Record entity)
+    public async Task<RecordFullResponseDto> CreateAsync(RecordCreateRequest request)
     {
-        throw new NotImplementedException();
+        var record = _mapper.Map<Record>(request);
+        
+        await GetOrCreateGenres(record, request.GenreNames);
+        await GetArtists(record, request.ArtistIds);
+        
+        await _context.Records.AddAsync(record);
+        await _context.SaveChangesAsync();
+        
+        return _mapper.Map<RecordFullResponseDto>(record);
     }
 
-    public Task<Record> UpdateAsync(Record entity)
+    private async Task GetArtists(Record record, List<int> artistIds)
     {
-        throw new NotImplementedException();
+        artistIds.ForEach(id =>
+        {
+            var artist = _context.Artists.FirstOrDefault(a => a.Id == id);
+            
+            if (artist is null)
+            {
+                throw new ArtistNotFoundException();
+            }
+            
+            record.Artists.Add(artist);
+        });
+    }
+    private async Task GetOrCreateGenres(Record record, List<string> genreNames)
+    {
+        genreNames.ForEach(async (name) =>
+        {
+            var genre = _context.Genres.FirstOrDefault(g => g.Name == name);
+            if (genre is null)
+            {
+                genre = new Genre { Name = name };
+                await _context.Genres.AddAsync(genre);
+            }
+            
+            record.Genres.Add(genre);
+        });
     }
 
-    public Task<bool> DeleteAsync(int id)
+    public async Task<RecordFullResponseDto> UpdateAsync(int id, RecordUpdateRequest request)
     {
-        throw new NotImplementedException();
+        var record = _context.Records
+            .Include(r => r.Genres)
+            .Include(r => r.Artists)
+            .FirstOrDefault(r => r.Id == id);
+        
+        if (record is null)
+        {
+            throw new RecordNotFoundException();
+        }
+        
+        _context.Records.Entry(record).CurrentValues.SetValues(request);
+        
+        record.Genres.Clear();
+        await GetOrCreateGenres(record, request.GenreNames);
+        
+        record.Artists.Clear();
+        await GetArtists(record, request.ArtistIds);
+        
+        await _context.SaveChangesAsync();
+        
+        return _mapper.Map<RecordFullResponseDto>(record);
+    }
+
+    public Task DeleteAsync(int id)
+    {
+        var record = _context.Records.FirstOrDefault(r => r.Id == id);
+        
+        if (record is null)
+        {
+            throw new RecordNotFoundException();
+        }
+        
+        _context.Records.Remove(record);
+        
+        return _context.SaveChangesAsync();
     }
 }

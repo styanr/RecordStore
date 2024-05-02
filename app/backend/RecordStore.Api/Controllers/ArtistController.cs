@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.Artists;
+using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers.QueryParams;
 using RecordStore.Api.Services.Artists;
 
@@ -18,7 +19,7 @@ public class ArtistController
     }
     
     [HttpGet]
-    public async Task<ActionResult<List<ArtistResponseDto>>> Get([FromQuery] GetArtistQueryParams queryParams)
+    public async Task<ActionResult<PagedResult<ArtistResponseDto>>> Get([FromQuery] GetArtistQueryParams queryParams)
     {
         var artists = await _artistService.GetAllAsync(queryParams);
         return artists;
@@ -28,6 +29,20 @@ public class ArtistController
     public async Task<ActionResult<ArtistFullResponseDto>> GetById(int id)
     {
         var artist = await _artistService.GetByIdAsync(id);
+        return artist;
+    }
+    
+    [HttpPost]
+    public async Task<ActionResult<ArtistResponseDto>> Create(ArtistCreateRequest entity)
+    {
+        var artist = await _artistService.CreateAsync(entity);
+        return artist;
+    }
+    
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ArtistResponseDto>> Update(int id, ArtistUpdateRequest entity)
+    {
+        var artist = await _artistService.UpdateAsync(id, entity);
         return artist;
     }
 }

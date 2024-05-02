@@ -22,9 +22,17 @@ import {
   RangeSliderThumb,
   Button,
   Container,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuGroup,
+  MenuDivider,
+  Portal,
+  Select,
 } from '@chakra-ui/react';
 
-import { SearchIcon } from '@chakra-ui/icons';
+import { SearchIcon, AddIcon, StarIcon } from '@chakra-ui/icons';
 
 import {
   AutoComplete,
@@ -33,10 +41,14 @@ import {
   AutoCompleteList,
 } from '@choc-ui/chakra-autocomplete';
 
-import { Link as ReactRouterLink } from 'react-router-dom';
-import productService from './ProductService';
-import genreService from './GenreService';
-import formatService from './FormatService';
+import { Link, Link as ReactRouterLink } from 'react-router-dom';
+import productService from '../hooks/ProductService';
+import genreService from '../hooks/GenreService';
+import formatService from '../hooks/FormatService';
+
+import useAuth from '../hooks/useAuth';
+
+import usePages from '../hooks/usePages';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -49,12 +61,16 @@ const Home = () => {
   const [format, setFormat] = useState('');
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
-  const [page, setPage] = useState(1);
+  const [orderBy, setOrderBy] = useState('price');
+  const [order, setOrder] = useState('asc');
 
-  const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
 
   const [prices, setPrices] = useState({});
+
+  const { user } = useAuth();
+
+  const { page, nextPage, prevPage, totalPages, setTotalPages } = usePages();
 
   useEffect(() => {
     const fetchPrices = async () => {
@@ -90,6 +106,8 @@ const Home = () => {
       if (maxPrice !== 0) {
         filterParams.MaxPrice = maxPrice;
       }
+      filterParams.OrderBy = orderBy;
+      filterParams.OrderDirection = order;
       filterParams.Page = page;
 
       const products = await productService.getProducts(filterParams);
@@ -101,7 +119,7 @@ const Home = () => {
     setIsLoading(true);
     fetchProducts();
     setIsLoading(false);
-  }, [search]);
+  }, [search, orderBy, order, page]);
 
   const [genreOptions, setGenreOptions] = useState([]);
   const [genreSearch, setGenreSearch] = useState('');
@@ -125,7 +143,7 @@ const Home = () => {
 
   useEffect(() => {
     const fetchGenres = async () => {
-      const genres = await genreService.getGenres(genreSearch);
+      const genres = await genreService.searchGenres(genreSearch);
       console.log(genres);
       setGenreOptions(genres);
     };
@@ -140,24 +158,56 @@ const Home = () => {
   };
 
   return (
-    <Box bg='gray.100' minH='100vh' py={12}>
+    <Box bg='gray.100' py={12} flexGrow={1}>
       {isLoading ? (
         <Center>
           <CircularProgress isIndeterminate size='60px' color='blue.500' />
         </Center>
       ) : (
-        <Container maxW='7xl'>
+        <Container maxW='8xl'>
           <Flex justify='space-between' align='center' mb={8}>
             <Heading size='xl' fontWeight='bold'>
-              Знайдено {totalCount} записів
+              Знайден{totalCount % 10 == 1 ? 'а' : 'о'} {totalCount}{' '}
+              {totalCount % 10 === 1
+                ? 'позиція'
+                : totalCount % 10 < 5
+                ? 'позиції'
+                : 'позицій'}
             </Heading>
-            <Button
-              colorScheme='blue'
-              onClick={handleSearch}
-              rightIcon={<SearchIcon />}
-            >
-              Пошук
-            </Button>
+            <Box>
+              <Menu>
+                {user &&
+                  (user.role === 'admin' || user.role === 'employee') && (
+                    <MenuButton
+                      as={Button}
+                      colorScheme='green'
+                      rightIcon={<AddIcon />}
+                      mr={4}
+                    >
+                      Додати
+                    </MenuButton>
+                  )}
+                <Portal>
+                  <MenuList>
+                    <MenuGroup title='Новий'>
+                      <MenuItem as={Link} to='/products/new'>
+                        Продукт
+                      </MenuItem>
+                      <MenuItem as={Link} to='/records/new'>
+                        Запис
+                      </MenuItem>
+                    </MenuGroup>
+                  </MenuList>
+                </Portal>
+              </Menu>
+              <Button
+                colorScheme='blue'
+                onClick={handleSearch}
+                rightIcon={<SearchIcon />}
+              >
+                Пошук
+              </Button>
+            </Box>
           </Flex>
           <Flex>
             <Box bg='white' borderRadius='md' boxShadow='md' p={6} mr={8}>
@@ -177,7 +227,7 @@ const Home = () => {
                 mb={4}
               />
               <Flex gap={4} mb={4}>
-                <AutoComplete openOnFocus isLoading={isGenreLoading} mb={4}>
+                <AutoComplete openOnFocus isLoading={isFormatLoading} mb={4}>
                   <AutoCompleteInput
                     placeholder='Формат'
                     onChange={(e) => {
@@ -243,12 +293,34 @@ const Home = () => {
                 <RangeSliderThumb boxSize={6} index={0} />
                 <RangeSliderThumb boxSize={6} index={1} />
               </RangeSlider>
+              <Flex justify='space-between' mb={4} gap={4}>
+                <Select
+                  value={orderBy}
+                  onChange={(e) => setOrderBy(e.target.value)}
+                  placeholder='Order By'
+                >
+                  <option value='title'>Title</option>
+                  <option value='price'>Price</option>
+                  <option value='releaseDate'>Release Date</option>
+                  <option value='rating'>Rating</option>
+                  <option value='reviewCount'>Review Count</option>
+                </Select>
+                <Select
+                  value={order}
+                  onChange={(e) => setOrder(e.target.value)}
+                  placeholder='Order Direction'
+                >
+                  <option value='asc'>Ascending</option>
+                  <option value='desc'>Descending</option>
+                </Select>
+              </Flex>
             </Box>
             <Grid
               templateColumns={[
                 'repeat(1, 1fr)',
                 'repeat(2, 1fr)',
                 'repeat(3, 1fr)',
+                'repeat(4, 1fr)',
               ]}
               gap={6}
               flex='1'
@@ -261,16 +333,22 @@ const Home = () => {
               {products.map((product, index) => (
                 <Box
                   bg='white'
-                  borderRadius='md'
+                  borderRadius='2xl'
                   boxShadow='md'
                   overflow='hidden'
                   key={index}
                   _hover={{ boxShadow: 'xl', transform: 'translateY(-5px)' }}
                   transition={'all 0.2s ease-in-out'}
                 >
-                  <LinkBox as='article'>
+                  <LinkBox
+                    as='article'
+                    overflow='hidden'
+                    display={'flex'}
+                    flexDir={'column'}
+                    h='100%'
+                  >
                     <Image
-                      src={product.image_url}
+                      src={product.imageUrl}
                       fallbackSrc='https://via.placeholder.com/150'
                       alt='product image'
                       objectFit='cover'
@@ -280,15 +358,16 @@ const Home = () => {
                     <LinkOverlay
                       as={ReactRouterLink}
                       to={`/products/${product.id}`}
+                      flexGrow={1}
                     >
                       <Box p={4}>
-                        <Heading size='sm' fontWeight='semibold'>
+                        <Heading size='md' fontWeight='semibold' mb={2}>
                           {product.title}
                         </Heading>
-                        <Text fontSize='sm' mt={1} color='gray.500'>
+                        <Text fontSize='sm' color='gray.500' mb={1}>
                           {product.format.name}
                         </Text>
-                        <Text fontSize='sm' mt={1}>
+                        <Text fontSize='sm' mb={2}>
                           {product.artists.map((artist, index) =>
                             index === 0 ? (
                               <span key={index}>{artist.name}</span>
@@ -297,14 +376,25 @@ const Home = () => {
                             )
                           )}
                         </Text>
+                        <Flex align='center' mb={2}>
+                          <Flex align='center'>
+                            <StarIcon color='yellow.500' />
+                            <Text fontSize='sm' color='yellow.500' ml={2}>
+                              {product.averageRating.toFixed(1)}
+                            </Text>
+                          </Flex>
+                          <Text fontSize='sm' color='gray.500' ml={2}>
+                            ({product.totalRatings})
+                          </Text>
+                        </Flex>
                       </Box>
                     </LinkOverlay>
                     <Flex
                       align='center'
                       justify='space-between'
-                      bg='gray.50'
+                      bg='gray.100'
                       p={4}
-                      borderTopWidth={1}
+                      borderTopWidth='1px'
                       borderTopColor='gray.200'
                     >
                       <Text color='blue.500' fontWeight='bold'>
@@ -316,10 +406,26 @@ const Home = () => {
               ))}
             </Grid>
           </Flex>
+          <Flex mt={4} justify='center'>
+            <Button
+              isDisabled={page === 1}
+              onClick={() => prevPage()}
+              size='sm'
+            >
+              Попередня
+            </Button>
+            <Text mx={2}>{page}</Text>
+            <Button
+              isDisabled={page === totalPages}
+              onClick={() => nextPage()}
+              size='sm'
+            >
+              Наступна
+            </Button>
+          </Flex>
         </Container>
       )}
     </Box>
   );
 };
-
 export default Home;

@@ -35,20 +35,29 @@ public class MappingProfiles : Profile
         CreateMap<Record, RecordFullResponseDto>()
             .ForMember(s => s.Artists, opt => opt.MapFrom(d => d.Artists))
             .ForMember(s => s.Genres, opt => opt.MapFrom(d => d.Genres));
-        
-        CreateMap<Product, ProductResponseDto>()
-            .ForMember(s => s.Title, opt => opt.MapFrom(d => d.Record.Title))
-            .ForMember(s => s.Artists, opt => opt.MapFrom(d => d.Record.Artists))
-            .ForMember(s => s.Genres, opt => opt.MapFrom(d => d.Record.Genres))
-            .ForMember(s => s.Format, opt => opt.MapFrom(d => d.Format))
-            .ForMember(s => s.ReleaseDate, opt => opt.MapFrom(d => d.Record.ReleaseDate));
 
-        CreateMap<Product, ProductFullResponseDto>()
+        CreateMap<PagedResult<Record>, PagedResult<RecordResponseDto>>();
+        
+        CreateMap<RecordCreateRequest, Record>();
+        CreateMap<Product, ProductShortResponseDto>()
             .ForMember(s => s.Title, opt => opt.MapFrom(d => d.Record.Title))
             .ForMember(s => s.Artists, opt => opt.MapFrom(d => d.Record.Artists))
             .ForMember(s => s.Genres, opt => opt.MapFrom(d => d.Record.Genres))
             .ForMember(s => s.Format, opt => opt.MapFrom(d => d.Format))
-            .ForMember(s => s.ReleaseDate, opt => opt.MapFrom(d => d.Record.ReleaseDate));
+            .ForMember(s => s.ReleaseDate, opt => opt.MapFrom(d => d.Record.ReleaseDate))
+            .ForMember(s => s.AverageRating, opt => opt.MapFrom(d => d.Reviews.Average(r => r.Rating)))
+            .ForMember(s => s.TotalRatings, opt => opt.MapFrom(d => d.Reviews.Count));
+
+        CreateMap<Product, ProductResponseDto>()
+            .IncludeBase<Product, ProductShortResponseDto>();
+        
+        CreateMap<Product, ProductFullResponseDto>()
+            .IncludeBase<Product, ProductShortResponseDto>()
+            .ForMember(s => s.Location, opt => opt.MapFrom(d => d.Inventories.FirstOrDefault().Location))
+            .ForMember(s => s.Quantity, opt => opt.MapFrom(d => d.Inventories.FirstOrDefault().Quantity))
+            .ForMember(s => s.RestockLevel, opt => opt.MapFrom(d => d.Inventories.FirstOrDefault().RestockLevel));
+        
+        CreateMap<ProductCreateRequest, Product>();
         
         CreateMap<OrderStatus, OrderStatusDto>();
         CreateMap<OrderLine, OrderLineResponse>()
@@ -76,11 +85,15 @@ public class MappingProfiles : Profile
         
         CreateMap<CreateReviewRequest, Review>();
         
-        CreateMap<PagedResult<Product>, PagedResult<ProductResponseDto>>();
+        CreateMap<PagedResult<Product>, PagedResult<ProductShortResponseDto>>();
         CreateMap<PagedResult<ShopOrder>, PagedResult<OrderResponse>>();
         
         CreateMap<AppUser, UserResponse>().ForMember(s => s.Role, opt => opt.MapFrom(d => d.Role.RoleName));
-
+        CreateMap<PagedResult<AppUser>, PagedResult<UserResponse>>();
+        CreateMap<UserCreateRequest, AppUser>();
+        
+        CreateMap<Role, RoleResponse>().ForMember(s => s.Name, opt => opt.MapFrom(d => d.RoleName));
+        
         CreateMap<Supplier, SupplierResponse>();
         
         CreateMap<PurchaseOrderLine, PurchaseOrderLineResponse>();
@@ -92,5 +105,10 @@ public class MappingProfiles : Profile
             order.PurchaseOrderLines.ToList().ForEach(p => p.PurchaseOrderId = order.Id);
         });
         CreateMap<PagedResult<PurchaseOrder>, PagedResult<PurchaseOrderResponse>>();
+        
+        CreateMap<ArtistCreateRequest, Artist>();
+        CreateMap<PagedResult<Artist>, PagedResult<ArtistResponseDto>>();
+        
+        
     }
 }

@@ -68,7 +68,8 @@ public static class QueryExtensions
             .ThenInclude(r => r.Genres)
             .Include(p => p.Record)
             .ThenInclude(r => r.Artists)
-            .Include(p => p.Format);
+            .Include(p => p.Format)
+            .Include(p => p.Reviews);
     }
 
     public static IQueryable<Product> ApplyFiltersAndOrderBy(this IQueryable<Product> query, GetProductQueryParams queryParams)
@@ -105,12 +106,14 @@ public static class QueryExtensions
         }
         
         bool sortAsc = queryParams.OrderDirection == "asc";
-
+        
         query = queryParams.OrderBy switch
         {
             "title" => query.OrderByBoolean(p => p.Record.Title, sortAsc),
             "price" => query.OrderByBoolean(p => p.Price, sortAsc),
             "releaseDate" => query.OrderByBoolean(p => p.Record.ReleaseDate, sortAsc),
+            "rating" => query.OrderByBoolean(p => p.Reviews.Average(r => r.Rating), sortAsc),
+            "reviewCount" => query.OrderByBoolean(p => p.Reviews.Count, sortAsc),
             _ => query.OrderByBoolean(p => p.Record.Title, sortAsc)
         };
         
@@ -176,11 +179,14 @@ public static class QueryExtensions
     {
         return query
             .Include(o => o.OrderLines)
-            .ThenInclude(ol => ol.Product)
-            .ThenInclude(p => p.Record)
+                .ThenInclude(ol => ol.Product)
+                .ThenInclude(p => p.Record)
             .Include(o => o.OrderLines)
-            .ThenInclude(ol => ol.Product)
-            .ThenInclude(p => p.Format);
+                .ThenInclude(ol => ol.Product)
+                .ThenInclude(p => p.Format)
+            .Include(o => o.OrderLines)
+                .ThenInclude(ol => ol.Product)
+                .ThenInclude(p => p.Reviews);
     }
     
     public static IQueryable<ShopOrder> ApplyFiltersAndOrderBy(this IQueryable<ShopOrder> query, GetOrderQueryParams queryParams)
@@ -216,4 +222,45 @@ public static class QueryExtensions
         
         return query;
     }
+    
+    public static IQueryable<AppUser> ApplyIncludes(this IQueryable<AppUser> query)
+    {
+        return query.Include(u => u.Role);
+    }
+    
+    public static IQueryable<AppUser> ApplyFiltersAndOrderBy(this IQueryable<AppUser> query, GetUserQueryParams queryParams)
+    {
+        if (!string.IsNullOrWhiteSpace(queryParams.Email))
+        {
+            string normalizedEmail = queryParams.Email.ToLower().Trim();
+            query = query.Where(u => u.Email.ToLower().Contains(normalizedEmail));
+        }
+        
+        if (!string.IsNullOrWhiteSpace(queryParams.RoleName))
+        {
+            query = query.Where(u => u.Role.RoleName == queryParams.RoleName);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(queryParams.Name))
+        {
+            string normalizedName = queryParams.Name.ToLower().Trim();
+            query = query.Where(u => u.FirstName.ToLower().Contains(normalizedName) || u.LastName.ToLower().Contains(normalizedName));
+        }
+        
+        bool sortAsc = queryParams.OrderDirection == "asc";
+
+        query = queryParams.OrderBy switch
+        {
+            "id" => query.OrderByBoolean(u => u.Id, sortAsc),
+            "email" => query.OrderByBoolean(u => u.Email, sortAsc),
+            "name" => query.OrderByBoolean(u => u.FirstName, sortAsc),
+            "role" => query.OrderByBoolean(u => u.Role.RoleName, sortAsc),
+            "createdAt" => query.OrderByBoolean(u => u.CreatedAt, sortAsc),
+            _ => query.OrderByBoolean(u => u.Email, sortAsc)
+        };
+        
+        return query;
+    }
+    
+    
 }

@@ -15,6 +15,7 @@ import {
   useToast,
   Select,
   Box,
+  Image,
 } from '@chakra-ui/react';
 
 import {
@@ -27,21 +28,22 @@ import {
 
 // should use useDebounce in this, couldn't get it to work
 // import { useDebounce } from '@uidotdev/usehooks';
-import productService from '../home/ProductService';
-import genreService from '../home/GenreService';
-import artistService from './ArtistService';
-import formatService from '../home/FormatService';
+import productService from '../hooks/ProductService';
+import genreService from '../hooks/GenreService';
+import artistService from '../hooks/ArtistService';
+import formatService from '../hooks/FormatService';
 
 const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
   const [formData, setFormData] = useState({
     // title: product ? product.title : '',
     description: product ? product.description : '',
     price: product ? product.price : '',
-    format: product ? (product.format || {}).name : '', // should be format.name (not format
+    formatName: product ? (product.format || {}).name : '', // should be format.name (not format
     releaseDate: product ? product.releaseDate : '',
-    // artists: product ? product.artists || [] : [],
-    // recordId: product ? product.recordId : '',
-    // genres: product ? (product.genres || []).map((genre) => genre.name) : [],
+    quantity: product ? product.quantity : '',
+    location: product ? product.location : '',
+    restockLevel: product ? product.restockLevel : '',
+    imageUrl: product ? product.imageUrl : '',
   });
 
   const [id, setId] = useState(product ? product.id : '');
@@ -105,13 +107,11 @@ const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
         // title: product ? product.title : '',
         description: product ? product.description : '',
         price: product ? product.price : '',
-        format: product ? (product.format || {}).name : '', // should be format.name (not format
-        // releaseDate: product ? product.releaseDate : '',
-        // artists: product ? product.artists || [] : [],
-        // recordId: product ? product.recordId : '',
-        // genres: product
-        //   ? (product.genres || []).map((genre) => genre.name)
-        //   : [],
+        formatName: product ? (product.format || {}).name : '', // should be format.name (not format
+        quantity: product ? product.quantity : '',
+        location: product ? product.location : '',
+        restockLevel: product ? product.restockLevel : '',
+        imageUrl: product ? product.imageUrl : '',
       });
 
       setId(product.id);
@@ -132,7 +132,7 @@ const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
   //   };
 
   const handleFormatChange = (name) => {
-    setFormData({ ...formData, format: name });
+    setFormData({ ...formData, formatName: name });
   };
 
   const handleSubmit = async (e) => {
@@ -147,14 +147,21 @@ const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
         <ModalCloseButton />
         <form onSubmit={handleSubmit}>
           <ModalBody>
-            {/* <FormControl id='title' mb={4}>
-              <FormLabel>Назва</FormLabel>
+            <Image
+              src={formData.imageUrl}
+              fallbackSrc='https://via.placeholder.com/150'
+              alt={formData.title}
+              boxSize='150px'
+              mb={4}
+            />
+            <FormControl id='imageUrl' mb={4}>
+              <FormLabel>Посилання на зображення</FormLabel>
               <Input
-                name='title'
-                value={formData.title}
+                name='imageUrl'
+                value={formData.imageUrl}
                 onChange={handleChange}
               />
-            </FormControl> */}
+            </FormControl>
             <FormControl id='description' mb={4}>
               <FormLabel>Опис</FormLabel>
               <Textarea
@@ -199,75 +206,32 @@ const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
                 </AutoCompleteList>
               </AutoComplete>
             </FormControl>
-            {/*
-              <AutoComplete
-                openOnFocus
-                mb={4}
-                multiple
-                creatable
-                onChange={handleArtistChange}
-                defaultValues={formData.artists.map((artist) => artist.name)}
-              >
-                <AutoCompleteInput
-                  variant='filled'
-                  onChange={(e) => setSearchArtistTerm(e.target.value)}
-                >
-                  {({ tags }) =>
-                    tags.map((tag, tid) => (
-                      <AutoCompleteTag
-                        key={tid}
-                        label={tag.label}
-                        onRemove={tag.onRemove}
-                        backgroundColor='gray.300'
-                      />
-                    ))
-                  }
-                </AutoCompleteInput>
-                <AutoCompleteList>
-                  {artists.map((artist) => (
-                    <AutoCompleteItem key={artist.name} value={artist.name}>
-                      {artist.name}
-                    </AutoCompleteItem>
-                  ))}
-                </AutoCompleteList>
-              </AutoComplete>
-            </FormControl> */}
-            {/* <FormControl id='genres' mb={4}>
-              <FormLabel>Жанри</FormLabel>
-              <Box position='relative'>
-                <AutoComplete
-                  openOnFocus
-                  mb={4}
-                  multiple
-                  creatable
-                  onChange={handleGenreChange}
-                  defaultValues={formData.genres}
-                >
-                  <AutoCompleteInput
-                    variant='filled'
-                    onChange={(e) => setSearchGenreTerm(e.target.value)}
-                  >
-                    {({ tags }) =>
-                      tags.map((tag, tid) => (
-                        <AutoCompleteTag
-                          key={tid}
-                          label={tag.label}
-                          onRemove={tag.onRemove}
-                          backgroundColor='gray.300'
-                        />
-                      ))
-                    }
-                  </AutoCompleteInput>
-                  <AutoCompleteList>
-                    {genres.map((genre) => (
-                      <AutoCompleteItem key={genre.name} value={genre.name}>
-                        {genre.name}
-                      </AutoCompleteItem>
-                    ))}
-                  </AutoCompleteList>
-                </AutoComplete>
-              </Box>
-            </FormControl> */}
+            <FormControl id='quantity' mb={4}>
+              <FormLabel>Кількість</FormLabel>
+              <Input
+                name='quantity'
+                type='number'
+                value={formData.quantity}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <FormControl id='location' mb={4}>
+              <FormLabel>Локація</FormLabel>
+              <Input
+                name='location'
+                value={formData.location}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <FormControl id='restockLevel' mb={4}>
+              <FormLabel>Рівень поповнення</FormLabel>
+              <Input
+                name='restockLevel'
+                type='number'
+                value={formData.restockLevel}
+                onChange={handleChange}
+              />
+            </FormControl>
           </ModalBody>
           <ModalFooter>
             <Button colorScheme='blue' mr={3} type='submit'>

@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import CartService from './CartService';
 
+import useAuth from './useAuth';
+
 const useCart = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { isAuthenticated } = useAuth();
 
   const cartService = new CartService();
 
@@ -52,9 +56,9 @@ const useCart = () => {
   };
 
   useEffect(() => {
+    if (isAuthenticated === undefined) return;
     fetchCart();
-    console.log(cart);
-  }, []);
+  }, [isAuthenticated]);
 
   return { cart, loading, error, addToCart, updateCart, removeFromCart };
 };

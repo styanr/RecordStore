@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import useAuth from '../auth/useAuth';
+import useAuth from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 import { Spinner } from '@chakra-ui/react';

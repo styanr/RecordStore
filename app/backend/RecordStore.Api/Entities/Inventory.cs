@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace RecordStore.Api.Entities;
 
+// TODO: remove inventory logic, move to product entity
 public partial class Inventory
 {
     public int Id { get; set; }

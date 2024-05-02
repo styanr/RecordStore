@@ -6,6 +6,8 @@ namespace RecordStore.Api.Entities;
 public partial class Product
 {
     public int Id { get; set; }
+    
+    public string? ImageUrl { get; set; }
 
     public int RecordId { get; set; }
 

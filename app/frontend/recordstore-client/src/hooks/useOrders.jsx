@@ -44,6 +44,7 @@ export default function useOrders(type = 'user') {
 
     if (response.success === true) {
       const order = response.data;
+      console.log('Updated order:', order);
       setOrders((prevOrders) => {
         const index = prevOrders.results.findIndex((o) => o.id === order.id);
         if (index === -1) {
@@ -53,7 +54,33 @@ export default function useOrders(type = 'user') {
         newOrders[index] = order;
         return { ...prevOrders, results: newOrders };
       });
-      return response;
+    }
+
+    return response;
+  };
+
+  // params: format, from, to
+  const exportOrders = async (params) => {
+    try {
+      const response = await OrderService.exportOrders(params); // octet-stream
+
+      console.log(response);
+
+      const filename = `orders-report.${params.format}`;
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error exporting orders:', error);
+      return { success: false, error: error.message };
     }
   };
 
@@ -64,5 +91,6 @@ export default function useOrders(type = 'user') {
     createOrder,
     fetchOrders,
     updateOrderStatus,
+    exportOrders,
   };
 }

@@ -20,7 +20,7 @@ public class ArtistService : IArtistService
         _mapper = mapper;
     }
     
-    public async Task<List<ArtistResponseDto>> GetAllAsync(GetArtistQueryParams queryParams)
+    public async Task<PagedResult<ArtistResponseDto>> GetAllAsync(GetArtistQueryParams queryParams)
     {
         var query = _context.Artists
             .AsQueryable()
@@ -28,7 +28,7 @@ public class ArtistService : IArtistService
         
         PagedResult<Artist> pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
 
-        var artists = _mapper.Map<List<ArtistResponseDto>>(pagedResult.Results);
+        var artists = _mapper.Map<PagedResult<ArtistResponseDto>>(pagedResult);
         
         return artists;
     }
@@ -47,18 +47,43 @@ public class ArtistService : IArtistService
         return artistDto;
     }
 
-    public Task<ArtistResponseDto> CreateAsync(Artist entity)
+    public async Task<ArtistResponseDto> CreateAsync(ArtistCreateRequest entity)
     {
-        throw new NotImplementedException();
+        var artist = _mapper.Map<Artist>(entity);
+        
+        _context.Artists.Add(artist);
+        await _context.SaveChangesAsync();
+        
+        var artistDto = _mapper.Map<ArtistResponseDto>(artist);
+        return artistDto;
     }
 
-    public Task<ArtistResponseDto> UpdateAsync(Artist entity)
+    public async Task<ArtistResponseDto> UpdateAsync(int id, ArtistUpdateRequest entity)
     {
-        throw new NotImplementedException();
+        var artist = await _context.Artists.FindAsync(id);
+        
+        if (artist is null)
+        {
+            throw new ArtistNotFoundException();
+        }
+        
+        _context.Artists.Entry(artist).CurrentValues.SetValues(entity);
+        await _context.SaveChangesAsync();
+        
+        var artistDto = _mapper.Map<ArtistResponseDto>(artist);
+        return artistDto;
     }
 
-    public Task<bool> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var artist = await _context.Artists.FindAsync(id);
+        
+        if (artist is null)
+        {
+            throw new ArtistNotFoundException();
+        }
+        
+        _context.Artists.Remove(artist);
+        await _context.SaveChangesAsync();
     }
 }

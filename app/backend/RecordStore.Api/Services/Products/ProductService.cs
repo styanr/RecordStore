@@ -24,7 +24,7 @@ public class ProductService : IProductService
         _mapper = mapper;
         _userService = userService;
     }
-    public async Task<PagedResult<ProductResponseDto>> GetAllAsync(GetProductQueryParams queryParams)
+    public async Task<PagedResult<ProductShortResponseDto>> GetAllAsync(GetProductQueryParams queryParams)
     {
         var query = _context.Products
             .AsQueryable()
@@ -33,47 +33,57 @@ public class ProductService : IProductService
         
         PagedResult<Product> pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
         
-        PagedResult<ProductResponseDto> pagedResultDto = _mapper.Map<PagedResult<ProductResponseDto>>(pagedResult);
+        PagedResult<ProductShortResponseDto> pagedResultDto = _mapper.Map<PagedResult<ProductShortResponseDto>>(pagedResult);
         
         return pagedResultDto;
     }
 
-    public async Task<ProductFullResponseDto> GetByIdAsync(int id)
+    public async Task<ProductResponseDto> GetByIdAsync(int id)
     {
-        var product = await _context.Products
+        UserResponse? currentUser = await GetCurrentUserAsync();
+        
+        var query = _context.Products
             .AsQueryable()
-            .ApplyIncludes()
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .ApplyIncludes();
+        
+        if (currentUser?.Role is "admin" or "employee")
+        {
+            query = query.Include(p => p.Inventories);
+        }
+         
+        var product = await query.FirstOrDefaultAsync(p => p.Id == id);
         
         if (product is null)
         {
             throw new ProductNotFoundException();
         }
         
-        var productDto = _mapper.Map<ProductFullResponseDto>(product);
-        
-        UserResponse currentUser;
-        try
-        {
-            currentUser = await _userService.GetCurrentUserAsync();
-        }
-        catch (InvalidOperationException)
-        {
-            currentUser = null;
-        }
-        
-        if (currentUser?.Role is "admin" or "employee")
-        {
-            // TODO: should extract that to a separate method
-            productDto.Quantity = _context.Inventories
-                .Where(i => i.ProductId == id)
-                .Sum(i => i.Quantity);
-        }
+        var productDto = MapProductDto(product, currentUser);
         
         return productDto;
     }
+    
+    private ProductResponseDto MapProductDto(Product product, UserResponse? currentUser)
+    {
+        // Determine the appropriate DTO based on user role
+        return currentUser?.Role is "admin" or "employee"
+            ? _mapper.Map<ProductFullResponseDto>(product)
+            : _mapper.Map<ProductResponseDto>(product);
+    }
+    
+    private async Task<UserResponse?> GetCurrentUserAsync()
+    {
+        try
+        {
+            return await _userService.GetCurrentUserAsync();
+        }
+        catch (Exception e) when (e is InvalidOperationException or UserNotFoundException)
+        {
+            return null;
+        }
+    }
 
-    public async Task<List<ProductResponseDto>> GetByRecordIdAsync(int recordId, GetRecordProductQueryParams queryParams)
+    public async Task<List<ProductShortResponseDto>> GetByRecordIdAsync(int recordId, GetRecordProductQueryParams queryParams)
     {
         var query = _context.Products
             .AsQueryable()
@@ -90,12 +100,47 @@ public class ProductService : IProductService
         
         var products = await query.ToListAsync();
         
-        return _mapper.Map<List<ProductResponseDto>>(products);
+        return _mapper.Map<List<ProductShortResponseDto>>(products);
     }
 
-    public Task<ProductFullResponseDto> CreateAsync(Product entity)
+    public async Task<ProductFullResponseDto> CreateAsync(ProductCreateRequest entity)
     {
-        throw new NotImplementedException();
+        // that should be done in the record service
+        var record = await _context.Records
+            .FirstOrDefaultAsync(r => r.Id == entity.RecordId);
+
+        if (record is null)
+        {
+            throw new RecordNotFoundException();
+        }
+        
+        var format = await GetOrCreateFormatAsync(entity.FormatName);
+
+        var product = _mapper.Map<Product>(entity);
+        
+        product.Format = format;
+        
+        var inventory = new Inventory
+        {
+            Product = product,
+            Quantity = entity.Quantity,
+            Location = entity.Location,
+            RestockLevel = entity.RestockLevel
+        };
+        _context.Products.Add(product);
+        
+        _context.Inventories.Add(inventory);
+        
+        await _context.SaveChangesAsync();
+        
+        // TODO: use a private method to get product
+        var productFull = await _context.Products
+            .AsQueryable()
+            .ApplyIncludes()
+            .Include(p => p.Inventories)
+            .FirstOrDefaultAsync(p => p.Id == product.Id);
+        
+        return _mapper.Map<ProductFullResponseDto>(productFull);
     }
 
     public async Task<ProductFullResponseDto> UpdateAsync(int id, ProductUpdateRequest entity)
@@ -110,19 +155,9 @@ public class ProductService : IProductService
 
         _context.Products.Entry(product).CurrentValues.SetValues(entity);
 
-        var format = await _context.Formats
-            .FirstOrDefaultAsync(f => f.FormatName == entity.Format);
-
-        if (format is null)
-        {
-            format = new Format
-            {
-                FormatName = entity.Format
-            };
-            _context.Formats.Add(format);
-            
-            await _context.SaveChangesAsync();
-        }
+        await UpdateProductInventory(id, entity);
+        
+        var format = await GetOrCreateFormatAsync(entity.FormatName);
         
         product.Format = format;
         
@@ -131,12 +166,24 @@ public class ProductService : IProductService
         var productFull = await _context.Products
             .AsQueryable()
             .ApplyIncludes()
+            .Include(p => p.Inventories)
             .FirstOrDefaultAsync(p => p.Id == id);
         
-        var productDto = _mapper.Map<ProductFullResponseDto>(productFull);
-        
-        return productDto;
+        return _mapper.Map<ProductFullResponseDto>(productFull);
 }
+    // this will be removed in the future
+    private async Task UpdateProductInventory(int productId, ProductUpdateRequest entity)
+    {
+        var productInventory = await _context.Inventories
+            .FirstOrDefaultAsync(i => i.ProductId == productId);
+        
+        if (productInventory is null)
+        {
+            throw new EntityNotFoundException("Inventory");
+        }
+        
+        _context.Inventories.Entry(productInventory).CurrentValues.SetValues(entity);
+    }
 
     public async Task<PriceMinMaxResponse> GetPriceMinMaxAsync()
     {
@@ -150,5 +197,21 @@ public class ProductService : IProductService
     public Task<bool> DeleteAsync(int id)
     {
         throw new NotImplementedException();
+    }
+    
+    private async Task<Format> GetOrCreateFormatAsync(string formatName)
+    {
+        var format = await _context.Formats.FirstOrDefaultAsync(f => f.FormatName == formatName);
+
+        if (format is null)
+        {
+            format = new Format
+            {
+                FormatName = formatName
+            };
+            _context.Formats.Add(format);
+        }
+
+        return format;
     }
 }

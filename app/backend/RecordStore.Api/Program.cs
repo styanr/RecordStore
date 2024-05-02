@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RecordStore.Api.Context;
@@ -29,10 +30,9 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<InvalidOperationExceptionFilter>();
     options.Filters.Add<UnauthorizedAccessFilter>();
     // options.Filters.Add<GenericExceptionFilter>();
-});
+}).AddJsonOptions(x => x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

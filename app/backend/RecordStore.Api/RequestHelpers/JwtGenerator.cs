@@ -27,7 +27,7 @@ public static class JwtGenerator
             issuer: configuration["Jwt:Issuer"],
             audience: configuration["Jwt:Issuer"],
             claims: claims,
-            expires: DateTime.Now.AddMinutes(120),
+            expires: DateTime.UtcNow.AddMinutes(120),
             signingCredentials: credentials
         );
         

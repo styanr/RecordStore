@@ -1,45 +1,53 @@
-import { useState, useEffect } from 'react';
-import authService from './AuthService';
-import { jwtDecode } from 'jwt-decode';
+import React, { createContext, useState, useEffect } from 'react';
 
-const useAuth = () => {
+import { useNavigate } from 'react-router-dom';
+
+import authService from './hooks/AuthService';
+
+export const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('AuthContext useEffect');
     const token = localStorage.getItem('token');
+    console.log(token);
+
     if (token) {
       authService.setToken(token);
+      getUser()
+        .then(() => {
+          setIsAuthenticated(true);
+          console.log('no error');
+        })
+        .catch(() => {
+          setIsAuthenticated(false);
+          console.log('error');
+        });
     } else {
       setIsAuthenticated(false);
-      return;
     }
-
-    const fetchUser = async () => {
-      try {
-        await getUser();
-        console.log(user);
-        setIsAuthenticated(true);
-      } catch (err) {
-        setIsAuthenticated(false);
-      }
-    };
-
-    fetchUser();
   }, []);
 
   const handleAuthSuccess = (token) => {
     authService.setToken(token);
     localStorage.setItem('token', token);
+    getUser();
+    console.log(user);
     setIsAuthenticated(true);
+
+    // navigate('/', { replace: true });
   };
 
   const login = async (email, password) => {
     setLoading(true);
     setError(null);
-
     try {
       const { token } = await authService.login(email, password);
       handleAuthSuccess(token);
@@ -53,7 +61,6 @@ const useAuth = () => {
   const register = async (username, password) => {
     setLoading(true);
     setError(null);
-
     try {
       const { token } = await authService.register(username, password);
       handleAuthSuccess(token);
@@ -78,13 +85,25 @@ const useAuth = () => {
 
     try {
       const data = await authService.getUser();
+      console.log(data);
       setUser(data);
+    } catch (err) {
+      console.log(err);
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  return { user, loading, error, login, register, logout, isAuthenticated };
-};
+  const value = {
+    user,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    isAuthenticated,
+  };
 
-export default useAuth;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

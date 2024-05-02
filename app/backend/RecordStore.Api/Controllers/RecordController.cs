@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.Records;
 using RecordStore.Api.Entities;
+using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers;
 using RecordStore.Api.RequestHelpers.QueryParams;
 using RecordStore.Api.Services;
@@ -20,7 +21,7 @@ public class RecordController
     }
     
     [HttpGet]
-    public async Task<IEnumerable<RecordResponseDto>> GetAll([FromQuery] GetRecordQueryParams queryParams)
+    public async Task<PagedResult<RecordResponseDto>> GetAll([FromQuery] GetRecordQueryParams queryParams)
     {
         return await _recordService.GetAllAsync(queryParams);
     }
@@ -36,5 +37,23 @@ public class RecordController
     public async Task<IEnumerable<RecordResponseDto>> GetByArtistId(int artistId, [FromQuery] GetRecordQueryParams queryParams)
     {
         return await _recordService.GetByArtistIdAsync(artistId, queryParams);
+    }
+    
+    [HttpPost]
+    public async Task<RecordFullResponseDto> Create([FromBody] RecordCreateRequest request)
+    {
+        return await _recordService.CreateAsync(request);
+    }
+    
+    [HttpPut("{id}")]
+    public async Task<RecordFullResponseDto> Update(int id, [FromBody] RecordUpdateRequest request)
+    {
+        return await _recordService.UpdateAsync(id, request);
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task Delete(int id)
+    {
+        await _recordService.DeleteAsync(id);
     }
 }

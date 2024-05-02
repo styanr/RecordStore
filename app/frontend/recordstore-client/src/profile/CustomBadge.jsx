@@ -2,7 +2,7 @@ import { Box } from '@chakra-ui/react';
 
 import { getContrastColor } from '../utils/getContrastColor';
 
-const CustomBadge = ({ color, children }) => (
+const CustomBadge = ({ color, children, ...props }) => (
   <Box
     bg={color}
     color={getContrastColor(color)}
@@ -13,6 +13,7 @@ const CustomBadge = ({ color, children }) => (
     fontSize='sm'
     textTransform='uppercase'
     w='fit-content'
+    {...props}
   >
     {children}
   </Box>

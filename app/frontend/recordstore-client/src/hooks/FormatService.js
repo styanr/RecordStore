@@ -7,6 +7,11 @@ class FormatService {
     const response = await axios.get(api_url, { params: { name } });
     return response.data;
   };
+
+  getFormats = async () => {
+    const response = await axios.get(api_url);
+    return response.data;
+  };
 }
 
 const formatService = new FormatService();

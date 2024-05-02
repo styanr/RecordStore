@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RecordStore.Api.Dto.Users;
 using RecordStore.Api.Services.Users;
 
@@ -19,7 +20,7 @@ public class AuthController : ControllerBase
     [Route("register")]
     public async Task<ActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
     {
-        await _authService.RegisterAsync(userRegisterDto);
+        await _authService.RegisterUserAsync(userRegisterDto);
         
         return Ok();
     }
@@ -31,5 +32,15 @@ public class AuthController : ControllerBase
         var token = await _authService.LoginAsync(userLoginDto);
         
         return Ok(new { token });
+    }
+    
+    [HttpPost]
+    [Route("create")]
+    [Authorize(Roles="admin")]
+    public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
+    {
+        await _authService.CreateUserAsync(request);
+        
+        return Ok();
     }
 }

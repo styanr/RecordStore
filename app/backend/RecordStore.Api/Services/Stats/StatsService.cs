@@ -1,6 +1,8 @@
 ﻿using System.Data;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 using RecordStore.Api.Context;
 using RecordStore.Api.Dto.Stats;
 
@@ -17,31 +19,39 @@ public class StatsService : IStatsService
 
     public async Task<List<OrderDateStats>> GetOrderStatsAsync(string period)
     {
-        var functionName = GetOrderFunctionName(period);
-        await using var command = _context.Database.GetDbConnection().CreateCommand();
-
+        await using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+        
+        await using var command = connection.CreateCommand();
+        
+        var granularity = GetGranularity(period);
         command.CommandType = CommandType.Text;
-        command.CommandText = $"SELECT * FROM {functionName}()";
-
-        await _context.Database.OpenConnectionAsync();
-
+        command.CommandText = $"SELECT * FROM get_order_stats(@granularity)";
+        
+        var granularityParam = new NpgsqlParameter("@granularity", NpgsqlDbType.Text) {Value = granularity};
+        command.Parameters.Add(granularityParam);
+        
         await using var result = await command.ExecuteReaderAsync();
         var dataTable = new DataTable();
         dataTable.Load(result);
-
+        
         return MapToOrderStats(dataTable, period);
     }
 
     public async Task<List<FinancialDateStats>> GetFinancialStatsAsync(string period)
     {
-        var functionName = GetFinancialFunctionName(period);
-        await using var command = _context.Database.GetDbConnection().CreateCommand();
+        await using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
 
+        await using var command = connection.CreateCommand();
+        
+        var granularity = GetGranularity(period);
         command.CommandType = CommandType.Text;
-        command.CommandText = $"SELECT * FROM {functionName}()";
+        command.CommandText = $"SELECT * FROM get_financial_stats(@granularity)";
 
-        await _context.Database.OpenConnectionAsync();
-
+        var granularityParam = new NpgsqlParameter("@granularity", NpgsqlDbType.Text) {Value = granularity};
+        command.Parameters.Add(granularityParam);
+        
         await using var result = await command.ExecuteReaderAsync();
         var dataTable = new DataTable();
         dataTable.Load(result);
@@ -49,7 +59,7 @@ public class StatsService : IStatsService
         return MapToFinancialStats(dataTable, period);
     }
 
-    public async Task<FinancialStats> GetFinancialStatsAsync()
+    public async Task<FinancialStats> GetFinancialSummaryAsync()
     {
         await using var command = _context.Database.GetDbConnection().CreateCommand();
 
@@ -71,6 +81,100 @@ public class StatsService : IStatsService
         };
     }
 
+    public async Task<List<OrderDateStats>> GetOrderStatsAsync(int id, string period)
+    {
+        await using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+        
+        await using var command = connection.CreateCommand();
+        
+        var granularity = GetGranularity(period);
+        command.CommandType = CommandType.Text;
+        command.CommandText = $"SELECT * FROM get_order_count_by_product(@id, @granularity)";
+        
+        var idParam = new NpgsqlParameter("@id", NpgsqlDbType.Integer) {Value = id};
+        var granularityParam = new NpgsqlParameter("@granularity", NpgsqlDbType.Text) {Value = granularity};
+        command.Parameters.Add(idParam);
+        command.Parameters.Add(granularityParam);
+        
+        await using var result = await command.ExecuteReaderAsync();
+        var dataTable = new DataTable();
+        dataTable.Load(result);
+        
+        return MapToOrderStats(dataTable, period);
+    }
+
+    public async Task<List<ProductQuantitySoldStats>> GetProductQuantitySoldStatsAsync(int id, string period)
+    {
+        await using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+        
+        await using var command = connection.CreateCommand();
+        
+        var granularity = GetGranularity(period);
+        command.CommandType = CommandType.Text;
+        command.CommandText = $"SELECT * FROM get_product_quantity_sold(@id, @granularity)";
+        
+        var idParam = new NpgsqlParameter("@id", NpgsqlDbType.Integer) {Value = id};
+        var granularityParam = new NpgsqlParameter("@granularity", NpgsqlDbType.Text) {Value = granularity};
+        command.Parameters.Add(idParam);
+        command.Parameters.Add(granularityParam);
+        
+        await using var result = await command.ExecuteReaderAsync();
+        var dataTable = new DataTable();
+        dataTable.Load(result);
+        
+        return MapToProductQuantitySoldStats(dataTable, period);
+    }
+
+    public async Task<List<AverageOrderValueStats>> GetAverageOrderValueStatsAsync(string period)
+    {
+        await using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+        
+        await using var command = connection.CreateCommand();
+        
+        var granularity = GetGranularity(period);
+        command.CommandType = CommandType.Text;
+        command.CommandText = $"SELECT * FROM get_average_order_value(@granularity)";
+        
+        var granularityParam = new NpgsqlParameter("@granularity", NpgsqlDbType.Text) {Value = granularity};
+        command.Parameters.Add(granularityParam);
+        
+        await using var result = await command.ExecuteReaderAsync();
+        var dataTable = new DataTable();
+        dataTable.Load(result);
+        
+        return MapToAverageOrderValueStats(dataTable, period);
+    }
+
+    public async Task<List<OrdersPerRegionStats>> GetOrdersPerRegionStatsAsync()
+    {
+        await using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+        
+        await using var command = connection.CreateCommand();
+        
+        command.CommandType = CommandType.Text;
+        command.CommandText = "SELECT * FROM get_total_orders_by_region()";
+        
+        await using var result = await command.ExecuteReaderAsync();
+        var dataTable = new DataTable();
+        dataTable.Load(result);
+        
+        return MapToOrdersPerRegionStats(dataTable);
+    }
+    
+    private List<OrdersPerRegionStats> MapToOrdersPerRegionStats(DataTable dataTable)
+    {
+        return (from DataRow row in dataTable.Rows
+            select new OrdersPerRegionStats
+            {
+                Region = row["region"].ToString(),
+                OrdersCount = Convert.ToInt32(row["total_orders"])
+            }).ToList();
+    }
+
     private List<FinancialDateStats> MapToFinancialStats(DataTable dataTable, string period)
     {
         return (from DataRow row in dataTable.Rows
@@ -83,29 +187,7 @@ public class StatsService : IStatsService
             }).ToList();
     }
 
-    private static string GetFinancialFunctionName(string period)
-    {
-        return period switch
-        {
-            "year" => "get_yearly_financial_stats",
-            "month" => "get_monthly_financial_stats",
-            "week" => "get_weekly_financial_stats",
-            _ => throw new ArgumentException("Invalid period", nameof(period))
-        };
-    }
-
-    private static string GetOrderFunctionName(string period)
-    {
-        return period switch
-        {
-            "year" => "get_yearly_order_stats",
-            "month" => "get_monthly_order_stats",
-            "week" => "get_weekly_order_stats",
-            _ => throw new ArgumentException("Invalid period", nameof(period))
-        };
-    }
-
-    private static List<OrderDateStats> MapToOrderStats(DataTable dataTable, string period)
+    private List<OrderDateStats> MapToOrderStats(DataTable dataTable, string period)
     {
         return (from DataRow row in dataTable.Rows
             select new OrderDateStats
@@ -114,15 +196,46 @@ public class StatsService : IStatsService
                 TotalOrders = Convert.ToInt32(row["num_orders"])
             }).ToList();
     }
+    
+    private List<ProductQuantitySoldStats> MapToProductQuantitySoldStats(DataTable dataTable, string period)
+    {
+        return (from DataRow row in dataTable.Rows
+            select new ProductQuantitySoldStats
+            {
+                Date = GetFormattedDate(row, period),
+                QuantitySold = Convert.ToInt32(row["quantity_sold"])
+            }).ToList();
+    }
+    
+    private List<AverageOrderValueStats> MapToAverageOrderValueStats(DataTable dataTable, string period)
+    {
+        return (from DataRow row in dataTable.Rows
+            select new AverageOrderValueStats
+            {
+                Date = GetFormattedDate(row, period),
+                AverageOrderValue = Convert.ToDecimal(row["average_order_value"])
+            }).ToList();
+    }
 
-    private static string? GetFormattedDate(DataRow row, string period)
+    private string? GetFormattedDate(DataRow row, string period)
     {
         return period switch
         {
             "year" => row["year"].ToString(),
             "month" => CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(
-                Convert.ToInt32(row["month"])) + " " + row["year"],
-            "week" => "Week " + row["week"] + " " + row["year"],
+                Convert.ToInt32(row["period"])) + " " + row["year"],
+            "week" => "Week " + row["period"] + " " + row["year"],
+            _ => throw new ArgumentException("Invalid period", nameof(period))
+        };
+    }
+    
+    private string GetGranularity(string period)
+    {
+        return period switch
+        {
+            "year" => "yearly",
+            "month" => "monthly",
+            "week" => "weekly",
             _ => throw new ArgumentException("Invalid period", nameof(period))
         };
     }

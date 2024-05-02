@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Flex, Box, Avatar, Text, Button } from '@chakra-ui/react';
 import CustomBadge from './CustomBadge';
 
-import useAuth from '../auth/useAuth';
-import useAddress from './useAddress';
-import useOrders from '../order/useOrders';
+import useAuth from '../hooks/useAuth';
+import useAddress from '../hooks/useAddress';
+import useOrders from '../hooks/useOrders';
 
 import stringToColor from '../utils/stringToColor';
 import AddressSection from './AddressSection';
@@ -37,7 +37,7 @@ export default function Profile() {
   };
 
   return (
-    <Flex justify='center' align='start'>
+    <Flex justify='center' align='start' flexGrow={1}>
       {user ? (
         <Box p={6} m={20} w='100%'>
           <Flex justify='space-between' align='center' mb={4}>
@@ -57,7 +57,7 @@ export default function Profile() {
               colorScheme='red'
               leftIcon={<HiX />}
             >
-              Logout
+              Вийти
             </Button>
           </Flex>
           {user.role === 'user' && (

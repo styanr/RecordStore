@@ -1,11 +1,11 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import productService from '../home/ProductService';
+import productService from '../hooks/ProductService';
 
-import useAuth from '../auth/useAuth';
+import useAuth from '../hooks/useAuth';
 
-import useCart from '../cart/useCart';
+import useCart from '../hooks/useCart';
 import formatCurrency from '../utils/formatCurrency';
 
 import {
@@ -22,6 +22,7 @@ import {
   useToast,
   IconButton,
   Icon,
+  Badge,
 } from '@chakra-ui/react';
 
 import { CheckIcon, StarIcon, EditIcon } from '@chakra-ui/icons';
@@ -103,7 +104,7 @@ const Product = () => {
     document.documentElement.scrollTop = 0;
   }, [location.pathname]);
 
-  const [product, setProduct] = useState({});
+  const [product, setProduct] = useState(undefined);
   const [reviews, setReviews] = useState([]);
 
   const [otherProducts, setOtherProducts] = useState([]);
@@ -157,20 +158,31 @@ const Product = () => {
   };
 
   useEffect(() => {
+    // this assures the token is set before fetching the product
+    if (isAuthenticated === undefined) return;
+
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const response = await productService.getProduct(id);
+        console.log(response);
         setProduct(response);
         console.log(product);
       } catch (error) {
         console.error('Error:', error);
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 400)
+        ) {
+          navigate('/');
+        }
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchData();
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -190,8 +202,16 @@ const Product = () => {
     fetchData();
   }, [product]);
 
+  if (product === undefined) {
+    return (
+      <Box p={8} flexGrow={1}>
+        <Text>Loading...</Text>
+      </Box>
+    );
+  }
+
   return (
-    <Box p={8} bg='gray.100' minH='100vh'>
+    <Box p={8} bg='gray.100' flexGrow={1}>
       <Flex
         bg='white'
         boxShadow='md'
@@ -210,7 +230,7 @@ const Product = () => {
               position='relative'
             >
               <Image
-                src={product.image_url}
+                src={product.imageUrl}
                 alt='product image'
                 fallbackSrc='https://via.placeholder.com/150'
                 borderRadius='md'
@@ -233,9 +253,20 @@ const Product = () => {
             </Box>
             <VStack spacing={6} align='stretch' flex='1' p={8}>
               <Box>
-                <Heading size='xl' mb={2}>
-                  {product.title}
-                </Heading>
+                <Flex justify='space-between' align='center'>
+                  <Heading size='xl' mb={2}>
+                    {product.title}
+                  </Heading>
+                  <Flex>
+                    <StarIcon color='yellow.500' />
+                    <Text fontSize='sm' color='yellow.500' ml={2}>
+                      {product.averageRating.toFixed(1)}
+                    </Text>
+                    <Text fontSize='sm' color='gray.500' ml={2}>
+                      ({product.totalRatings})
+                    </Text>
+                  </Flex>
+                </Flex>
                 {isEmployee && (
                   <Box
                     color='white'
@@ -250,11 +281,21 @@ const Product = () => {
                     {product.quantity} шт. на складі
                   </Box>
                 )}
-                <Text color='gray.600' fontSize='sm'>
+                <Box>
                   {product.artists
-                    ? product.artists.map((artist) => artist.name).join(', ')
+                    ? product.artists.map((artist) => (
+                        <Badge
+                          key={artist.id}
+                          colorScheme='teal'
+                          as={Link}
+                          to={`/artists/${artist.id}`}
+                          mr={2}
+                        >
+                          {artist.name}
+                        </Badge>
+                      ))
                     : 'Loading...'}
-                </Text>
+                </Box>
                 <Flex align='center' mb={1}>
                   {product.format ? (
                     <Text color='gray.600' fontSize='sm' mr={2}>
