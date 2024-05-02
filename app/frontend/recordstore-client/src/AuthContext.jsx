@@ -58,11 +58,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (username, password) => {
+  const register = async (request) => {
     setLoading(true);
     setError(null);
     try {
-      const { token } = await authService.register(username, password);
+      const { token } = await authService.register(request);
       handleAuthSuccess(token);
     } catch (err) {
       setError(err.response.data.message);

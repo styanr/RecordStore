@@ -45,7 +45,7 @@ public class MappingProfiles : Profile
             .ForMember(s => s.Genres, opt => opt.MapFrom(d => d.Record.Genres))
             .ForMember(s => s.Format, opt => opt.MapFrom(d => d.Format))
             .ForMember(s => s.ReleaseDate, opt => opt.MapFrom(d => d.Record.ReleaseDate))
-            .ForMember(s => s.AverageRating, opt => opt.MapFrom(d => d.Reviews.Average(r => r.Rating)))
+            .ForMember(s => s.AverageRating, opt => opt.MapFrom(d => d.Reviews.Any() ? d.Reviews.Average(r => r.Rating) : (double?)null))
             .ForMember(s => s.TotalRatings, opt => opt.MapFrom(d => d.Reviews.Count));
 
         CreateMap<Product, ProductResponseDto>()

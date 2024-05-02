@@ -135,7 +135,7 @@ const OrderSection = ({
             </HStack>
           </>
         ) : (
-          <Text>No orders</Text>
+          <Text fontSize='lg'>Замовлення відсутні</Text>
         )}
       </Box>
     </Box>

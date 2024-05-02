@@ -171,7 +171,7 @@ const Home = () => {
               Знайден{totalCount % 10 == 1 ? 'а' : 'о'} {totalCount}{' '}
               {totalCount % 10 === 1
                 ? 'позиція'
-                : totalCount % 10 < 5
+                : totalCount % 10 < 5 && totalCount % 10 !== 0
                 ? 'позиції'
                 : 'позицій'}
             </Heading>

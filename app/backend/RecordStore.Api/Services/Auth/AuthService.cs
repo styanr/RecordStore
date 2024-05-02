@@ -32,6 +32,13 @@ public class AuthService : IAuthService
             throw new InvalidOperationException("Role not found");
         }
         
+        var emailExists = await _context.AppUsers.AnyAsync(u => u.Email == userRegisterDto.Email);
+        
+        if (emailExists)
+        {
+            throw new InvalidOperationException("Email already exists");
+        }
+        
         var user = new AppUser
         {
             Email = userRegisterDto.Email,

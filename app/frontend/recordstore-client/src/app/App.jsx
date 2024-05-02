@@ -32,6 +32,7 @@ import Records from '../employee/records/new/Records';
 import CreateRecord from '../employee/records/new/CreateRecord';
 import EditRecord from '../employee/records/new/EditRecord';
 import CreateUser from '../admin/CreateUser';
+import Register from '../auth/Register';
 
 const ProtectedUserRoute = ({ element }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -101,6 +102,10 @@ const App = () => {
         {
           path: '/',
           element: <ProtectedUserRoute element={<Home />} />,
+        },
+        {
+          path: '/register',
+          element: <Register />,
         },
         {
           path: '/login',

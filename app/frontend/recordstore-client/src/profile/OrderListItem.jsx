@@ -97,7 +97,7 @@ const OrderListItem = ({
               </Badge>
               {order.status === 'Pending' && (
                 <Button
-                  colorScheme='blue'
+                  colorScheme='green'
                   onClick={async (e) => {
                     e.stopPropagation();
                     payForOrder(order.id);

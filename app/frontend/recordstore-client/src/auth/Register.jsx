@@ -1,8 +1,8 @@
-// src/components/Login.js
+// src/components/Register.js
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-
 import {
   Box,
   Container,
@@ -13,19 +13,18 @@ import {
   FormLabel,
   Flex,
   useToast,
-  Text,
 } from '@chakra-ui/react';
 
-import { Link } from 'react-router-dom';
-
-const Login = () => {
+const Register = () => {
   const toast = useToast();
-  const { login, error, isAuthenticated, loading } = useAuth();
+  const { register, error, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [credentials, setCredentials] = useState({
     email: '',
     password: '',
+    firstName: '',
+    lastName: '',
   });
 
   useEffect(() => {
@@ -41,14 +40,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(credentials.email, credentials.password);
+    await register({
+      email: credentials.email,
+      password: credentials.password,
+      firstName: credentials.firstName,
+      lastName: credentials.lastName,
+    });
   };
 
   useEffect(() => {
     console.log(error);
     if (error) {
       toast({
-        title: 'Помилка',
+        title: 'Помилка реєстрації',
         description: error,
         status: 'error',
         duration: 5000,
@@ -69,11 +73,11 @@ const Login = () => {
     >
       <Container maxW='xl'>
         <Heading color='teal.600' mb={4}>
-          Вхід
+          Реєстрація
         </Heading>
         <form onSubmit={handleSubmit}>
           <FormControl mt={6} isRequired>
-            <FormLabel>Електронна пошта</FormLabel>
+            <FormLabel>Email</FormLabel>
             <Input
               type='text'
               name='email'
@@ -87,33 +91,38 @@ const Login = () => {
             <Input
               type='password'
               name='password'
-              placeholder='Password'
+              placeholder='Пароль'
               value={credentials.password}
               onChange={handleChange}
             />
           </FormControl>
+          <FormControl mt={6} isRequired>
+            <FormLabel>Ім'я</FormLabel>
+            <Input
+              type='text'
+              name='firstName'
+              placeholder="Ім'я"
+              value={credentials.firstName}
+              onChange={handleChange}
+            />
+          </FormControl>
+          <FormControl mt={6} isRequired>
+            <FormLabel>Прізвище</FormLabel>
+            <Input
+              type='text'
+              name='lastName'
+              placeholder='Прізвище'
+              value={credentials.lastName}
+              onChange={handleChange}
+            />
+          </FormControl>
           <Button type='submit' colorScheme='teal' mt={6} width='full'>
-            Увійти
+            Зареєструватися
           </Button>
         </form>
-        <Flex justify='center' mt={4}>
-          <Text>
-            Ще не зареєстровані?{' '}
-            <Text
-              as={Link}
-              to='/register'
-              color='teal.600'
-              fontWeight='bold'
-              ml={1}
-              _hover={{ textDecoration: 'underline' }}
-            >
-              Зареєструватися
-            </Text>
-          </Text>
-        </Flex>
       </Container>
     </Box>
   );
 };
 
-export default Login;
+export default Register;

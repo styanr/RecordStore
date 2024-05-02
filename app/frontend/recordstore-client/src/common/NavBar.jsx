@@ -21,6 +21,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   Heading,
+  Text,
 } from '@chakra-ui/react';
 
 import { FaCartShopping } from 'react-icons/fa6';
@@ -34,6 +35,8 @@ import useCart from '../hooks/useCart';
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CustomBadge from '../profile/CustomBadge';
+import stringToColor from '../utils/stringToColor';
 
 const links = [
   {
@@ -237,7 +240,22 @@ export default function Simple() {
       >
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
           <HStack spacing={8} alignItems={'center'}>
-            <Box>Record Store</Box>
+            <Flex ms={2} alignItems={'center'} gap={3}>
+              <Text
+                fontFamily='Satisfy, sans-serif'
+                lineHeight={10}
+                fontWeight='bold'
+                fontSize='2xl'
+                mt={1}
+              >
+                Record Store
+              </Text>
+              {user && (
+                <CustomBadge color={stringToColor(user.role)}>
+                  {user.role}
+                </CustomBadge>
+              )}
+            </Flex>
             <HStack
               as={'nav'}
               spacing={4}
@@ -249,7 +267,7 @@ export default function Simple() {
             </HStack>
           </HStack>
           <Flex alignItems={'center'}>
-            {isAuthenticated && (
+            {isAuthenticated && user && (
               <Menu>
                 {user && user.role === 'user' && (
                   <IconButton

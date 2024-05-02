@@ -20,9 +20,9 @@ public class AuthController : ControllerBase
     [Route("register")]
     public async Task<ActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
     {
-        await _authService.RegisterUserAsync(userRegisterDto);
+        var token = await _authService.RegisterUserAsync(userRegisterDto);
         
-        return Ok();
+        return Ok(new { token });
     }
     
     [HttpPost]

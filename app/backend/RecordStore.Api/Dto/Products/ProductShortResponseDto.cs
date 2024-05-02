@@ -10,7 +10,7 @@ public class ProductShortResponseDto
     public string ImageUrl { get; set; }
     public string Title { get; set; }
     public decimal Price { get; set; }
-    public float AverageRating { get; set; }
+    public float? AverageRating { get; set; }
     public int TotalRatings { get; set; }
     public DateOnly ReleaseDate { get; set; }
     

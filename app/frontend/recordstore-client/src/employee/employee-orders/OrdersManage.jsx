@@ -4,6 +4,8 @@ import useOrders from '../../hooks/useOrders';
 
 import { useEffect, useState } from 'react';
 
+import useAuth from '../../hooks/useAuth';
+
 import {
   Box,
   Container,
@@ -20,6 +22,7 @@ import {
   useDisclosure,
   Select,
   Input,
+  Flex,
 } from '@chakra-ui/react';
 
 const OrdersManage = () => {
@@ -30,6 +33,8 @@ const OrdersManage = () => {
     from: '',
     to: '',
   });
+
+  const { user } = useAuth();
 
   const {
     orders,
@@ -88,10 +93,14 @@ const OrdersManage = () => {
   return (
     <Box bg='gray.100' py={12} flexGrow={1}>
       <Container maxW='7xl'>
-        <Heading>Керування замовленнями</Heading>
-        <Button onClick={onOpen} mb={4}>
-          Export Orders
-        </Button>
+        <Flex justify='space-between' align='center' mb={4}>
+          <Heading>Керування замовленнями</Heading>
+          {user && user.role === 'admin' && (
+            <Button onClick={onOpen} mb={4} colorScheme='pink'>
+              Експортувати
+            </Button>
+          )}
+        </Flex>
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
           <ModalContent>
