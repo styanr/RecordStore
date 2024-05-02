@@ -69,6 +69,7 @@ public class ReviewService : IReviewService
         var reviews = await _context.Reviews
             .Where(review => review.ProductId == id)
             .Include(r => r.User)
+            .OrderByDescending(review => review.CreatedAt)
             .ToListAsync();
 
         return _mapper.Map<List<ReviewResponse>>(reviews);

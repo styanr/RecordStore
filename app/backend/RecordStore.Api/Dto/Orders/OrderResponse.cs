@@ -5,6 +5,8 @@ public class OrderResponse
     public int Id { get; set; }
 
     public decimal Total { get; set; }
+    
+    public string Region { get; set; } = null!;
 
     public string City { get; set; } = null!;
 
