@@ -222,7 +222,7 @@ const Product = () => {
         my={8}
       >
         {product && (
-          <HStack spacing={0} align='start'>
+          <HStack spacing={0} align='start' w='full'>
             <Box
               p={8}
               borderRightWidth={1}
@@ -257,15 +257,21 @@ const Product = () => {
                   <Heading size='xl' mb={2}>
                     {product.title}
                   </Heading>
-                  <Flex>
-                    <StarIcon color='yellow.500' />
-                    <Text fontSize='sm' color='yellow.500' ml={2}>
-                      {product.averageRating.toFixed(1)}
+                  {product.averageRating ? (
+                    <Flex>
+                      <StarIcon color='yellow.500' />
+                      <Text fontSize='sm' color='yellow.500' ml={2}>
+                        {product.averageRating.toFixed(1)}
+                      </Text>
+                      <Text fontSize='sm' color='gray.500' ml={2}>
+                        ({product.totalRatings})
+                      </Text>
+                    </Flex>
+                  ) : (
+                    <Text fontSize='sm' color='gray.500'>
+                      Немає відгуків
                     </Text>
-                    <Text fontSize='sm' color='gray.500' ml={2}>
-                      ({product.totalRatings})
-                    </Text>
-                  </Flex>
+                  )}
                 </Flex>
                 {isEmployee && (
                   <Box

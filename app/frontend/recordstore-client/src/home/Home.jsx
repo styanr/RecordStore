@@ -353,7 +353,8 @@ const Home = () => {
                       fallbackSrc='https://via.placeholder.com/150'
                       alt='product image'
                       objectFit='cover'
-                      maxH='240px'
+                      h='200px'
+                      aspectRatio={1 / 1}
                       w='100%'
                     />
                     <LinkOverlay
@@ -378,15 +379,23 @@ const Home = () => {
                           )}
                         </Text>
                         <Flex align='center' mb={2}>
-                          <Flex align='center'>
-                            <StarIcon color='yellow.500' />
-                            <Text fontSize='sm' color='yellow.500' ml={2}>
-                              {product.averageRating.toFixed(1)}
+                          {product.averageRating ? (
+                            <>
+                              <Flex align='center'>
+                                <StarIcon color='yellow.500' />
+                                <Text fontSize='sm' color='yellow.500' ml={2}>
+                                  {product.averageRating.toFixed(1)}
+                                </Text>
+                              </Flex>
+                              <Text fontSize='sm' color='gray.500' ml={2}>
+                                ({product.totalRatings})
+                              </Text>
+                            </>
+                          ) : (
+                            <Text fontSize='sm' color='gray.500'>
+                              Немає відгуків
                             </Text>
-                          </Flex>
-                          <Text fontSize='sm' color='gray.500' ml={2}>
-                            ({product.totalRatings})
-                          </Text>
+                          )}
                         </Flex>
                       </Box>
                     </LinkOverlay>

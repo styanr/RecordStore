@@ -93,10 +93,10 @@ const OrdersManage = () => {
   return (
     <Box bg='gray.100' py={12} flexGrow={1}>
       <Container maxW='7xl'>
-        <Flex justify='space-between' align='center' mb={4}>
+        <Flex justify='space-between' align='center' mb={5}>
           <Heading>Керування замовленнями</Heading>
           {user && user.role === 'admin' && (
-            <Button onClick={onOpen} mb={4} colorScheme='pink'>
+            <Button onClick={onOpen} colorScheme='pink'>
               Експортувати
             </Button>
           )}
