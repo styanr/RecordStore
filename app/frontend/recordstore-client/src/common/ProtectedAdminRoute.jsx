@@ -4,7 +4,12 @@ import useAuth from '../hooks/useAuth';
 const ProtectedAdminRoute = ({ element }) => {
   const { isAuthenticated, user, loading } = useAuth();
 
-  if (loading) {
+  useEffect(() => {
+    console.log('ProtectedAdminRoute');
+    console.log(loading, isAuthenticated, user);
+  }, [loading]);
+
+  if (isAuthenticated === undefined || loading) {
     return <div>Loading...</div>;
   }
 

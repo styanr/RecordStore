@@ -29,8 +29,6 @@ public partial class RecordStoreContext : DbContext
 
     public virtual DbSet<Inventory> Inventories { get; set; }
 
-    public virtual DbSet<InventoryEvent> InventoryEvents { get; set; }
-
     public virtual DbSet<OrderLine> OrderLines { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
@@ -52,7 +50,8 @@ public partial class RecordStoreContext : DbContext
     public virtual DbSet<ShoppingCartProduct> ShoppingCartProducts { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
-
+    
+    public virtual DbSet<Log> Logs { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // optionsBuilder.LogTo(Console.WriteLine);
@@ -261,28 +260,6 @@ public partial class RecordStoreContext : DbContext
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("inventory_product_id_fkey");
-        });
-
-        modelBuilder.Entity<InventoryEvent>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("inventory_event_pkey");
-
-            entity.ToTable("inventory_event");
-
-            entity.Property(e => e.Id)
-                .UseIdentityAlwaysColumn()
-                .HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("created_at");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.QuantityChange).HasColumnName("quantity_change");
-            entity.Property(e => e.EventType).HasColumnName("event_type");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.InventoryEvents)
-                .HasForeignKey(d => d.ProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("inventory_event_product_id_fkey");
         });
 
         modelBuilder.Entity<OrderLine>(entity =>
@@ -556,6 +533,25 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.Phone)
                 .HasMaxLength(20)
                 .HasColumnName("phone");
+        });
+
+        modelBuilder.Entity<Log>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("log_pkey");
+
+            entity.ToTable("log");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.ActionType)
+                .HasMaxLength(20)
+                .HasColumnName("action_type");
+            entity.Property(e => e.Timestamp)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("timestamp");
+            entity.Property(e => e.Description).HasColumnName("description");
         });
 
         OnModelCreatingPartial(modelBuilder);

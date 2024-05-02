@@ -261,6 +261,4 @@ public static class QueryExtensions
         
         return query;
     }
-    
-    
 }

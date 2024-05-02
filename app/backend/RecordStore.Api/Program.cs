@@ -10,6 +10,7 @@ using RecordStore.Api.Services.Artists;
 using RecordStore.Api.Services.Carts;
 using RecordStore.Api.Services.Formats;
 using RecordStore.Api.Services.Genres;
+using RecordStore.Api.Services.Logs;
 using RecordStore.Api.Services.Orders;
 using RecordStore.Api.Services.Products;
 using RecordStore.Api.Services.PurchaseOrders;
@@ -91,6 +92,7 @@ builder.Services.AddScoped<IFormatService, FormatService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+builder.Services.AddScoped<ILogService, LogService>();
 
 builder.Services.AddCors(opt =>
     {

@@ -6,6 +6,7 @@ using RecordStore.Api.Context;
 using RecordStore.Api.Dto.Cart;
 using RecordStore.Api.Entities;
 using RecordStore.Api.Exceptions;
+using RecordStore.Api.Services.Logs;
 using RecordStore.Api.Services.Products;
 using RecordStore.Api.Services.Users;
 
@@ -17,22 +18,25 @@ public class CartService : ICartService
     private readonly IMapper _mapper;
     private readonly IProductService _productService;
     private readonly IUserService _userService;
+    private readonly ILogService _logService;
 
     public CartService(
-        IHttpContextAccessor contextAccessor, 
-        RecordStoreContext context, 
-        IMapper mapper, 
+        IHttpContextAccessor contextAccessor,
+        RecordStoreContext context,
+        IMapper mapper,
         IProductService productService,
-        IUserService userService
-        )
+        IUserService userService,
+        ILogService logService
+    )
     {
         _contextAccessor = contextAccessor;
         _context = context;
         _mapper = mapper;
         _productService = productService;
         _userService = userService;
+        _logService = logService;
     }
-    
+
     public async Task<CartResponse> GetCartAsync()
     {
         var userId = await GetUserId();
@@ -55,9 +59,11 @@ public class CartService : ICartService
             throw new CartNotFoundException();
         }
 
+        await _logService.LogActionAsync("Get Cart", $"Cart retrieved for user with ID: {userId}");
+
         return _mapper.Map<CartResponse>(cart);
     }
-    
+
     public async Task AddToCartAsync(CartItemRequest request)
     {
         var userId = await GetUserId();
@@ -100,9 +106,11 @@ public class CartService : ICartService
             shoppingCartProduct.Quantity += request.Quantity;
         }
 
+        await _logService.LogActionAsync("Add to Cart", $"Product with ID: {request.ProductId} added to cart for user with ID: {userId}");
+        
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task EditCartAsync(CartItemRequest request)
     {
         var userId = await GetUserId();
@@ -126,8 +134,10 @@ public class CartService : ICartService
         shoppingCartProduct.Quantity = request.Quantity;
 
         await _context.SaveChangesAsync();
+
+        await _logService.LogActionAsync("Edit Cart", $"Product with ID: {request.ProductId} quantity updated to {request.Quantity} in cart for user with ID: {userId}");
     }
-    
+
     public async Task RemoveFromCartAsync(int productId)
     {
         var userId = await GetUserId();
@@ -151,8 +161,10 @@ public class CartService : ICartService
         cart.ShoppingCartProducts.Remove(shoppingCartProduct);
 
         await _context.SaveChangesAsync();
+
+        await _logService.LogActionAsync("Remove from Cart", $"Product with ID: {productId} removed from cart for user with ID: {userId}");
     }
-    
+
     private async Task<int> GetUserId()
     {
         var user = await _userService.GetCurrentUserAsync();
@@ -161,12 +173,12 @@ public class CartService : ICartService
         {
             throw new UserNotFoundException();
         }
-        
+
         if (user.Role is not "user")
         {
             throw new UnauthorizedAccessException();
         }
-        
+
         return user.Id;
     }
 }

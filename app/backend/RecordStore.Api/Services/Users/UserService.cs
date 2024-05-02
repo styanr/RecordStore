@@ -28,16 +28,20 @@ public class UserService : IUserService
         var userIdString = _contextAccessor.HttpContext.User.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
 
         if (string.IsNullOrEmpty(userIdString))
+        {
             throw new InvalidOperationException("User ID not found in claims.");
+        }
 
         var userId = int.Parse(userIdString);
         
         var user = await _context.AppUsers
             .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.Id == userId);
-        
+
         if (user is null)
+        {
             throw new UserNotFoundException();
+        }
 
         return _mapper.Map<UserResponse>(user);
     }

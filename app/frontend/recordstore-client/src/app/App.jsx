@@ -33,6 +33,7 @@ import CreateRecord from '../employee/records/new/CreateRecord';
 import EditRecord from '../employee/records/new/EditRecord';
 import CreateUser from '../admin/CreateUser';
 import Register from '../auth/Register';
+import Logs from '../admin/Logs';
 
 const ProtectedUserRoute = ({ element }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -175,6 +176,10 @@ const App = () => {
         {
           path: '/users/new',
           element: <ProtectedAdminRoute element={<CreateUser />} />,
+        },
+        {
+          path: '/logs',
+          element: <ProtectedAdminRoute element={<Logs />} />,
         },
       ],
     },

@@ -30,4 +30,6 @@ public partial class AppUser
     public virtual ICollection<ShopOrder> ShopOrders { get; set; } = new List<ShopOrder>();
 
     public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new List<ShoppingCart>();
+    
+    public virtual ICollection<Log> Logs { get; set; } = new List<Log>();
 }

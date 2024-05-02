@@ -4,6 +4,7 @@ using RecordStore.Api.Dto.Artists;
 using RecordStore.Api.Dto.Cart;
 using RecordStore.Api.Dto.Formats;
 using RecordStore.Api.Dto.Genres;
+using RecordStore.Api.Dto.Logs;
 using RecordStore.Api.Dto.Orders;
 using RecordStore.Api.Dto.Products;
 using RecordStore.Api.Dto.PurchaseOrders;
@@ -108,7 +109,8 @@ public class MappingProfiles : Profile
         
         CreateMap<ArtistCreateRequest, Artist>();
         CreateMap<PagedResult<Artist>, PagedResult<ArtistResponseDto>>();
-        
-        
+
+        CreateMap<Log, LogResponse>();
+        CreateMap<LogCreateRequest, Log>();
     }
 }

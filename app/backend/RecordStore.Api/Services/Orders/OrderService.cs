@@ -12,6 +12,7 @@ using RecordStore.Api.Entities;
 using RecordStore.Api.Exceptions;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers.QueryParams;
+using RecordStore.Api.Services.Logs;
 using RecordStore.Api.Services.Users;
 using ServiceStack;
 using ServiceStack.Text;
@@ -23,12 +24,14 @@ public class OrderService : IOrderService
     private readonly RecordStoreContext _context;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
+    private readonly ILogService _logService;
 
-    public OrderService(RecordStoreContext context, IMapper mapper, IUserService userService)
+    public OrderService(RecordStoreContext context, IMapper mapper, IUserService userService, ILogService logService)
     {
         _context = context;
         _mapper = mapper;
         _userService = userService;
+        _logService = logService;
     }
 
     public async Task<PagedResult<OrderResponse>> GetAllForUserAsync(GetOrderQueryParams queryParams)
@@ -40,11 +43,13 @@ public class OrderService : IOrderService
             .ApplyIncludes()
             .ApplyFiltersAndOrderBy(queryParams)
             .Where(o => o.UserId == userId);
-
+    
         var pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
 
         var orders = _mapper.Map<PagedResult<OrderResponse>>(pagedResult);
-
+        
+        await _logService.LogActionAsync("Get orders", $"Get all orders for user with ID: {userId}");
+        
         return orders;
     }
 
@@ -57,6 +62,8 @@ public class OrderService : IOrderService
         var pagedResult = await query.GetPagedAsync(queryParams.Page, queryParams.PageSize);
         
         var orders = _mapper.Map<PagedResult<OrderResponse>>(pagedResult);
+        
+        await _logService.LogActionAsync("Get orders", "Get all orders");
         
         return orders; 
     }
@@ -145,6 +152,8 @@ public class OrderService : IOrderService
         ]);
 
         if (rowsAffected == 0) throw new Exception("Order was not created");
+        
+        await _logService.LogActionAsync("Create order", $"Create order for user with ID: {userId}");
     }
     
     public async Task<OrderResponse> UpdateStatusAsync(int orderId, OrderStatusDto status)
@@ -173,6 +182,8 @@ public class OrderService : IOrderService
             }
         }
         
+        await _logService.LogActionAsync("Update order status", $"Update order status to {status.Name} for order with ID: {orderId}");
+        
         return _mapper.Map<OrderResponse>(order);
     }
 
@@ -191,6 +202,8 @@ public class OrderService : IOrderService
         order.Status = OrderStatus.Paid;
         
         await _context.SaveChangesAsync();
+        
+        await _logService.LogActionAsync("Pay for order", $"Pay for order with ID: {orderId}");
         
         return _mapper.Map<OrderResponse>(order);
     }

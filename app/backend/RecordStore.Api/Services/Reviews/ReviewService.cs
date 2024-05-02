@@ -5,6 +5,7 @@ using RecordStore.Api.Dto.Reviews;
 using RecordStore.Api.Entities;
 using RecordStore.Api.Exceptions;
 using RecordStore.Api.RequestHelpers.QueryParams;
+using RecordStore.Api.Services.Logs;
 using RecordStore.Api.Services.Users;
 
 namespace RecordStore.Api.Services.Reviews;
@@ -14,12 +15,14 @@ public class ReviewService : IReviewService
     private readonly RecordStoreContext _context;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
+    private readonly ILogService _logService;
 
-    public ReviewService(RecordStoreContext context, IMapper mapper, IUserService userService)
+    public ReviewService(RecordStoreContext context, IMapper mapper, IUserService userService, ILogService logService)
     {
         _context = context;
         _mapper = mapper;
         _userService = userService;
+        _logService = logService;
     }
 
     public async Task CreateAsync(int id, CreateReviewRequest createReviewRequest)
@@ -32,13 +35,13 @@ public class ReviewService : IReviewService
             order.OrderLines.Any(orderLine => orderLine.ProductId == id));
 
         if (!userOrderedProduct) throw new UnauthorizedAccessException("User hasn't ordered this product");
-        
+
         var userReviewedProduct = _context.Reviews.Any(review =>
             review.UserId == user.Id &&
             review.ProductId == id);
-        
-        if (userReviewedProduct) throw new InvalidOperationException("User has already reviewed this product"); 
-        
+
+        if (userReviewedProduct) throw new InvalidOperationException("User has already reviewed this product");
+
         var review = _mapper.Map<Review>(createReviewRequest);
 
         review.ProductId = id;
@@ -47,6 +50,8 @@ public class ReviewService : IReviewService
         _context.Reviews.Add(review);
 
         await _context.SaveChangesAsync();
+
+        await _logService.LogActionAsync("Create Review", $"Review created for product with ID: {id}");
     }
 
     public async Task DeleteAsync(int id)
@@ -62,6 +67,8 @@ public class ReviewService : IReviewService
         _context.Reviews.Remove(review);
 
         await _context.SaveChangesAsync();
+
+        await _logService.LogActionAsync("Delete Review", $"Review deleted with ID: {id}");
     }
 
     public async Task<List<ReviewResponse>> GetAllAsync(int id, GetReviewQueryParams queryParams)
@@ -72,6 +79,10 @@ public class ReviewService : IReviewService
             .OrderByDescending(review => review.CreatedAt)
             .ToListAsync();
 
-        return _mapper.Map<List<ReviewResponse>>(reviews);
+        var reviewResponses = _mapper.Map<List<ReviewResponse>>(reviews);
+
+        await _logService.LogActionAsync("Get Reviews", $"Reviews retrieved for product with ID: {id}");
+
+        return reviewResponses;
     }
 }
