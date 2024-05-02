@@ -29,6 +29,7 @@ const orderDirectionOptions = [
 const OrderSection = ({
   orders,
   fetchOrders,
+  payForOrder = null, // orderId
   manage = false,
   statusOptions = null,
   updateStatus = null, // orderId, status
@@ -60,6 +61,10 @@ const OrderSection = ({
   useEffect(() => {
     fetchOrders(params);
   }, [params.page]);
+
+  useEffect(() => {
+    console.log(payForOrder);
+  }, [payForOrder]);
 
   return (
     <Box>
@@ -108,6 +113,7 @@ const OrderSection = ({
                 manage={manage}
                 statusOptions={statusOptions}
                 updateStatus={updateStatus}
+                payForOrder={payForOrder}
               />
             ))}
             <HStack mt={4} justify='center'>

@@ -49,6 +49,16 @@ class OrderService {
     }
   }
 
+  async payForOrder(orderId) {
+    try {
+      const response = await axios.patch(api_url + `/${orderId}/pay`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error('Error paying for order:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   async getStatusOptions() {
     try {
       const response = await axios.get(api_url + '/statuses');

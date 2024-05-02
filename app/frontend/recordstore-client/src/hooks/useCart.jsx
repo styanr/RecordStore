@@ -60,7 +60,15 @@ const useCart = () => {
     fetchCart();
   }, [isAuthenticated]);
 
-  return { cart, loading, error, addToCart, updateCart, removeFromCart };
+  return {
+    cart,
+    loading,
+    error,
+    addToCart,
+    updateCart,
+    removeFromCart,
+    fetchCart,
+  };
 };
 
 export default useCart;

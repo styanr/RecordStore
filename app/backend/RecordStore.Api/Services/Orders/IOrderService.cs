@@ -12,4 +12,5 @@ public interface IOrderService
     List<string> GetOrderStatusesAsync();
     Task CreateAsync(CreateOrderRequest createOrderRequest);
     Task<OrderResponse> UpdateStatusAsync(int orderId, OrderStatusDto orderStatusDto);
+    Task<OrderResponse> PayAsync(int orderId);
 }

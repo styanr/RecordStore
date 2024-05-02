@@ -30,6 +30,7 @@ import {
   MenuDivider,
   Portal,
   Select,
+  HStack,
 } from '@chakra-ui/react';
 
 import { SearchIcon, AddIcon, StarIcon } from '@chakra-ui/icons';
@@ -406,7 +407,7 @@ const Home = () => {
               ))}
             </Grid>
           </Flex>
-          <Flex mt={4} justify='center'>
+          <HStack mt={4} justify='center'>
             <Button
               isDisabled={page === 1}
               onClick={() => prevPage()}
@@ -422,7 +423,7 @@ const Home = () => {
             >
               Наступна
             </Button>
-          </Flex>
+          </HStack>
         </Container>
       )}
     </Box>

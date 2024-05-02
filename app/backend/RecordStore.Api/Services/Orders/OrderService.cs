@@ -175,4 +175,23 @@ public class OrderService : IOrderService
         
         return _mapper.Map<OrderResponse>(order);
     }
+
+    public async Task<OrderResponse> PayAsync(int orderId)
+    {
+        var order = await _context.ShopOrders.ApplyIncludes().FirstOrDefaultAsync(o => o.Id == orderId);
+        
+        if (order == null) throw new EntityNotFoundException("Order not found");
+        
+        var user = await _userService.GetCurrentUserAsync();
+        
+        if (order.UserId != user.Id) throw new UnauthorizedAccessException("You are not allowed to pay for this order");
+        
+        if (order.Status != OrderStatus.Pending) throw new InvalidOperationException("Order is already paid");
+        
+        order.Status = OrderStatus.Paid;
+        
+        await _context.SaveChangesAsync();
+        
+        return _mapper.Map<OrderResponse>(order);
+    }
 }

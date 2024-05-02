@@ -10,6 +10,7 @@ import {
   Select,
   ListItem,
   useToast,
+  Button,
 } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 
@@ -33,6 +34,7 @@ const OrderListItem = ({
   statusOptions,
   updateStatus,
   setOrder,
+  payForOrder,
 }) => {
   const { isOpen, onToggle } = useDisclosure();
   const [thisOrder, setThisOrder] = useState(order);
@@ -81,17 +83,31 @@ const OrderListItem = ({
               ))}
             </Select>
           ) : (
-            <Badge
-              colorScheme={statusMap[order.status].color || 'gray'}
-              px={3}
-              py={1}
-              borderRadius='full'
-              fontSize='sm'
-              textTransform='uppercase'
-              letterSpacing='wider'
-            >
-              {statusMap[order.status].text || order.status}
-            </Badge>
+            <Box>
+              <Badge
+                colorScheme={statusMap[order.status].color || 'gray'}
+                px={3}
+                py={1}
+                borderRadius='full'
+                fontSize='sm'
+                textTransform='uppercase'
+                letterSpacing='wider'
+              >
+                {statusMap[order.status].text || order.status}
+              </Badge>
+              {order.status === 'Pending' && (
+                <Button
+                  colorScheme='blue'
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    payForOrder(order.id);
+                  }}
+                  ml={4}
+                >
+                  Оплатити
+                </Button>
+              )}
+            </Box>
           )}
         </Flex>
         <Text color='gray.500' mb={2}>

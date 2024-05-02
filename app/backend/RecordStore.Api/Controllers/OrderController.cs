@@ -61,6 +61,15 @@ public class OrderController : ControllerBase
         return orderResponse;
     }
     
+    [HttpPatch]
+    [Route("{orderId}/pay")]
+    [Authorize(Roles = "user")]
+    public async Task<ActionResult<OrderResponse>> Pay(int orderId)
+    {
+        var orderResponse = await _orderService.PayAsync(orderId);
+        return orderResponse;
+    }
+    
     [HttpGet]
     [Route("~/api/admin/orders/report")]
     [Authorize(Roles = "admin")]

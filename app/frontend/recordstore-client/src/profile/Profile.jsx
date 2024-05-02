@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flex, Box, Avatar, Text, Button } from '@chakra-ui/react';
+import { Flex, Box, Avatar, Text, Button, useToast } from '@chakra-ui/react';
 import CustomBadge from './CustomBadge';
 
 import useAuth from '../hooks/useAuth';
@@ -15,10 +15,11 @@ import { HiX } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
+  const toast = useToast();
   const { user } = useAuth();
   const [roleColor, setRoleColor] = useState('gray');
   const { addresses, addAddress, deleteAddress } = useAddress();
-  const { orders, fetchOrders } = useOrders();
+  const { orders, fetchOrders, payForOrder } = useOrders();
 
   const navigate = useNavigate();
 
@@ -34,6 +35,27 @@ export default function Profile() {
 
   const getOrders = async (params) => {
     await fetchOrders(params);
+  };
+
+  const handlePayForOrder = async (orderId) => {
+    const response = await payForOrder(orderId);
+    if (response.success === true) {
+      toast({
+        title: 'Замовлення оплачено',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+    if (response.success === false) {
+      toast({
+        title: 'Помилка оплати замовлення',
+        description: response.error,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
@@ -62,7 +84,11 @@ export default function Profile() {
           </Flex>
           {user.role === 'user' && (
             <>
-              <OrderSection orders={orders} fetchOrders={getOrders} />
+              <OrderSection
+                orders={orders}
+                fetchOrders={getOrders}
+                payForOrder={handlePayForOrder}
+              />
               <AddressSection
                 addresses={addresses}
                 addAddress={addAddress}

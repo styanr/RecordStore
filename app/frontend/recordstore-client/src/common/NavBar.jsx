@@ -131,11 +131,16 @@ export default function Simple() {
 
   const navigate = useNavigate();
 
-  const { cart, addToCart, updateCart, removeFromCart } = useCart();
+  const { cart, addToCart, updateCart, removeFromCart, fetchCart } = useCart();
 
   useEffect(() => {
     console.log(cart);
   }, [cart]);
+
+  const handleOpenCart = () => {
+    fetchCart();
+    onOpen();
+  };
 
   //   const Links = user && user.role === 'admin' ? adminLinks : links;
 
@@ -251,7 +256,7 @@ export default function Simple() {
                     aria-label='Кошик'
                     icon={<FaCartShopping />}
                     ref={btnRef}
-                    onClick={onOpen}
+                    onClick={handleOpenCart}
                   />
                 )}
                 <IconButton

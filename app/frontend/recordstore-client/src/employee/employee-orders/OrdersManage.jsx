@@ -2,7 +2,7 @@ import OrderSection from '../../profile/OrderSection';
 
 import useOrders from '../../hooks/useOrders';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Box,

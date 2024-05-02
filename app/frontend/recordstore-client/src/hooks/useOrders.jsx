@@ -59,6 +59,30 @@ export default function useOrders(type = 'user') {
     return response;
   };
 
+  const payForOrder = async (orderId) => {
+    if (type !== 'user') {
+      throw new Error('Unauthorized: Only customers can pay for orders.');
+    }
+
+    const response = await OrderService.payForOrder(orderId);
+
+    if (response.success === true) {
+      const order = response.data;
+      console.log('Paid for order:', order);
+      setOrders((prevOrders) => {
+        const index = prevOrders.results.findIndex((o) => o.id === order.id);
+        if (index === -1) {
+          return prevOrders;
+        }
+        const newOrders = [...prevOrders.results];
+        newOrders[index] = order;
+        return { ...prevOrders, results: newOrders };
+      });
+    }
+
+    return response;
+  };
+
   // params: format, from, to
   const exportOrders = async (params) => {
     try {
@@ -92,5 +116,6 @@ export default function useOrders(type = 'user') {
     fetchOrders,
     updateOrderStatus,
     exportOrders,
+    payForOrder,
   };
 }

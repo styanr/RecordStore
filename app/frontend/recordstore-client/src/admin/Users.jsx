@@ -25,6 +25,7 @@ import {
   useDisclosure,
   useToast,
   TableContainer,
+  HStack,
 } from '@chakra-ui/react';
 import {
   FaTrashAlt,
@@ -246,7 +247,7 @@ const Users = () => {
           )}
         </Table>
       </TableContainer>
-      <Flex mt={4} justify='center'>
+      <HStack mt={4} justify='center'>
         <Button isDisabled={page === 1} onClick={() => prevPage()} size='sm'>
           Попередня
         </Button>
@@ -258,7 +259,7 @@ const Users = () => {
         >
           Наступна
         </Button>
-      </Flex>
+      </HStack>
 
       <Modal
         isOpen={isRoleModalOpen}
