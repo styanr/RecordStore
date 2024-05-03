@@ -117,9 +117,10 @@ class GenreArtist:
 
 
 class Product:
-    def __init__(self, record_id, formats, description, dataset_id, price, quantity, inactive=False, database_id=None):
+    def __init__(self, record_id, formats, label, description, dataset_id, price, quantity, inactive=False, database_id=None):
         self.record_id = record_id
         self.formats = formats
+        self.label = label
         self.description = description
         self.dataset_id = dataset_id
         self.price = price
