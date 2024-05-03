@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
+using RecordStore.Api.Dto.Labels;
 using RecordStore.Api.Dto.Products;
 using RecordStore.Api.Dto.Users;
 using RecordStore.Api.Entities;
@@ -131,6 +132,10 @@ public class ProductService : IProductService
 
         product.Format = format;
 
+        var label = await GetOrCreateLabelAsync(entity.LabelName);
+        
+        product.Label = label;
+        
         var inventory = new Inventory
         {
             Product = product,
@@ -172,6 +177,10 @@ public class ProductService : IProductService
         var format = await GetOrCreateFormatAsync(entity.FormatName);
 
         product.Format = format;
+        
+        var label = await GetOrCreateLabelAsync(entity.LabelName);
+        
+        product.Label = label;
 
         await _logService.LogActionAsync("Update Product", $"Product updated with ID: {id}");
         
@@ -214,6 +223,17 @@ public class ProductService : IProductService
         };
     }
 
+    public async Task<List<LabelResponse>> GetLabelsAsync(string name)
+    {
+        var normalizedName = name.ToLower().Trim();
+        
+        var labels = await _context.Labels
+            .Where(l => l.Name.ToLower().StartsWith(normalizedName))
+            .ToListAsync();
+
+        return _mapper.Map<List<LabelResponse>>(labels);
+    }
+    
     public Task<bool> DeleteAsync(int id)
     {
         throw new NotImplementedException();
@@ -233,5 +253,21 @@ public class ProductService : IProductService
         }
 
         return format;
+    }
+    
+    private async Task<Label> GetOrCreateLabelAsync(string labelName)
+    {
+        var label = await _context.Labels.FirstOrDefaultAsync(l => l.Name == labelName);
+
+        if (label is null)
+        {
+            label = new Label
+            {
+                Name = labelName
+            };
+            _context.Labels.Add(label);
+        }
+
+        return label;
     }
 }

@@ -4,6 +4,7 @@ using RecordStore.Api.Dto.Artists;
 using RecordStore.Api.Dto.Cart;
 using RecordStore.Api.Dto.Formats;
 using RecordStore.Api.Dto.Genres;
+using RecordStore.Api.Dto.Labels;
 using RecordStore.Api.Dto.Logs;
 using RecordStore.Api.Dto.Orders;
 using RecordStore.Api.Dto.Products;
@@ -46,8 +47,10 @@ public class MappingProfiles : Profile
             .ForMember(s => s.Genres, opt => opt.MapFrom(d => d.Record.Genres))
             .ForMember(s => s.Format, opt => opt.MapFrom(d => d.Format))
             .ForMember(s => s.ReleaseDate, opt => opt.MapFrom(d => d.Record.ReleaseDate))
-            .ForMember(s => s.AverageRating, opt => opt.MapFrom(d => d.Reviews.Any() ? d.Reviews.Average(r => r.Rating) : (double?)null))
-            .ForMember(s => s.TotalRatings, opt => opt.MapFrom(d => d.Reviews.Count));
+            .ForMember(s => s.AverageRating,
+                opt => opt.MapFrom(d => d.Reviews.Any() ? d.Reviews.Average(r => r.Rating) : (double?)null))
+            .ForMember(s => s.TotalRatings, opt => opt.MapFrom(d => d.Reviews.Count))
+            .ForMember(s => s.LabelName, opt => opt.MapFrom(d => d.Label.Name));
 
         CreateMap<Product, ProductResponseDto>()
             .IncludeBase<Product, ProductShortResponseDto>();
@@ -112,5 +115,7 @@ public class MappingProfiles : Profile
 
         CreateMap<Log, LogResponse>();
         CreateMap<LogCreateRequest, Log>();
+
+        CreateMap<Label, LabelResponse>();
     }
 }

@@ -105,35 +105,38 @@ const OrderSection = ({
       <Divider mb={4} />
       <Box>
         {orders !== null && orders.results.length > 0 ? (
-          <>
-            {orders.results.map((order) => (
-              <OrderListItem
-                key={order.id}
-                order={order}
-                manage={manage}
-                statusOptions={statusOptions}
-                updateStatus={updateStatus}
-                payForOrder={payForOrder}
-              />
-            ))}
-            <HStack mt={4} justify='center'>
-              <Button
-                isDisabled={params.page === 1}
-                onClick={() => handlePageChange(params.page - 1)}
-                size='sm'
-              >
-                Попередня
-              </Button>
-              <Text>{params.page}</Text>
-              <Button
-                isDisabled={params.page === orders.pageCount}
-                onClick={() => handlePageChange(params.page + 1)}
-                size='sm'
-              >
-                Наступна
-              </Button>
-            </HStack>
-          </>
+          (console.log(orders.results),
+          (
+            <>
+              {orders.results.map((order) => (
+                <OrderListItem
+                  key={order.id}
+                  order={order}
+                  manage={manage}
+                  statusOptions={statusOptions}
+                  updateStatus={updateStatus}
+                  payForOrder={payForOrder}
+                />
+              ))}
+              <HStack mt={4} justify='center'>
+                <Button
+                  isDisabled={params.page === 1}
+                  onClick={() => handlePageChange(params.page - 1)}
+                  size='sm'
+                >
+                  Попередня
+                </Button>
+                <Text>{params.page}</Text>
+                <Button
+                  isDisabled={params.page === orders.pageCount}
+                  onClick={() => handlePageChange(params.page + 1)}
+                  size='sm'
+                >
+                  Наступна
+                </Button>
+              </HStack>
+            </>
+          ))
         ) : (
           <Text fontSize='lg'>Замовлення відсутні</Text>
         )}

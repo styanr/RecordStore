@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using RecordStore.Api.Context;
 using RecordStore.Api.Dto.Records;
 using RecordStore.Api.Entities;
@@ -72,31 +73,33 @@ public class RecordService : IRecordService
 
     private async Task GetArtists(Record record, List<int> artistIds)
     {
-        artistIds.ForEach(id =>
+        foreach (int id in artistIds)
         {
-            var artist = _context.Artists.FirstOrDefault(a => a.Id == id);
-            
+            var artist = await _context.Artists.FirstOrDefaultAsync(a => a.Id == id);
+
             if (artist is null)
             {
                 throw new ArtistNotFoundException();
             }
-            
+
             record.Artists.Add(artist);
-        });
+        }
     }
+
     private async Task GetOrCreateGenres(Record record, List<string> genreNames)
     {
-        genreNames.ForEach(async (name) =>
+        foreach (string name in genreNames)
         {
-            var genre = _context.Genres.FirstOrDefault(g => g.Name == name);
+            var genre = await _context.Genres.FirstOrDefaultAsync(g => g.Name == name);
+
             if (genre is null)
             {
                 genre = new Genre { Name = name };
                 await _context.Genres.AddAsync(genre);
             }
-            
+
             record.Genres.Add(genre);
-        });
+        }
     }
 
     public async Task<RecordFullResponseDto> UpdateAsync(int id, RecordUpdateRequest request)
@@ -124,7 +127,7 @@ public class RecordService : IRecordService
         return _mapper.Map<RecordFullResponseDto>(record);
     }
 
-    public Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         var record = _context.Records.FirstOrDefault(r => r.Id == id);
         
@@ -132,9 +135,21 @@ public class RecordService : IRecordService
         {
             throw new RecordNotFoundException();
         }
-        
-        _context.Records.Remove(record);
-        
-        return _context.SaveChangesAsync();
+
+        try
+        {
+            _context.Records.Remove(record);
+            await _context.SaveChangesAsync();
+        } 
+        catch (DbUpdateException e)
+        {
+            var postgresException = e.InnerException as PostgresException;
+            if (postgresException.SqlState == "23502")
+            {
+                throw new InvalidOperationException("Record is in use and cannot be deleted");
+            }
+
+            throw;
+        }
     }
 }

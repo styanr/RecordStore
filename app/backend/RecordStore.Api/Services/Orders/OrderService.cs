@@ -77,8 +77,8 @@ public class OrderService : IOrderService
         var toDateTime = new DateTime(to.Year, to.Month, to.Day, 23, 59, 59, DateTimeKind.Utc);
 
         var orders = await _context.ShopOrders
-            .Where(o => o.CreatedAt >= fromDateTime && o.CreatedAt <= toDateTime)
             .ApplyIncludes()
+            .Where(o => o.CreatedAt >= fromDateTime && o.CreatedAt <= toDateTime)
             .ToListAsync();
 
         

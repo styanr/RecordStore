@@ -8,7 +8,9 @@ public class ProductUpdateRequest
     public string FormatName { get; set; }
     
     [Required]
-    public string ImageUrl { get; set; } = null!;
+    public string LabelName { get; set; } = null!;
+    
+    public string? ImageUrl { get; set; } = null!;
     
     [Required]
     public string Description { get; set; }

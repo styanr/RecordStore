@@ -38,9 +38,14 @@ const useRecords = () => {
   };
 
   const deleteRecord = async (recordId) => {
-    const response = await axios.delete(`${api_url}records/${recordId}`);
-
-    return response.data;
+    try {
+      const response = await axios.delete(`${api_url}records/${recordId}`);
+      console.log(response);
+      return { success: true };
+    } catch (error) {
+      console.log(error);
+      return { success: false, error: error.response.data.message };
+    }
   };
 
   return {

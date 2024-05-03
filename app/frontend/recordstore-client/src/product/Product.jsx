@@ -200,6 +200,7 @@ const Product = () => {
       }
     };
     fetchData();
+
   }, [product]);
 
   if (product === undefined) {
@@ -287,6 +288,13 @@ const Product = () => {
                     {product.quantity} шт. на складі
                   </Box>
                 )}
+                <Box>
+                  {product.labelName && (
+                    <Badge colorScheme='purple' mr={2}>
+                      {product.labelName}
+                    </Badge>
+                  )}
+                </Box>
                 <Box>
                   {product.artists
                     ? product.artists.map((artist) => (
@@ -376,6 +384,9 @@ const Product = () => {
                             <Text color='gray.600'>
                               {formatCurrency(p.price)}
                             </Text>
+                            <Badge colorScheme='purple' ml={2} px={2} py={1}>
+                              {p.labelName}
+                            </Badge>
                           </Flex>
                         </Link>
                       ))

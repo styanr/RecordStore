@@ -41,7 +41,7 @@ namespace RecordStore.Api.Services.Addresses
             await _context.SaveChangesAsync();
 
             // Log the addition of an address
-            await LogActionAsync("Add Address", $"Address added with ID: {address.Id}");
+            await _logService.LogActionAsync("Add Address", $"Address added with ID: {address.Id}");
         }
 
         public async Task<AddressResponse> UpdateAddressAsync(AddressUpdateRequest request)
@@ -64,7 +64,7 @@ namespace RecordStore.Api.Services.Addresses
             await _context.SaveChangesAsync();
 
             // Log the update of an address
-            await LogActionAsync("Update Address", $"Address updated with ID: {address.Id}");
+            await _logService.LogActionAsync("Update Address", $"Address updated with ID: {address.Id}");
 
             return _mapper.Map<AddressResponse>(address);
         }
@@ -89,7 +89,7 @@ namespace RecordStore.Api.Services.Addresses
             await _context.SaveChangesAsync();
 
             // Log the deletion of an address
-            await LogActionAsync("Delete Address", $"Address deleted with ID: {address.Id}");
+            await _logService.LogActionAsync("Delete Address", $"Address deleted with ID: {address.Id}");
         }
 
         public async Task<List<AddressResponse>> GetAllAsync()
@@ -105,21 +105,9 @@ namespace RecordStore.Api.Services.Addresses
                 .ToListAsync();
 
             // Log the retrieval of all addresses
-            await LogActionAsync("Get All Addresses", "All addresses retrieved.");
+            await _logService.LogActionAsync("Get All Addresses", "All addresses retrieved.");
 
             return _mapper.Map<List<AddressResponse>>(addresses);
-        }
-
-        // Method to log actions
-        private async Task LogActionAsync(string actionType, string description)
-        {
-            var logRequest = new LogCreateRequest
-            {
-                ActionType = actionType,
-                Description = description
-            };
-
-            await _logService.CreateAsync(logRequest);
         }
     }
 }

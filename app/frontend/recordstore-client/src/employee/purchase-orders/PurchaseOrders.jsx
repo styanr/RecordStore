@@ -75,7 +75,7 @@ const PurchaseOrders = () => {
   const handleDelete = async () => {
     setIsDeleteLoading(true);
 
-    const response = await deletePurchaseOrder(orderToDelete.id);
+    const response = await deletePurchaseOrder(orderToDelete);
     if (response.success) {
       toast({
         title: 'Закупівлю успішно видалено',
@@ -91,8 +91,8 @@ const PurchaseOrders = () => {
         duration: 5000,
         isClosable: true,
       });
-      onClose();
     }
+    onClose();
 
     setIsDeleteLoading(false);
   };

@@ -12,6 +12,9 @@ public class ProductCreateRequest
     [Required]
     public string FormatName { get; set; } = null!;
     
+    [Required]
+    public string LabelName { get; set; } = null!;
+    
     public string? Description { get; set; }
     
     [Required]

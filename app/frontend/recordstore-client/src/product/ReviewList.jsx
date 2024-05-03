@@ -23,7 +23,7 @@ const ReviewList = ({ reviews }) => (
         >
           <Flex justifyContent='space-between' alignItems='center' mb={3}>
             <Text fontWeight='bold' fontSize='lg'>
-              {review.userFullName}
+              {review.userFullName ?? <Text as='i'>Видалений користувач</Text>}
             </Text>
             <Text fontSize='xs' color='gray.500'>
               {formatDate(review.createdAt)}

@@ -35,6 +35,7 @@ const CreateProduct = () => {
 
   const [recordId, setRecordId] = useState('');
   const [formatName, setFormatName] = useState('');
+  const [labelName, setLabelName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
@@ -42,9 +43,14 @@ const CreateProduct = () => {
   const [restockLevel, setRestockLevel] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+
   const [formatSearchQuery, setFormatSearchQuery] = useState('');
   const [formatOptions, setFormatOptions] = useState([]);
   const [isFormatLoading, setIsFormatLoading] = useState(false);
+
+  const [labelSearchQuery, setLabelSearchQuery] = useState('');
+  const [labelOptions, setLabelOptions] = useState([]);
+  const [isLabelLoading, setIsLabelLoading] = useState(false);
 
   const handleSearch = async (e) => {
     const query = e.target.value;
@@ -86,10 +92,28 @@ const CreateProduct = () => {
     fetchFormats();
   }, [formatSearchQuery]);
 
+  useEffect(() => {
+    console.log('Label search query:', labelSearchQuery);
+    const fetchLabels = async () => {
+      setIsLabelLoading(true);
+      try {
+        const labels = await productService.searchLabels(labelSearchQuery);
+        setLabelOptions(labels);
+      } catch (error) {
+        console.error('Error fetching labels:', error);
+      } finally {
+        setIsLabelLoading(false);
+      }
+    };
+
+    fetchLabels();
+  }, [labelSearchQuery]);
+
   const handleCreateProduct = async () => {
     const newProduct = {
       recordId,
       formatName,
+      labelName,
       description,
       price,
       quantity,
@@ -136,8 +160,8 @@ const CreateProduct = () => {
         <Heading color='teal.600' mb={4}>
           Додати продукт
         </Heading>
-        <Flex mb={4}>
-          <InputGroup mr={4}>
+        <Flex mb={4} gap={4}>
+          <InputGroup>
             <InputLeftElement pointerEvents='none'>
               <FaSearch color='gray.300' />
             </InputLeftElement>
@@ -172,18 +196,28 @@ const CreateProduct = () => {
             </AutoCompleteList>
           </AutoComplete>
 
-          {/* <Select
-            placeholder='Формат'
-            value={formatId}
-            onChange={(e) => setFormatId(e.target.value)}
-            isLoading={isFormatLoading}
+          <AutoComplete
+            openOnFocus
+            isLoading={isLabelLoading}
+            mb={4}
+            creatable
+            onChange={(value) => setLabelName(value)}
           >
-            {formatOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </Select> */}
+            <AutoCompleteInput
+              placeholder='Лейбл'
+              onChange={(e) => {
+                setLabelSearchQuery(e.target.value);
+              }}
+            />
+            <AutoCompleteList>
+              {labelOptions.map((option, index) => (
+                <AutoCompleteItem key={index} value={option.name}>
+                  {option.name}
+                </AutoCompleteItem>
+              ))}
+              <AutoCompleteCreatable />
+            </AutoCompleteList>
+          </AutoComplete>
         </Flex>
         <Box overflowY='auto' maxH='300px' mb={4}>
           {searchResults.map((record) => (

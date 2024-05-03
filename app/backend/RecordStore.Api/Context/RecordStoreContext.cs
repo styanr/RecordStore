@@ -39,6 +39,7 @@ public partial class RecordStoreContext : DbContext
 
     public virtual DbSet<Record> Records { get; set; }
 
+    public virtual DbSet<Label> Labels { get; set; }
     public virtual DbSet<Review> Reviews { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
@@ -308,6 +309,7 @@ public partial class RecordStoreContext : DbContext
                 .HasPrecision(12, 2)
                 .HasColumnName("price");
             entity.Property(e => e.RecordId).HasColumnName("record_id");
+            entity.Property(e => e.LabelId).HasColumnName("label_id");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
@@ -321,6 +323,12 @@ public partial class RecordStoreContext : DbContext
                 .HasForeignKey(d => d.RecordId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("product_record_id_fkey");
+            
+            entity.HasOne(d => d.Label).WithMany(p => p.Products)
+                .HasForeignKey(d => d.LabelId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("product_label_id_fkey");
+                
         });
 
         modelBuilder.Entity<PurchaseOrder>(entity =>
@@ -412,7 +420,7 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired(false);
 
             entity.HasOne(d => d.Product).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.ProductId)
@@ -465,7 +473,7 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.Street)
                 .HasMaxLength(150)
                 .HasColumnName("street");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired(false);
             entity.Property(e => e.Status).HasColumnName("status");
 
             entity.HasOne(d => d.User).WithMany(p => p.ShopOrders)
@@ -544,7 +552,7 @@ public partial class RecordStoreContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired(false);
             entity.Property(e => e.ActionType)
                 .HasMaxLength(20)
                 .HasColumnName("action_type");
@@ -552,6 +560,20 @@ public partial class RecordStoreContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("timestamp");
             entity.Property(e => e.Description).HasColumnName("description");
+        });
+
+        modelBuilder.Entity<Label>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("label_pkey");
+            
+            entity.ToTable("label");
+            
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
         });
 
         OnModelCreatingPartial(modelBuilder);

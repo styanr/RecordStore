@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using RecordStore.Api.Dto.Labels;
 using RecordStore.Api.Dto.Products;
 using RecordStore.Api.Entities;
 using RecordStore.Api.Extensions;
@@ -71,5 +72,14 @@ public class ProductController : ControllerBase
         var product = await _productService.UpdateAsync(id, productUpdateRequest);
         
         return product;
+    }
+    
+    [HttpGet]
+    [Route("~/api/labels")]
+    public async Task<ActionResult<List<LabelResponse>>> GetLabels(string name)
+    {
+        var labels = await _productService.GetLabelsAsync(name);
+        
+        return labels;
     }
 }

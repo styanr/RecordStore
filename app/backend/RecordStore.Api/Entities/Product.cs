@@ -13,6 +13,7 @@ public partial class Product
 
     public int FormatId { get; set; }
 
+    public int LabelId { get; set; }
     public string? Description { get; set; }
 
     public decimal Price { get; set; }
@@ -22,6 +23,8 @@ public partial class Product
     public DateTime UpdatedAt { get; set; }
 
     public virtual Format Format { get; set; } = null!;
+    
+    public virtual Label Label { get; set; } = null!;
 
     public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 

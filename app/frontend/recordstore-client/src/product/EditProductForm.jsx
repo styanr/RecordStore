@@ -35,7 +35,6 @@ import formatService from '../hooks/FormatService';
 
 const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
   const [formData, setFormData] = useState({
-    // title: product ? product.title : '',
     description: product ? product.description : '',
     price: product ? product.price : '',
     formatName: product ? (product.format || {}).name : '', // should be format.name (not format
@@ -44,48 +43,20 @@ const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
     location: product ? product.location : '',
     restockLevel: product ? product.restockLevel : '',
     imageUrl: product ? product.imageUrl : '',
+    labelName: product ? product.labelName : '',
   });
 
   const [id, setId] = useState(product ? product.id : '');
 
-  //   const [searchArtistTerm, setSearchArtistTerm] = useState('');
-  //   const [artists, setArtists] = useState([]);
-  //   const [searchGenreTerm, setSearchGenreTerm] = useState('');
-  //   const [genres, setGenres] = useState([]);
   const [searchFormatTerm, setSearchFormatTerm] = useState('');
   const [formats, setFormats] = useState([]);
+
+  const [searchLabelTerm, setSearchLabelTerm] = useState('');
+  const [labels, setLabels] = useState([]);
 
   useEffect(() => {
     console.log(formData);
   }, [formData]);
-
-  //   useEffect(() => {
-  //     const fetchArtists = async () => {
-  //       try {
-  //         const response = await artistService.searchArtists(searchArtistTerm);
-  //         setArtists(response);
-  //       } catch (error) {
-  //         console.error('Error fetching artists:', error);
-  //       }
-  //     };
-  //     if (searchArtistTerm) {
-  //       fetchArtists();
-  //     }
-  //   }, [searchArtistTerm]);
-
-  //   useEffect(() => {
-  //     const fetchGenres = async () => {
-  //       try {
-  //         const response = await genreService.getGenres(searchGenreTerm);
-  //         setGenres(response);
-  //       } catch (error) {
-  //         console.error('Error fetching genres:', error);
-  //       }
-  //     };
-  //     if (searchGenreTerm) {
-  //       fetchGenres();
-  //     }
-  //   }, [searchGenreTerm]);
 
   useEffect(() => {
     const fetchFormats = async () => {
@@ -102,6 +73,20 @@ const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
   }, [searchFormatTerm]);
 
   useEffect(() => {
+    const fetchLabels = async () => {
+      try {
+        const response = await productService.searchLabels(searchLabelTerm);
+        setLabels(response);
+      } catch (error) {
+        console.error('Error fetching labels:', error);
+      }
+    };
+    if (searchLabelTerm) {
+      fetchLabels();
+    }
+  }, [searchLabelTerm]);
+
+  useEffect(() => {
     if (product) {
       setFormData({
         // title: product ? product.title : '',
@@ -112,27 +97,26 @@ const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
         location: product ? product.location : '',
         restockLevel: product ? product.restockLevel : '',
         imageUrl: product ? product.imageUrl : '',
+        labelName: product ? product.labelName : '',
       });
 
       setId(product.id);
     }
     setSearchFormatTerm(product ? (product.format || {}).name : '');
+    setSearchLabelTerm(product ? product.labelName : '');
+    console.log(product);
   }, [product]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  //   const handleArtistChange = (selectedArtists) => {
-  //     setFormData({ ...formData, artists: selectedArtists });
-  //   };
-
-  //   const handleGenreChange = (vals) => {
-  //     setFormData({ ...formData, genres: vals });
-  //   };
-
   const handleFormatChange = (name) => {
     setFormData({ ...formData, formatName: name });
+  };
+
+  const handleLabelChange = (name) => {
+    setFormData({ ...formData, labelName: name });
   };
 
   const handleSubmit = async (e) => {
@@ -199,6 +183,30 @@ const EditProductForm = ({ isOpen, onClose, product, onSubmit }) => {
                         handleFormatChange(option.name);
                       }}
                       value={option.name}
+                    >
+                      {option.name}
+                    </AutoCompleteItem>
+                  ))}
+                </AutoCompleteList>
+              </AutoComplete>
+              <FormLabel>Лейбл</FormLabel>
+              <AutoComplete openOnFocus>
+                <AutoCompleteInput
+                  placeholder='Лейбл'
+                  onChange={(e) => {
+                    setSearchLabelTerm(e.target.value);
+                  }}
+                  value={searchLabelTerm}
+                />
+                <AutoCompleteList>
+                  {labels.map((option, index) => (
+                    <AutoCompleteItem
+                      key={index}
+                      value={option.name}
+                      onClick={() => {
+                        setSearchLabelTerm(option.name);
+                        handleLabelChange(option.name);
+                      }}
                     >
                       {option.name}
                     </AutoCompleteItem>

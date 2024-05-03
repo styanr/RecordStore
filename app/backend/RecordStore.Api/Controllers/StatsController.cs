@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecordStore.Api.Context;
@@ -9,6 +10,7 @@ namespace RecordStore.Api.Controllers;
 
 [ApiController]
 [Route("api/admin/stats")]
+[Authorize(Roles = "admin")]
 public class StatsController : ControllerBase
 {
     private readonly IStatsService _statsService;

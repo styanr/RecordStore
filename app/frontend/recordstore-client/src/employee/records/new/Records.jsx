@@ -39,6 +39,7 @@ import usePages from '../../../hooks/usePages';
 import RecordRow from './RecordRow';
 
 const Records = () => {
+  const toast = useToast();
   const { getRecords, deleteRecord } = useRecords();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,8 +78,8 @@ const Records = () => {
 
   const handleDelete = async () => {
     setIsDeleteLoading(true);
-    try {
-      await deleteRecord(recordIdToDelete);
+    const response = await deleteRecord(recordIdToDelete);
+    if (response.success) {
       setRecords(records.filter((record) => record.id !== recordIdToDelete));
       toast({
         title: 'Запис успішно видалено',
@@ -86,19 +87,17 @@ const Records = () => {
         duration: 5000,
         isClosable: true,
       });
-    } catch (error) {
-      console.error('Error deleting record:', error);
+    } else {
       toast({
         title: 'Помилка',
-        description: 'Не вдалося видалити запис. ' + error.message,
+        description: 'Не вдалося видалити запис. ' + response.error,
         status: 'error',
         duration: 5000,
         isClosable: true,
       });
-    } finally {
-      setIsDeleteLoading(false);
-      onClose();
     }
+    onClose();
+    setIsDeleteLoading(false);
   };
   return (
     <Box bg='gray.100' py={12} flexGrow={1}>

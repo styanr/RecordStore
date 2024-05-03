@@ -7,7 +7,7 @@ public partial class ShopOrder
 {
     public int Id { get; set; }
 
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     public string City { get; set; } = null!;
 

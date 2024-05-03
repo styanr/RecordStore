@@ -69,7 +69,8 @@ public static class QueryExtensions
             .Include(p => p.Record)
             .ThenInclude(r => r.Artists)
             .Include(p => p.Format)
-            .Include(p => p.Reviews);
+            .Include(p => p.Reviews)
+            .Include(p => p.Label);
     }
 
     public static IQueryable<Product> ApplyFiltersAndOrderBy(this IQueryable<Product> query, GetProductQueryParams queryParams)
@@ -96,6 +97,11 @@ public static class QueryExtensions
             query = query.Where(p => p.Format.FormatName == queryParams.Format);
         }
         
+        if (!string.IsNullOrWhiteSpace(queryParams.Label))
+        {
+            query = query.Where(p => p.Label.Name == queryParams.Label);
+        }
+        
         if (queryParams.MinPrice is not null)
         {
             query = query.Where(p => p.Price >= queryParams.MinPrice);
@@ -112,7 +118,8 @@ public static class QueryExtensions
             "title" => query.OrderByBoolean(p => p.Record.Title, sortAsc),
             "price" => query.OrderByBoolean(p => p.Price, sortAsc),
             "releaseDate" => query.OrderByBoolean(p => p.Record.ReleaseDate, sortAsc),
-            "rating" => query.OrderByBoolean(p => p.Reviews.Average(r => r.Rating), sortAsc),
+            "rating" => query.OrderByBoolean(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0 
+                , sortAsc),
             "reviewCount" => query.OrderByBoolean(p => p.Reviews.Count, sortAsc),
             _ => query.OrderByBoolean(p => p.Record.Title, sortAsc)
         };
@@ -186,7 +193,10 @@ public static class QueryExtensions
                 .ThenInclude(p => p.Format)
             .Include(o => o.OrderLines)
                 .ThenInclude(ol => ol.Product)
-                .ThenInclude(p => p.Reviews);
+                .ThenInclude(p => p.Reviews)
+            .Include(o => o.OrderLines)
+                .ThenInclude(ol => ol.Product)
+                .ThenInclude(p => p.Label);
     }
     
     public static IQueryable<ShopOrder> ApplyFiltersAndOrderBy(this IQueryable<ShopOrder> query, GetOrderQueryParams queryParams)

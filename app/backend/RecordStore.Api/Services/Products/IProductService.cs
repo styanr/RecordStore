@@ -1,4 +1,5 @@
-﻿using RecordStore.Api.Dto.Products;
+﻿using RecordStore.Api.Dto.Labels;
+using RecordStore.Api.Dto.Products;
 using RecordStore.Api.Entities;
 using RecordStore.Api.Extensions;
 using RecordStore.Api.RequestHelpers;
@@ -15,5 +16,7 @@ public interface IProductService
     Task<ProductFullResponseDto> UpdateAsync(int id, ProductUpdateRequest entity);
     
     Task<PriceMinMaxResponse> GetPriceMinMaxAsync();
+    
+    Task<List<LabelResponse>> GetLabelsAsync(string name);
     Task<bool> DeleteAsync(int id);
 }

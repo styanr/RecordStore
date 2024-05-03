@@ -58,6 +58,15 @@ class ProductService {
     });
     return response.data;
   };
+
+  searchLabels = async (name) => {
+    console.log('Searching for labels:', name);
+    const response = await axios.get(import.meta.env.VITE_API_URL + 'labels', {
+      params: { name },
+    });
+
+    return response.data;
+  };
 }
 
 const productService = new ProductService();

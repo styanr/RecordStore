@@ -60,6 +60,7 @@ const Home = () => {
   const [artist, setArtist] = useState('');
   const [genre, setGenre] = useState('');
   const [format, setFormat] = useState('');
+  const [label, setLabel] = useState('');
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [orderBy, setOrderBy] = useState('price');
@@ -107,6 +108,9 @@ const Home = () => {
       if (maxPrice !== 0) {
         filterParams.MaxPrice = maxPrice;
       }
+      if (label !== '') {
+        filterParams.Label = label;
+      }
       filterParams.OrderBy = orderBy;
       filterParams.OrderDirection = order;
       filterParams.Page = page;
@@ -129,6 +133,10 @@ const Home = () => {
   const [formatOptions, setFormatOptions] = useState([]);
   const [formatSearch, setFormatSearch] = useState('');
   const [isFormatLoading, setIsFormatLoading] = useState(false);
+
+  const [labelOptions, setLabelOptions] = useState([]);
+  const [labelSearch, setLabelSearch] = useState('');
+  const [isLabelLoading, setIsLabelLoading] = useState(false);
 
   useEffect(() => {
     const fetchFormats = async () => {
@@ -154,8 +162,47 @@ const Home = () => {
     setIsGenreLoading(false);
   }, [genreSearch]);
 
+  useEffect(() => {
+    const fetchLabels = async () => {
+      const labels = await productService.searchLabels(labelSearch);
+      setLabelOptions(labels);
+    };
+
+    setIsLabelLoading(true);
+    fetchLabels();
+    setIsLabelLoading(false);
+  }, [labelSearch]);
+
   const handleSearch = () => {
     setSearch(!search);
+  };
+
+  const ending = (totalCount) => {
+    const lastTwoDigits = totalCount % 100;
+    if (lastTwoDigits > 19) {
+      const lastDigit = totalCount % 10;
+      switch (lastDigit) {
+        case 1:
+          return 'позиція';
+        case 2:
+        case 3:
+        case 4:
+          return 'позиції';
+        default:
+          return 'позицій';
+      }
+    } else {
+      switch (lastTwoDigits) {
+        case 1:
+          return 'позиція';
+        case 2:
+        case 3:
+        case 4:
+          return 'позиції';
+        default:
+          return 'позицій';
+      }
+    }
   };
 
   return (
@@ -168,12 +215,9 @@ const Home = () => {
         <Container maxW='8xl'>
           <Flex justify='space-between' align='center' mb={8}>
             <Heading size='xl' fontWeight='bold'>
-              Знайден{totalCount % 10 == 1 ? 'а' : 'о'} {totalCount}{' '}
-              {totalCount % 10 === 1
-                ? 'позиція'
-                : totalCount % 10 < 5 && totalCount % 10 !== 0
-                ? 'позиції'
-                : 'позицій'}
+              {`Знайден${
+                totalCount % 100 > 19 && totalCount % 10 === 1 ? 'а' : 'о'
+              } ${totalCount} ${ending(totalCount)}`}
             </Heading>
             <Box>
               <Menu>
@@ -227,6 +271,30 @@ const Home = () => {
                 onChange={(e) => setArtist(e.target.value)}
                 mb={4}
               />
+              <Box mb={4}>
+                <AutoComplete openOnFocus isLoading={isLabelLoading}>
+                  <AutoCompleteInput
+                    placeholder='Лейбл'
+                    onChange={(e) => {
+                      if (e.target.value === '') {
+                        setLabel('');
+                      }
+                      setLabelSearch(e.target.value);
+                    }}
+                  />
+                  <AutoCompleteList>
+                    {labelOptions.map((option, index) => (
+                      <AutoCompleteItem
+                        key={index}
+                        onClick={() => setLabel(option.name)}
+                        value={option.name}
+                      >
+                        {option.name}
+                      </AutoCompleteItem>
+                    ))}
+                  </AutoCompleteList>
+                </AutoComplete>
+              </Box>
               <Flex gap={4} mb={4}>
                 <AutoComplete openOnFocus isLoading={isFormatLoading} mb={4}>
                   <AutoCompleteInput

@@ -70,6 +70,10 @@ const adminLinks = [
     name: 'Виконавці',
     path: '/artists',
   },
+  {
+    name: 'Логування',
+    path: '/logs',
+  },
 ];
 
 const employeeLinks = [
@@ -246,6 +250,7 @@ export default function Simple() {
                 lineHeight={10}
                 fontWeight='bold'
                 fontSize='2xl'
+                userSelect={'none'}
                 mt={1}
               >
                 Record Store
