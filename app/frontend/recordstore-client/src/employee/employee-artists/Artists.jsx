@@ -25,6 +25,7 @@ import { FaSearch } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import useArtists from '../../hooks/useArtists';
 import usePages from '../../hooks/usePages';
+import useAuth from '../../hooks/useAuth';
 
 const Artists = () => {
   const toast = useToast();
@@ -38,6 +39,8 @@ const Artists = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [searchName, setSearchName] = useState('');
+
+  const { user } = useAuth();
 
   const {
     page,
@@ -233,7 +236,7 @@ const Artists = () => {
             />
           </ModalBody>
           <ModalFooter>
-            {!isEditing && (
+            {!isEditing && user && user.role === 'admin' && (
               <Button
                 colorScheme='red'
                 mr={4}

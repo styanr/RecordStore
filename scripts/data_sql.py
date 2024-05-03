@@ -3,6 +3,7 @@ from rich.progress import Progress, BarColumn, TimeRemainingColumn, TextColumn
 from model import *
 import psycopg2 as pg
 from utils import *
+import datetime
 
 progress = Progress(
     TextColumn("[bold blue]{task.description}", justify="right"),
@@ -16,6 +17,20 @@ DB_USER = "postgres"
 DB_PASSWORD = "Jd35B^1-Wa_/}0,"
 DB_HOST = "localhost"
 DB_PORT = "5432"
+
+
+image_urls = {
+    "Vinyl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/12in-Vinyl-LP-Record-Angle.jpg/800px-12in-Vinyl-LP-Record-Angle.jpg",
+    "CD": "https://images-platform.99static.com//IQ3GhyogoO6ALruR2vbh7HKVd9o=/94x184:1644x1734/fit-in/500x500/99designs-contests-attachments/84/84134/attachment_84134420",
+    "CDr": "https://images-platform.99static.com//IQ3GhyogoO6ALruR2vbh7HKVd9o=/94x184:1644x1734/fit-in/500x500/99designs-contests-attachments/84/84134/attachment_84134420",
+    "DVD": "https://images-platform.99static.com//IQ3GhyogoO6ALruR2vbh7HKVd9o=/94x184:1644x1734/fit-in/500x500/99designs-contests-attachments/84/84134/attachment_84134420",
+    "Cassette": "https://m.media-amazon.com/images/I/619ncpA5k1L.jpg",
+    "Box Set": "https://jazz.centerstagestore.com/cdn/shop/products/LP-Boxeset.png?v=1612994585",
+    "fall back": "https://media.istockphoto.com/id/1175435360/vector/music-note-icon-vector-illustration.jpg?s=612x612&w=0&k=20&c=R7s6RR849L57bv_c7jMIFRW4H87-FjLB8sqZ08mN0OU="
+}
+
+RECORD_COUNT = 5000
+PRODUCTS_COUNT = 6000
 
 
 def connect():
@@ -100,7 +115,7 @@ def parse_master_xml(file_path, artists):
                     if count % 1000 == 0:
                         progress.console.print(
                             f"[bold green]{count} records parsed...")
-                    if count >= 10000:                                   # for testing purposes
+                    if count >= RECORD_COUNT:                                   # for testing purposes
                         break
             root.clear()  # Free up memory
 
@@ -122,7 +137,7 @@ def parse_record(xml_master, db_artists) -> tuple[Record, list[ArtistRecord]]:
     #### `tuple[Record, list[ArtistRecord], list[Genre]]`
         A tuple containing the record, a list of ArtistRecord objects, and a list of Genre objects.
     """
-    # TODO: ADD TRACKS, MASTERS
+
     title = xml_master.find('title').text
 
     release_date = xml_master.find('year')
@@ -135,7 +150,7 @@ def parse_record(xml_master, db_artists) -> tuple[Record, list[ArtistRecord]]:
 
     artistRecords = []
 
-    # need to check for duplocates for some reason
+    # need to check for duplicates for some reason
 
     dataset_ids = []
     if dataset_artists is not None:
@@ -281,10 +296,6 @@ def process_records(records, cursor):
                 insert_genre_record_mapping(
                     cursor, record.database_id, genre.database_id)
 
-                for artist_record in artist_records:
-                    insert_genre_artist_mapping(
-                        cursor, artist_record.artist_id, genre.database_id)
-
             progress.advance(task)
     progress.remove_task(task)
 
@@ -301,7 +312,6 @@ def parse_release_xml(file_path, record_artists_tuples):
     total_count = 0
     record_dict = {record.dataset_id: record for record,
                    _, _ in record_artists_tuples}
-
     for event, element in context:
         if event == "end" and element.tag == "release":
             total_count += 1
@@ -313,8 +323,8 @@ def parse_release_xml(file_path, record_artists_tuples):
                 master_record = record_dict.get(release_master_id)
 
                 if master_record is not None:
-                    product_track_tuple = parse_product(element, master_record)
-                    products.append(product_track_tuple)
+                    product_tuple = parse_product(element, master_record)
+                    products.append(product_tuple)
                     count += 1
 
                     if count % 100 == 0:
@@ -323,7 +333,7 @@ def parse_release_xml(file_path, record_artists_tuples):
                         progress.console.print(
                             f"[bold green]{total_count} products parsed in total...")
 
-                if count >= 5000:                                   # for testing purposes
+                if count >= PRODUCTS_COUNT:                                   # for testing purposes
                     break
         root.clear()  # Free up memory
 
@@ -339,15 +349,39 @@ def parse_product(xml_release, record):
         format_descriptions = []
     else:
         format_names = [format.get('name') for format in formats]
-        format_descriptions = [format.find('descriptions').text if format.find(
-            'descriptions') is not None else "" for format in formats]
+        format_descriptions = []
+        for format in formats:
+            descriptions = format.find('descriptions')
+            if descriptions is not None:
+                description_texts = [
+                    description.text for description in descriptions.findall('description')]
+                format_descriptions.append(description_texts)
+            else:
+                format_descriptions.append([])
+
+    labels = xml_release.find('labels')
+
+    if labels is not None:
+        label = labels[0].get('name')
+    else:
+        label = None
 
     id = xml_release.get('id', '')
 
     description = ""
+
+    tracks_xml = xml_release.find('tracklist')
+    if tracks_xml is not None:
+        for track_xml in tracks_xml:
+            title, duration, track_order = parse_track(track_xml)
+            description += f"{track_order}. {title} - {datetime.timedelta(seconds=duration)}\n"
+
     if format_descriptions:
-        description = "Format notes: " + \
-            ", ".join(desc for desc in format_descriptions if desc)
+        formatted_descriptions = [", ".join(desc)
+                                  for desc in format_descriptions if desc]
+        if formatted_descriptions:
+            description += "\nFormat notes: " + \
+                ", ".join(formatted_descriptions)
 
     notes = xml_release.find('notes')
     if notes is not None and notes.text:
@@ -359,36 +393,26 @@ def parse_product(xml_release, record):
     quantity = random_quantity()
 
     product = Product(
-        record_id, format_names if format_names else [], description, dataset_id, price, quantity)
+        record_id, format_names if format_names else [], label, description, dataset_id, price, quantity)
 
-    tracks = []
-
-    tracks_xml = xml_release.find('tracklist')
-    if tracks_xml is not None:
-        for track_xml in tracks_xml:
-            track, track_product = parse_track(track_xml, product)
-            tracks.append((track, track_product))
-
-    return product, tracks
+    return product
 
 
-def parse_track(track_xml, product):
+def parse_track(track_xml):
     title = track_xml.find('title').text if track_xml.find(
         'title') is not None else ""
     duration_xml = track_xml.find('duration')
 
-    if title == "Piercing Music":
+    if title == "Channel Check":
         pass
 
     duration = get_duration_seconds(
         duration_xml.text if duration_xml is not None else None)
+
     track_order = track_xml.find('position').text if track_xml.find(
         'position') is not None else ""
 
-    track = Track(title, duration)
-    track_product = TrackProduct(-1, -1, track_order)
-
-    return track, track_product
+    return title, duration, track_order
 
 
 def get_duration_seconds(duration):
@@ -400,6 +424,9 @@ def get_duration_seconds(duration):
     if len(parts) == 1:
         parts = duration.split('.')
 
+    if len(parts) == 1:
+        return int(parts[0])
+
     if len(parts) == 2:
         return int(parts[0]) * 60 + int(parts[1])
 
@@ -407,26 +434,26 @@ def get_duration_seconds(duration):
         return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
 
 
-def process_products(products_tuple, cursor):
+def process_products(products, cursor):
     task = progress.add_task(
-        "[red]Processing Products...", total=len(products_tuple)
+        "[red]Processing Products...", total=len(products)
     )
 
     with progress:
-        for product, tracks in products_tuple:
+        for product in products:
             format_id = get_or_create_format(cursor, product.formats)
+            label_id = get_or_create_label(cursor, product.label)
 
             product.database_id = insert_product(
                 cursor,
                 product.record_id,
                 format_id,
+                label_id,
                 product.description,
                 product.quantity,
                 product.price,
-                product.inactive,
+                product.formats[0],
             )
-
-            insert_tracks(cursor, tracks, product.database_id)
 
             progress.advance(task)
     progress.remove_task(task)
@@ -458,12 +485,39 @@ def get_or_create_format(cursor, format_names):
     return format_id
 
 
+def get_or_create_label(cursor, label_name):
+    if label_name is None:
+        return None
+
+    cursor.execute(
+        """
+        SELECT id FROM label
+        WHERE name = %s;
+        """,
+        (label_name,),
+    )
+
+    if cursor.rowcount == 0:
+        cursor.execute(
+            """
+            INSERT INTO label (name)
+            VALUES (%s)
+            RETURNING id;
+            """,
+            (label_name,),
+        )
+
+    label_id = cursor.fetchone()[0]
+
+    return label_id
+
+
 def insert_product(
-    cursor, record_id, format_id, description, quantity, price, inactive
+    cursor, record_id, format_id, label_id, description, quantity, price, format_name
 ):
     cursor.execute(
         """
-        INSERT INTO product (record_id, format_id, description, quantity, price, inactive)
+        INSERT INTO product (record_id, format_id, description, price, image_url, label_id)
         VALUES (%s, %s, %s, %s, %s, %s)
         RETURNING id;
         """,
@@ -471,53 +525,29 @@ def insert_product(
             record_id,
             format_id,
             description,
-            quantity,
             price,
-            inactive,
+            image_urls.get(format_name, image_urls["fall back"]),
+            label_id,
         ),
     )
-    return cursor.fetchone()[0]
+    product_id = cursor.fetchone()[0]
 
-
-def insert_tracks(cursor, tracks, product_id):
-    for track, track_product in tracks:
-        track.database_id = insert_track(cursor, track.title, track.duration)
-        insert_track_product(cursor, track.database_id,
-                             product_id, track_product.track_order)
-
-
-def insert_track(cursor, title, duration):
     cursor.execute(
         """
-        INSERT INTO track (title, duration_seconds)
-        VALUES (%s, %s)
-        RETURNING id;
+        INSERT INTO inventory (product_id, quantity, location, restock_level)
+        VALUES (%s, %s, %s, %s);
         """,
-        (
-            title,
-            duration,
-        ),
-    )
-    return cursor.fetchone()[0]
-
-
-def insert_track_product(cursor, track_id, product_id, track_order):
-    cursor.execute(
-        """
-        INSERT INTO track_product (track_id, product_id, track_order)
-        VALUES (%s, %s, %s);
-        """,
-        (
-            track_id,
-            product_id,
-            track_order,
-        ),
+        (product_id, quantity, "Row 1, Shelf 1", 100),
     )
 
+    return product_id
 
-def main():
+
+def run():
     with connect() as conn:
         cursor = conn.cursor()
+
+        cursor.execute("select * from truncate_schema('public')")
 
         with progress.console.status("[bold green]Processing Artists XML file..."):
             artists = parse_artist_xml(
@@ -530,14 +560,10 @@ def main():
         process_records(record_artists_tuples, cursor)
 
         with progress.console.status("[bold green]Processing Releases XML file..."):
-            products_tuple = parse_release_xml(
+            products = parse_release_xml(
                 r'./discogs_20240301_releases.xml', record_artists_tuples)
 
-        process_products(products_tuple, cursor)
+        process_products(products, cursor)
 
-        # conn.commit()
-        conn.rollback()  # for testing purposes
-
-
-if __name__ == '__main__':
-    main()
+        conn.commit()
+        # conn.rollback()  # for testing purposes
